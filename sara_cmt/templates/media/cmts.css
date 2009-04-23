@@ -1,0 +1,22 @@
+/* Value  Color
+ *
+ * 000033 purple (darkest)
+ * 000066 purple (dark)     
+ * 666699 purple (neutral)
+ * CC6600 orange (dark)
+ * FF9933 orange (light)
+ *
+ */
+
+body {
+  background:  #FFFFFF none repeat scroll 0 0;
+  color:       #000033;
+  font-family: "Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+  font-size:   12px;
+  margin:      0;
+  padding:     0;
+}
+
+h1 {
+  background:  #FF9933 none repeat scroll 0 0;
+}

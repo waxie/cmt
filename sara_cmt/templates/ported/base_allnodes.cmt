@@ -1,0 +1,27 @@
+{% comment %} #################################################################
+
+Date   : feb 13th 2009
+Author : Sil Westerveld
+E-mail : sil.westerveld@sara.nl
+
+The CMTSARA-templates rely on the Django Template Engine, documented at:
+
+  http://docs.djangoproject.com/en/dev/topics/templates/#topics-templates
+
+Some quickstart info, for writing your own CMTSARA-templates, can be found in
+the README file of the CMTSARA-package.
+
+############################################################### {% endcomment %}
+{% include 'ported/header' %}
+{% block description %}
+# Description :
+#
+{% endblock description %}
+{ BLANKLINE }
+{% for hw in HardwareUnit.objects.all %}
+{% block hw_cluster_name %}
+  {% ifequal hw.cluster.name '<name>' %}
+    {{ hw.hostname }}
+  {% endifequal %}
+{% endblock hw_cluster_name %}
+{% endfor %}

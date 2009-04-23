@@ -1,0 +1,24 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+{# Date:    01 dec 2008                                                        #}
+{# Author:  Sil Westerveld                                                     #}
+{# Contact: sil.westerveld@sara.nl                                             #}
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>Adding {{ count }} networks</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="/site_media/cmts.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<form method="POST" action="">
+  <h2>Network</h2>
+  <table>
+    {{ form.as_table }}
+  </table>
+  <p><input type="submit" value="Proceed"></p>
+</form>
+</body>
