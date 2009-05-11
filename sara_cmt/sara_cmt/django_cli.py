@@ -74,7 +74,7 @@ class ModelExtension():
       Make a QuerySet, based on one or more given queries. Delegate each query
       to _query_to_qset and return the intersection of the returned QuerySets.
     """
-    qset = models.query.QuerySet.none(model.objects.all())
+    qset = models.query.QuerySet.none(model.objects.all()) # empty QuerySet
     for query in queries.items():
       qset_part = ModelExtension._query_to_qset(model, query)
       if not qset_part:
@@ -90,7 +90,7 @@ class ModelExtension():
         if not qset:
           # Intersection of QuerySets is empty, so return it immediately.
           return models.query.QuerySet.none(model.objects.all())
-    logger.debug("Queries '%s' gave QuerySet: %s" % (queries,qset))
+    #logger.debug("Queries '%s' gave QuerySet: %s" % (queries,qset))
     return qset
 
   @staticmethod
@@ -138,8 +138,8 @@ class ModelExtension():
         # Unite the resulting QuerySet with the so far constructed QuerySet
         qset |= eval(wrapper_cmd)
 
-    logger.debug("Query '%s' gave QuerySet (with ID's):\n%s (%s)"
-                  % (query,qset,[item.id for item in qset]))
+    #logger.debug("Query '%s' gave QuerySet (with ID's):\n%s (%s)"
+    #              % (query,qset,[item.id for item in qset]))
     return qset
 
       
@@ -176,7 +176,7 @@ class ModelExtension():
     matching_indices = []
     # Only search in the required fields of the model
     search_space = ModelExtension._values(model, fields)
-    logger.debug('Search space: %s' % search_space)
+    #logger.debug('Search space: %s' % search_space)
     
     # Search for objects containing the given value...
     for entity in search_space:
@@ -229,7 +229,16 @@ class ModelExtension():
 
         # !!! TODO: Complete !!!
 
-        
+  @staticmethod
+  def display(model):
+    """
+      Print all values given in list_display of the model's admin
+    """
+    # First get access to the admin
+    admin = model._meta.object_name+'Admin'
+    logger.debug(admin)
+
+      
         
     
 #
@@ -403,7 +412,7 @@ class ModelExtension():
       max_len = 0
       print ' '*(offset-2) + '\_' + self._meta.object_name.ljust(max_len) + '__'
 
-      # look for the key with the longest string, to be able to align the values
+      # determine the key with the longest string, to be able to align the values
       for key in self.__dict__.keys():
         if len(key) > max_len:
           max_len = len(key)

@@ -25,6 +25,7 @@ import sys
 
 
 
+from sara_cmt.django_cli import ModelExtension
 from sara_cmt.logger import Logger
 logger = Logger().getLogger()
 
@@ -69,7 +70,6 @@ logger.setLevel(LOGLEVEL)
 #
 #####
 
-from sara_cmt.django_cli import ModelExtension
 
 #####
 #
@@ -83,7 +83,6 @@ def add(option, opt_str, value, parser, *args, **kwargs):
     the user should be given the opportunity to add data to the missing fields
     on an interactive manner.
   """
-  logger.debug(parserstat(option, opt_str, value, parser, *args, **kwargs))
   # First be sure a valid entity has been given
   try:
     new_object = entities[value]()
@@ -112,7 +111,6 @@ def add(option, opt_str, value, parser, *args, **kwargs):
   else:
     logger.info('Normally the %s should be saved now' % new_object._meta.verbose_name)
     logger.debug('%s: %s' % (entities[value], new_object.__dict__))
-  logger.debug(parserstat(option, opt_str, value, parser, *args, **kwargs))
 
 
 
@@ -120,7 +118,6 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
   """
     Remove the objects which match the given values (queries).
   """
-  logger.debug(parserstat(option, opt_str, value, parser, *args, **kwargs))
   # First search existing objects which match the given queries.
   queries_dict = queries_to_dict(parser.rargs) # ??? TODO: tuple-list instead of dict ???
   logger.debug(queries_dict)
@@ -144,7 +141,6 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
   else:
     logger.info('No existing objects found matching query')
 
-  logger.debug(parserstat(option, opt_str, value, parser, *args, **kwargs))
 
 
 
@@ -176,7 +172,6 @@ def change(option, opt_str, value, parser, *args, **kwargs):
   """
     Search for an object which matches the given values, and change it/them.
   """
-  logger.debug(parserstat(option, opt_str, value, parser, *args, **kwargs))
   # TODO: Implement for usage like `cmtsara --change <entity> <query> <assignments>
   #
   # queries => dict of tuples
@@ -206,26 +201,22 @@ def change(option, opt_str, value, parser, *args, **kwargs):
   else:
     print 'No entities found matching query'
 
-  logger.debug(parserstat(option, opt_str, value, parser, *args, **kwargs))
 
 
 
 def show(option, opt_str, value, parser, *args, **kwargs):
-  logger.debug(parserstat(option, opt_str, value, parser, *args, **kwargs))
   queries = queries_to_dict(parser.rargs) # !!! TODO: tuple-set instead of dict?
   logger.debug(queries)
   entities_found = ModelExtension._queries_to_qset(entities[value], queries)
 
   # !!! TODO: either print short, or print long lists !!!
   for entity in entities_found:
-    print entity.__dict__
+    ModelExtension.display(entity)
 
-  logger.debug(parserstat(option, opt_str, value, parser, *args, **kwargs))
 
 
 
 def generate(option, opt_str, value, parser, *args, **kwargs):
-  logger.debug(parserstat(option, opt_str, value, parser, *args, **kwargs))
   # Put data in a dictionary to make accessible in the templates
   template_data = {}
   for entity in entities.values():
@@ -238,7 +229,6 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
     # Render a string of the template from the argument
     template_string = render_to_string('ported/'+value+'.cmt', template_data)
 
-    #logger.debug(template_string.__repr__())
     # Remove blanks from the output of Django Template Engine
     whitespace = r'\n(\s*\n)*'
     lines = re.sub(whitespace, '\n', template_string).splitlines()
@@ -246,7 +236,6 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
 
     # Insert blank lines where they are needed
     cleaned_data = parsed_str.replace('{ BLANKLINE }\n', '\n')
-    #logger.debug(cleaned_data.__repr__())
 
     # !!! TODO: save the generated file !!!
     # !!! TODO: execute command to reload the generated file !!!
@@ -254,7 +243,6 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
   except TemplateDoesNotExist, e:
     print TemplateDoesNotExist, e
 
-  logger.debug(parserstat(option, opt_str, value, parser, *args, **kwargs))
   return
 
 
@@ -263,7 +251,6 @@ def mac(option, opt_str, value, parser, *args, **kwargs):
   """
     Change the MAC-address of an existing interface.
   """
-  logger.debug(parserstat(option, opt_str, value, parser, *args, **kwargs))
   old_mac, new_mac = value[0], value[1]
   try:
     interface = Interface.objects.get(mac=old_mac)
@@ -274,7 +261,6 @@ def mac(option, opt_str, value, parser, *args, **kwargs):
   except Interface.DoesNotExist, e:
     logger.error('%s %s' % (Interface.DoesNotExist, e))
 
-  logger.debug(parserstat(option, opt_str, value, parser, *args, **kwargs))
 #
 # </Database related methods>
 #
@@ -397,26 +383,6 @@ def collect_args(option, parser):
   return collected
 
 
-
-
-
-
-def parserstat(option, opt_str, value, parser, *args, **kwargs):
-  str = """
-<--
-  option      : %s
-  opt_str     : %s
-  value       : %s
-  parser      : %s
-  parser.rargs: %s
-  parser.largs: %s
-  args        : %s
-  kwargs      : %s
--->
-  """ % (option,opt_str,value,parser,parser.rargs,parser.largs,args,kwargs)
-  return str
-
-  
 
 def main():
   # ??? TODO: parser options for '--query' and '--assign'
