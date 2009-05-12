@@ -28,7 +28,6 @@ import sys
 import sara_cmt.cluster.admin
 from sara_cmt.django_cli import ModelExtension
 from sara_cmt.logger import Logger
-logger = Logger().getLogger()
 
 
 import sara_cmt.cluster.models
@@ -40,32 +39,33 @@ import sara_cmt.cluster.models
 # <CMT-specific settings from file>
 #
 
-# 1. Instantiate ConfigParser
+# Instantiate ConfigParser
 configfile = os.path.join(os.path.dirname(__file__),'cmt.cfg')
 config_parser = ConfigParser.ConfigParser()
-config_parser.optionxform = lambda x: x # Hack for case-insensitivity (http://www.finalcog.com/python-config-parser-lower-case-names)
+config_parser.optionxform = lambda x: x
+# ^^ Hack for case-insensitivity, reference:
+#    http://www.finalcog.com/python-config-parser-lower-case-names
 config_parser.read(configfile)
 
-# 2. Collect package information
-section='info'
-CMTSARA_VERSION = config_parser.get(section,'version').strip("'")
-CMTSARA_DESCRIPTION = config_parser.get(section,'description').strip("'")
+# Get global logger
+logger = Logger().getLogger()
+loglevel_str = config_parser.get('defaults','LOGLEVEL')
+logger.setLevel(config_parser.getint('loglevels',loglevel_str))
 
-# 3. Make a dict with aliasses for the models
+# Collect package information
+CMTSARA_VERSION = config_parser.get('info','version').strip("'")
+CMTSARA_DESCRIPTION = config_parser.get('info','description').strip("'")
+
+# Make a dict with aliasses for the models
 entities = {}
-section='entities'
-for option in config_parser.options(section):
-  labels = config_parser.get(section,option).split(',')
+for option in config_parser.options('entities'):
+  labels = config_parser.get('entities',option).split(',')
   for label in labels:
     entities[label] = sara_cmt.cluster.models.__getattribute__(option)
 
-# 4. Get and set the defaults
-section='defaults'
-DRYRUN = config_parser.getboolean(section,'DRYRUN')
-INTERACTIVE = config_parser.getboolean(section,'DRYRUN')
-LEVELS={'NOTSET':0,'DEBUG':10,'INFO':20,'WARNING':30,'ERROR':40,'CRITICAL':50}
-LOGLEVEL = LEVELS[config_parser.get(section,'LOGLEVEL')]
-logger.setLevel(LOGLEVEL)
+# Get and set the defaults
+DRYRUN = config_parser.getboolean('defaults','DRYRUN')
+INTERACTIVE = config_parser.getboolean('defaults','DRYRUN')
 #
 # </CMT-specific settings from file>
 #
@@ -150,6 +150,9 @@ def _search(entity_type, queries):
     Search for entities which match the given query.
     Returns a queryset.
   """
+  
+  # TODO: !!! Delegate this task to a function in the ModelExtension !!!
+
   return NotImplementedError
 #  try:
 #    assert queries, "Maybe you'll get better results with a query/filter."
@@ -206,7 +209,7 @@ def change(option, opt_str, value, parser, *args, **kwargs):
 
 
 def show(option, opt_str, value, parser, *args, **kwargs):
-  queries = queries_to_dict(parser.rargs) # !!! TODO: tuple-set instead of dict?
+  queries = queries_to_dict(parser.rargs) # ??? tuple-set instead of dict ???
   logger.debug(queries)
   entities_found = ModelExtension._queries_to_qset(entities[value], queries)
 

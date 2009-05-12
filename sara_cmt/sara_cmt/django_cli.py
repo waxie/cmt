@@ -229,6 +229,7 @@ class ModelExtension():
 
         # !!! TODO: Complete !!!
 
+
   @staticmethod
   def display(instance):
     """
@@ -249,8 +250,7 @@ class ModelExtension():
     for key in admin_list_display:
       if key not in ('__unicode__','__str__'):
         print ' : %s : %s' % (key.ljust(longest_key),instance.__getattribute__(key))
-    print " '---"
-    print ''
+    print " '---\n"
 
       
         
