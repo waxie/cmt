@@ -25,6 +25,7 @@ import sys
 
 
 
+import sara_cmt.cluster.admin
 from sara_cmt.django_cli import ModelExtension
 from sara_cmt.logger import Logger
 logger = Logger().getLogger()

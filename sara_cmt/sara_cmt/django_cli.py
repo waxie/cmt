@@ -230,13 +230,27 @@ class ModelExtension():
         # !!! TODO: Complete !!!
 
   @staticmethod
-  def display(model):
+  def display(instance):
     """
       Print all values given in list_display of the model's admin
     """
     # First get access to the admin
-    admin = model._meta.object_name+'Admin'
-    logger.debug(admin)
+    admin_class_name = instance._meta.object_name+'Admin'
+    admin_list_display = eval('sara_cmt.cluster.admin.'+admin_class_name+'.list_display')
+
+    # Determine longest value-string to display
+    longest_key = 0
+    for val in admin_list_display:
+      if len(val) > longest_key:
+        longest_key = len(val)
+
+    # Print the values
+    print ' .---[  %s  ]---' % instance
+    for key in admin_list_display:
+      if key not in ('__unicode__','__str__'):
+        print ' : %s : %s' % (key.ljust(longest_key),instance.__getattribute__(key))
+    print " '---"
+    print ''
 
       
         
@@ -382,8 +396,8 @@ class ModelExtension():
 #########
 
 
-  def _filter(self, filter, model):
-    _model = model or self.__class__
+  def _filter(self, filter, model_class):
+    _model_class = model_class or self.__class__
     items = filter.split(',')
     _dict = {}
 
@@ -391,67 +405,15 @@ class ModelExtension():
       item = items.pop(0).split('=')
       _dict[item[0]] = item[1]
 
-    result = _model.objects.complex_filter(_dict)
+    result = _model_class.objects.complex_filter(_dict)
     
     try:
       assert len(result) is 1, "Number of %s matching '%s' is %s (has to be 1)" \
-        % (_model._meta.verbose_name_plural, filter, len(result))
+        % (_model_class._meta.verbose_name_plural, filter, len(result))
     except AssertionError, e:
       logger.error(e)
       sys.exit(1)
-      pass
 
     return result
-
-  def str(self, depth=1, offset=0, delim=' = '):
-    """
-      Prints the fieldvalues of the model. If the field is a ForeignKey then the
-      tree will be traversed to the depth given as an argument.
-    """
-    if depth >= 0:
-      max_len = 0
-      print ' '*(offset-2) + '\_' + self._meta.object_name.ljust(max_len) + '__'
-
-      # determine the key with the longest string, to be able to align the values
-      for key in self.__dict__.keys():
-        if len(key) > max_len:
-          max_len = len(key)
-
-      for item in self.__dict__.items():
-      # TODO: have to use self._meta.get_all_field_names()
-        key = item[0].ljust(max_len)
-        val = str(item[1])
-        if len(val) > 30:
-          val = val[:27]+'...'
-        print ' '*offset + '%s%s%s' % (key, delim, val)
-        if item[0].endswith('_id') and val is not None:
-          try: # because the key can end with '_id' while it is not a ForeignKey
-            ent_type = item[0][:-3]
-            entity = entities[ent_type].objects.get(id=val)
-            #print_model_tree(entity, depth=depth-1, offset=offset+max_len+len(delim))
-            entity.str(depth=depth-1, offset=offset+max_len+len(delim))
-          except:
-            pass
-
-
-  def print_model_tree(model, depth=1, offset=0, delim=' = '):
-    """
-      Prints the fieldvalues of the model. If the field is a ForeignKey then the
-      tree will be traversed to the depth given as an argument.
-    """
-    if depth >= 0:
-      max_len = 0
-      print ' '*(offset-2) + '\_' + model._meta.object_name.ljust(max_len) + '__'
-
-      # look for the key with the longest string, to be able to align the values
-      for key in model.__dict__.keys():
-        if len(key) > max_len:
-          max_len = len(key)
-
-      for f in model._meta.get_all_field_names():
-        print type(model)
-        print '%s: %s' % (f, model.__dict__[f])
-
-
 
 ##############
