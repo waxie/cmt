@@ -33,6 +33,31 @@ from sara_cmt.logger import Logger
 import sara_cmt.cluster.models
 
 
+#####
+#
+# <Decorators>
+#
+
+def crud_validate(func):
+  """
+    Validate the entity given as an argument to CRUD-functions
+  """
+  def crudFunc(option, opt_str, value, parser, *args, **kwargs):
+    print 'Decorated function:', func.__name__
+    if entities.has_key(value):
+      logger.debug('Validated entity %s as an %s'%(value.__repr__(),entities[value]))
+      return func(option, opt_str, value, parser, *args, **kwargs)
+    else:
+      logger.error('''Entity %s not known. Valid entities are: %s''' % (value.__repr__(),entities.keys()))
+      sys.exit(1)
+  return crudFunc
+
+#
+# </Decorators>
+#
+#####
+
+
 
 #####
 #
@@ -47,7 +72,7 @@ config_parser.optionxform = lambda x: x
 #    http://www.finalcog.com/python-config-parser-lower-case-names
 config_parser.read(configfile)
 
-# Get global logger
+# Get instance of global logger
 logger = Logger().getLogger()
 loglevel_str = config_parser.get('defaults','LOGLEVEL')
 logger.setLevel(config_parser.getint('loglevels',loglevel_str))
@@ -76,6 +101,7 @@ INTERACTIVE = config_parser.getboolean('defaults','DRYRUN')
 #
 # <Database related methods>
 #
+@crud_validate
 def add(option, opt_str, value, parser, *args, **kwargs):
   """
     Add an object according to the given values.
@@ -84,16 +110,10 @@ def add(option, opt_str, value, parser, *args, **kwargs):
     the user should be given the opportunity to add data to the missing fields
     on an interactive manner.
   """
-  # First be sure a valid entity has been given
-  try:
-    new_object = entities[value]()
-  except KeyError:
-    logger.error('%s is not a valid entity' % value.__repr__())
-    sys.exit(1)
-    
   # Assign values to attributes if assignments are given.
   queries = collect_args(option, parser)
   queries_dict = queries_to_dict(queries)
+  new_object = entities[value]()
   new_object.setattrs_from_dict(queries_dict)
     
   # Let the user complete interactively if INTERACTIVE-flag has been set.
@@ -115,6 +135,7 @@ def add(option, opt_str, value, parser, *args, **kwargs):
 
 
 
+@crud_validate
 def remove(option, opt_str, value, parser, *args, **kwargs):
   """
     Remove the objects which match the given values (queries).
@@ -172,6 +193,7 @@ def _search(entity_type, queries):
 
 
 
+@crud_validate
 def change(option, opt_str, value, parser, *args, **kwargs):
   """
     Search for an object which matches the given values, and change it/them.
@@ -207,7 +229,7 @@ def change(option, opt_str, value, parser, *args, **kwargs):
 
 
 
-
+@crud_validate
 def show(option, opt_str, value, parser, *args, **kwargs):
   queries = queries_to_dict(parser.rargs) # ??? tuple-set instead of dict ???
   logger.debug(queries)
@@ -355,7 +377,7 @@ def queries_to_tuples(queries):
   logger.debug('queries_to_tuples(%s) => %s' % (queries, result))
   return result
 
-
+  
 def collect_args(option, parser):
   """
     Collects the arguments belonging to the given option, and removes them from
@@ -384,6 +406,7 @@ def collect_args(option, parser):
     del parser.rargs[:len(collected)]
     setattr(parser.values, option.dest, collected)
 
+  logger.debug('Collected arguments for %s: %s'%(option,collected))
   return collected
 
 
