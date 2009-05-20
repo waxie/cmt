@@ -52,11 +52,11 @@ class ModelExtension():
 
 
   @staticmethod
-  def _complete(model):
+  def _is_complete(model):
     """
       Check if all the required fields has been assigned.
     """
-    return not ModelExtension._required_fields(model)
+    return not ModelExtension._missing_fields(model)
 
 
   @staticmethod
@@ -74,12 +74,14 @@ class ModelExtension():
       Make a QuerySet, based on one or more given queries. Delegate each query
       to _query_to_qset and return the intersection of the returned QuerySets.
     """
-    qset = models.query.QuerySet.none(model.objects.all()) # empty QuerySet
+    def empty_qset(model): return models.query.QuerySet.none(model.objects.all())
+
+    qset = empty_qset(model)#models.query.QuerySet.none(model.objects.all()) # empty QuerySet
     for query in queries.items():
       qset_part = ModelExtension._query_to_qset(model, query)
       if not qset_part:
         # Nothing found, so an empty QuerySet could be returned immediately.
-        return models.query.QuerySet.none(model.objects.all())
+        return empty_qset(model)#models.query.QuerySet.none(model.objects.all())
       elif not qset:
         # First QuerySet has been found.
         qset = qset_part
@@ -89,7 +91,7 @@ class ModelExtension():
         qset &= qset_part
         if not qset:
           # Intersection of QuerySets is empty, so return it immediately.
-          return models.query.QuerySet.none(model.objects.all())
+          return empty_qset(model)#models.query.QuerySet.none(model.objects.all())
     #logger.debug("Queries '%s' gave QuerySet: %s" % (queries,qset))
     return qset
 
@@ -108,7 +110,7 @@ class ModelExtension():
     attr, val = query
     logger.debug('attr,val: %s,%s' % (attr,val))
     if attr.find('__') is -1:
-      fld = model._meta.get_field(attr)
+      fld = model._meta.get_field(attr) # !!! TODO: try, except FieldDoesNotExist !!!
       if isinstance(fld, ForeignKey):
         # So the query was like: '<FK>=<val>'.
         # Now get id's of the objects (of the referenced model) with value in
@@ -305,14 +307,14 @@ class ModelExtension():
     """
       Checks if the required fields all have a value assigned to it, to be sure
       it can be saved to the database.
-      Returns the set of missing fields.
+      Returns the set of missing editable fields.
     """
     required, missing = ModelExtension._required_fields(self.__class__), []
 
     # Isolate all missing fields from required fields.
     for field in required:
       try:
-        if not self.__getattribute__(field.name): # Field hasn't been set
+        if not self.__getattribute__(field.name) and field.editable: # Field hasn't been set
           missing.append(field)
       except: # FK hasn't been set
         missing.append(field)
@@ -326,22 +328,43 @@ class ModelExtension():
     """
     # !!! Note: This function should only be called in INTERACTIVE mode. !!!
     # ??? TODO: Check raw_input for ValueError. ???
+    
+    # !!! TODO: Validation via forms:
+    #           http://docs.djangoproject.com/en/dev/ref/forms/validation/ !!!
+
     missing = self._missing_fields()
 
     while missing:
-      logger.info('Missing required attributes: %s' % [field.name for field in missing])
-
-      for field in missing:
-        input = raw_input(field.verbose_name+': ')
-        try:
-          assert bool(input), 'Field cannot be left blank'
-          # Input for missing attribute is now stored in variable 'input'.
-          self._setattr(field, input)
-        except AssertionError, err:
-          logger.error(err)
-      
-      logger.info('Current values: %s' % self.__dict__)
       missing = self._missing_fields()
+      logger.info('Missing required attributes: %s'
+        % ' '.join([field.name for field in missing]))
+
+      current_field = missing[0]
+      input = raw_input(current_field.verbose_name+': ')
+      try:
+        assert bool(input), 'Field cannot be left blank'
+        # Input for missing attribute is now stored in variable 'input'.
+        i = self._setattr(current_field, input)
+        #self.save()
+        missing.remove(current_field)
+      except AssertionError, err:
+        logger.error(err)
+      except sqlite3.IntegrityError, err:
+        print IntegrityError, err
+
+      logger.info('Current values: %s' % self.__dict__)
+
+      #for field in missing:
+      #  input = raw_input(field.verbose_name+': ')
+      #  try:
+      #    assert bool(input), 'Field cannot be left blank'
+      #    # Input for missing attribute is now stored in variable 'input'.
+      #    self._setattr(field, input)
+      #  except AssertionError, err:
+      #    logger.error(err)
+      #
+      #logger.info('Current values: %s' % self.__dict__)
+      #missing = self._missing_fields()
 
 
   def _setfk(self, field, value, subfields=None):
@@ -375,18 +398,19 @@ class ModelExtension():
       If the search results to a single match, the id of the matching entity is
       assigned to the given ForeignKey-field.
     """
-    logger.debug('field=%s %s, value=%s' % (field.__repr__(),type(field),value.__repr__()))
     # First init the field itself if it's given as a string
     if isinstance(field, StringTypes):
       field = self._meta.get_field(field)
 
-    assert type(value) is str, "Given value is a %s, which isn't supported yet (still have to implement this)" % type(value) # !!! TODO: implement support for lists of values !!!
+    logger.debug('field=%s (%s), value=%s' % (field.name,field.__class__.__name__,value.__repr__()))
+
+    assert isinstance(value, StringTypes), "Given value is a %s, which isn't supported yet (still have to implement this)" % type(value) # !!! TODO: implement support for lists of values !!!
     if isinstance(field, ForeignKey):
       self._setfk(field, value)
     else:
       self.__setattr__(field.name, value)
 
-    if ModelExtension._complete(self):
+    if ModelExtension._is_complete(self):
       try:
         self.save() # !!! TODO: disable at dry-runs
       except (sqlite3.IntegrityError, ValueError), err:

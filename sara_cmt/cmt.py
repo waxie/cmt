@@ -43,13 +43,13 @@ def crud_validate(func):
     Validate the entity given as an argument to CRUD-functions
   """
   def crudFunc(option, opt_str, value, parser, *args, **kwargs):
-    print 'Decorated function:', func.__name__
     if entities.has_key(value):
       logger.debug('Validated entity %s as an %s'%(value.__repr__(),entities[value]))
       return func(option, opt_str, value, parser, *args, **kwargs)
     else:
       logger.error('''Entity %s not known. Valid entities are: %s''' % (value.__repr__(),entities.keys()))
       sys.exit(1)
+  logger.debug('Decorated function %s'%func.__name__.__repr__())
   return crudFunc
 
 #
@@ -140,20 +140,21 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
   """
     Remove the objects which match the given values (queries).
   """
+  my_args = collect_args(option, parser)
+  queries = queries_to_dict(my_args) # ??? TODO: tuple-list instead of dict ???
   # First search existing objects which match the given queries.
-  queries_dict = queries_to_dict(parser.rargs) # ??? TODO: tuple-list instead of dict ???
-  logger.debug(queries_dict)
-  objects_qset = ModelExtension._queries_to_qset(entities[value], queries_dict)
+  logger.debug(my_args)
+  entities_found = ModelExtension._queries_to_qset(entities[value], my_args)
 
-  if objects_qset:
+  if entities_found:
     logger.info('Found %s objects matching query: %s'\
-      % (len(objects_qset), ', '.join([object.__str__() for object in objects_qset])))
+      % (len(entities_found), ', '.join([object.__str__() for object in entities_found])))
     confirmation = not parser.values.INTERACTIVE or raw_input('Are you sure? [Yn] ')
     print 'confirmation', confirmation
     # Delete and log
     if confirmation in ['', 'y', 'Y', True]:
       logger.info('deleting...')
-      for object in objects_qset:
+      for object in entities_found:
         if not parser.values.DRYRUN:
           object.delete()
           logger.info('Deleted %s' % object)
@@ -162,34 +163,6 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
           
   else:
     logger.info('No existing objects found matching query')
-
-
-
-
-def _search(entity_type, queries):
-  """
-    Search for entities which match the given query.
-    Returns a queryset.
-  """
-  
-  # TODO: !!! Delegate this task to a function in the ModelExtension !!!
-
-  return NotImplementedError
-#  try:
-#    assert queries, "Maybe you'll get better results with a query/filter."
-#  except AssertionError, err:
-#    logger.info(err)
-#    
-#  arg_dict = queries_to_dict(queries)
-#
-#  if queries in [[],['all']]: # ??? Maybe only ['all'] to use [] for interactive query ???
-#    entities_qset = entities[entity_type].objects.all()
-#  else:
-#    # Make a QuerySet based on the given query, and return it
-#    entities_qset = entities[entity_type].objects.complex_filter(arg_dict)
-#  logger.debug('Found %s entities reflecting the following args: %s'\
-#    % (len(entities_qset), queries))
-#  return entities_qset
 
 
 
@@ -231,7 +204,8 @@ def change(option, opt_str, value, parser, *args, **kwargs):
 
 @crud_validate
 def show(option, opt_str, value, parser, *args, **kwargs):
-  queries = queries_to_dict(parser.rargs) # ??? tuple-set instead of dict ???
+  my_args = collect_args(option, parser)
+  queries = queries_to_dict(my_args) # ??? tuple-set instead of dict ???
   logger.debug(queries)
   entities_found = ModelExtension._queries_to_qset(entities[value], queries)
 

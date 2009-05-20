@@ -1,5 +1,5 @@
 from django.contrib import admin
-from sara_cmt.cluster.models import *
+from sara_cmt.cluster.models import Cluster, Site, Contactperson, Rack, Interface, InterfaceType, HardwareUnit, Role, HardwareSpecifications, Network, Vendor, Warranty
 
 # Some info about the Django admin site can be found at:
 #   http://docs.djangoproject.com/en/dev/intro/tutorial02/#intro-tutorial02
@@ -99,7 +99,7 @@ admin.site.register(Contactperson, ContactpersonAdmin)
 admin.site.register(Rack, RackAdmin)
 admin.site.register(Interface, InterfaceAdmin)
 admin.site.register(InterfaceType, InterfaceTypeAdmin)
-admin.site.register(HardwareUnit, HardwareUnitAdmin)
+#admin.site.register(HardwareUnit, HardwareUnitAdmin)
 admin.site.register(Role, RoleAdmin)
 admin.site.register(Network, NetworkAdmin)
 admin.site.register(HardwareSpecifications, HardwareSpecificationsAdmin)
