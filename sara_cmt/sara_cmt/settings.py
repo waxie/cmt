@@ -1,8 +1,9 @@
 import os
+#import django_evolution
 
 # Django settings for core project.
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -15,6 +16,8 @@ MANAGERS = ADMINS
 DATABASE_ENGINE    = 'sqlite3'                # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
 DATABASE_NAME      = os.path.join(os.path.dirname(__file__),'../db/data.db') # Or path to database file if using sqlite3.
 TEST_DATABASE_NAME = os.path.join(os.path.dirname(__file__),'../db/test_data.db')
+#DATABASE_NAME      = os.path.join(os.path.dirname(__file__),'../db/data.db') # Or path to database file if using sqlite3.
+#TEST_DATABASE_NAME = os.path.join(os.path.dirname(__file__),'../db/test_data.db')
 DATABASE_USER      = '' # Not used with sqlite3.
 DATABASE_PASSWORD  = '' # Not used with sqlite3.
 DATABASE_HOST      = '' # Set to empty string for localhost. Not used with sqlite3.
@@ -49,7 +52,7 @@ MEDIA_URL = ''
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/'
+ADMIN_MEDIA_PREFIX = '/admin_media/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'uygv6wrel4o2%x8s4dk2%i6=dp!2bt32$0ne-%_7&j=ez*u$1b'
@@ -75,6 +78,7 @@ TEMPLATE_DIRS = (
   # Don't forget to use absolute paths, not relative paths.
   #path.normpath(path.join(CMTS_PATH, 'templates')),
   'templates',
+  #os.path.join(os.path.dirname(__file__), 'templates'),
 )
 
 FIXTURE_DIRS = (
@@ -92,6 +96,5 @@ INSTALLED_APPS = (
     'django.contrib.databrowse',
     'django.contrib.webdesign',
     'sara_cmt.cluster',
-    'sara_cmt.django_evolution',
     'sara_cmt.django_cli',
 )
