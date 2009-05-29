@@ -1,5 +1,4 @@
 import os
-#import django_evolution
 
 # Django settings for core project.
 
