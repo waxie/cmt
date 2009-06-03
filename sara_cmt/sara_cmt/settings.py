@@ -1,8 +1,10 @@
 import os
 
-# Django settings for core project.
+SARACMT_BASE = os.path.normpath(os.path.dirname(__file__))
+PROJECT_BASE = os.path.normpath(os.path.join(SARACMT_BASE, os.path.pardir))
 
 DEBUG = False
+#DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -15,8 +17,6 @@ MANAGERS = ADMINS
 DATABASE_ENGINE    = 'sqlite3'                # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
 DATABASE_NAME      = os.path.join(os.path.dirname(__file__),'../db/data.db') # Or path to database file if using sqlite3.
 TEST_DATABASE_NAME = os.path.join(os.path.dirname(__file__),'../db/test_data.db')
-#DATABASE_NAME      = os.path.join(os.path.dirname(__file__),'../db/data.db') # Or path to database file if using sqlite3.
-#TEST_DATABASE_NAME = os.path.join(os.path.dirname(__file__),'../db/test_data.db')
 DATABASE_USER      = '' # Not used with sqlite3.
 DATABASE_PASSWORD  = '' # Not used with sqlite3.
 DATABASE_HOST      = '' # Set to empty string for localhost. Not used with sqlite3.

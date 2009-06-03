@@ -1,16 +1,13 @@
 from django.db import models
 
-from types import StringTypes
-
-import sqlite3
-from sqlite3 import IntegrityError
-
 from IPy import IP
 
 from sara_cmt.logger import Logger
 logger = Logger().getLogger()
 
 from sara_cmt.django_cli import ModelExtension
+
+from datetime import date
 
 
 
@@ -47,12 +44,12 @@ class Cluster(models.Model, ModelExtension):
 class Location(models.Model, ModelExtension):
   """
     A class to hold information about the physical location of a model. In the
-    case of CMTSARA it is a superclass of Site, ContactPerson and Vendor.
+    case of CMTSARA it is a superclass of Site, ContactPerson and Company.
   """
   
   address1   = models.CharField(verbose_name='address', max_length=30)
   address2   = models.CharField(verbose_name='address', max_length=30, blank=True)
-  postalcode = models.CharField(max_length=6, blank=True)
+  postalcode = models.CharField(max_length=9, blank=True)
   city       = models.CharField(max_length=30)
   country    = models.CharField(max_length=30, blank=True)
   room       = models.CharField(max_length=30, blank=True)
@@ -63,9 +60,6 @@ class Location(models.Model, ModelExtension):
 
   def __unicode__(self):
     return '%s, %s' % (country, postalcode)
-    
-  def testje(self):
-    return 'geslaagd~'
 
 
 class Site(Location):
@@ -74,7 +68,7 @@ class Site(Location):
     a(n address of a) building, or more detailed a specific room in a building.
   """
   
-  name = models.CharField(max_length=30, unique=True)
+  name = models.SlugField(max_length=30, editable=False, unique=True)
   note = models.TextField(blank=True)
 
   class Meta:
@@ -84,40 +78,73 @@ class Site(Location):
   def __unicode__(self):
     return self.name
 
+  def save(self, force_insert=False, force_update=False):
+    if self.room:
+      self.name = '%s - %s (%s)' % (self.city, self.address1, self.room)
+    else:
+      self.name = '%s - %s' % (self.city, self.address1)
+    super(Site, self).save(force_insert, force_update)
 
-class Vendor(Location):
+
+class Company(Location):
   """
-    The Vendor-model can be linked to hardware. This way you are able to define
+    The Company-model can be linked to hardware. This way you are able to define
     contactpersons for a specific piece of hardware.
   """
   
-  name = models.CharField(max_length=30)
+  name    = models.CharField(max_length=30)
+  website = models.URLField(verify_exists=True)
 
   def __unicode__(self):
     return self.name
 
+  class Meta:
+    verbose_name_plural = 'companies'
 
-class Contactperson(Location):
+
+class Position(models.Model, ModelExtension):
+  label = models.CharField(max_length=30, help_text="'Account Manager' for example")
+
+  def __unicode__(self):
+    return self.label
+
+
+class Department(models.Model, ModelExtension):
+  label = models.CharField(max_length=50, help_text="'High Performance Computing & Visualisation' for example")
+
+  def __unicode__(self):
+    return self.label
+
+
+class Contact(Location):
   """
     Contactpersons can be linked to different sites, hardware, or its vendors.
     This makes it possible to lookup contactpersons in case of problems on a
     site or with specific hardware.
   """
   
-  site      = models.ForeignKey(Site, related_name='contacts', verbose_name='works at site', null=True, blank=True)
-  vendor    = models.ForeignKey(Vendor, related_name='contacts', verbose_name='works for vendor', null=True, blank=True)
+  employer  = models.ForeignKey(Company, related_name='employees')
+  department = models.ForeignKey(Department, related_name='employees', null=True, blank=True)
+  position  = models.ForeignKey(Position, related_name='contacts')
+  added_on  = models.DateField(editable=False, default=date.today)
+  active    = models.BooleanField(editable=True, default=True)
+  note      = models.TextField(default='', blank=True)
   
   firstname = models.CharField(verbose_name='first name', max_length=30)
   lastname  = models.CharField(verbose_name='last name', max_length=30)
   email     = models.EmailField()
-  phone     = models.CharField(max_length=15)
-  fax       = models.CharField(max_length=15, blank=True)
+  phone     = models.CharField(max_length=17)
+  fax       = models.CharField(max_length=17, blank=True)
 
   def __unicode__(self):
+    return self.fullname()
+
+  def fullname(self):
     return '%s %s' % (self.firstname, self.lastname)
 
   class Meta:
-    ordering = ['lastname', 'firstname']
+    ordering = ('lastname', 'firstname')
+    unique_together = ('firstname', 'lastname')
 
 
 class Rack(models.Model, ModelExtension):
@@ -128,16 +155,17 @@ class Rack(models.Model, ModelExtension):
 
   site     = models.ForeignKey(Site, verbose_name='is located at', related_name='racks')
 
-  label    = models.CharField(max_length=30)
-  note     = models.TextField(default=None, blank=True)
-  capacity = models.IntegerField(verbose_name='number of slots', null=True, blank=True)
+  label    = models.SlugField(max_length=30)
+  note     = models.TextField(default='', blank=True)
+  capacity = models.PositiveIntegerField(verbose_name='number of slots')
 
   class Meta:
-    ordering = ['site', 'label']
+    ordering = ('site', 'label',)
     verbose_name = 'rack'
     verbose_name_plural = 'racks'
 
 
+  # !!! TODO: Get rid of this !!!
   def __unicode__(self):
     try:
       assert self.label is not None, "rack hasn't got a label"
@@ -153,16 +181,16 @@ class HardwareSpecifications(models.Model, ModelExtension):
     specific type (model) of hardware.
   """
   
-  vendor         = models.ForeignKey(Vendor, related_name='model specifications')
+  vendor         = models.ForeignKey(Company, related_name='model specifications')
 
   name           = models.CharField(max_length=30, unique=True)
   system_id      = models.CharField(max_length=30, blank=True)
-  slots_size     = models.IntegerField(help_text='size in U for example')
-  slots_capacity = models.IntegerField(help_text='capacity in U for example', null=True, blank=True)
+  slots_size     = models.PositiveIntegerField(help_text='size in U for example')
+  slots_capacity = models.PositiveIntegerField(default=0, help_text='capacity in U for example')
   
   class Meta:
     verbose_name_plural = 'hardware specifications'
-    ordering = ['vendor', 'name']
+    ordering = ('vendor', 'name')
 
 
   def __unicode__(self):
@@ -176,7 +204,7 @@ class Warranty(models.Model, ModelExtension):
 
   label      = models.CharField(max_length=30, unique=True)
   date_from  = models.DateField(verbose_name='valid from')
-  months     = models.IntegerField()
+  months     = models.PositiveIntegerField()
   date_to    = models.DateField(verbose_name='expires at', editable=False)
 
   class Meta:
@@ -231,7 +259,7 @@ class HardwareUnit(models.Model, ModelExtension):
 
   service_tag  = models.CharField(max_length=30, blank=True, unique=True)
   serialnumber = models.CharField(max_length=30, blank=True, unique=True)
-  first_slot   = models.IntegerField()
+  first_slot   = models.PositiveIntegerField()
   hostname     = models.CharField(max_length=30, blank=True)
 
   class Meta:
@@ -375,7 +403,6 @@ class Interface(models.Model, ModelExtension):
       when the network has been changed.
     """
     try:
-      #assert type(self.network) is Network, "network doesn't exist"
       assert isinstance(self.network, Network), "network doesn't exist"
 
       ip = IP(self.ip or 0)
@@ -395,17 +422,9 @@ class Interface(models.Model, ModelExtension):
       print AssertionError, e
 
 
-#class Alias(models.Model, ModelExtension):
-#  interface = models.ForeignKey('Interface', related_name='aliasses', null=True, blank=True)
-#  name      = models.CharField(max_length=30, null=True, blank=True)
-#
-#  def __unicode__(self):
-#    return self.label
-
-
 class InterfaceType(models.Model, ModelExtension):
   label = models.CharField(max_length=30, help_text="'DRAC 4' for example")
-  vendor = models.ForeignKey('Vendor', null=True, blank=True, related_name='interfaces')
+  vendor = models.ForeignKey('Company', null=True, blank=True, related_name='interfaces')
 
   class Meta:
     verbose_name = 'type of interface'
