@@ -96,4 +96,5 @@ INSTALLED_APPS = (
     'django.contrib.webdesign',
     'sara_cmt.cluster',
     'sara_cmt.django_cli',
+    'south',
 )
