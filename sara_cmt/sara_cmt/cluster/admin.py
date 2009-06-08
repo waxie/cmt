@@ -7,36 +7,36 @@ from sara_cmt.cluster.models import Cluster, Site, Contact, Rack, Interface, Int
 
 class ClusterAdmin(admin.ModelAdmin):
   list_display = ('name',)
-  fields       = ('name', 'note',)
+  fields       = ('name', 'note', 'tags')
 
 
 class SiteAdmin(admin.ModelAdmin):
-  list_display = ('name', 'address1', 'room', 'city', 'country',)
+  list_display = ('name', 'address1', 'room', 'city', 'country')
   list_filter  = ('city',)
 
 
 class ContactAdmin(admin.ModelAdmin):
   fieldsets = (
     ('Summary', {
-      'fields': ('firstname', 'lastname', 'employer', 'department', 'position', 'active', 'note',),
+      'fields': ('firstname', 'lastname', 'employer', 'department', 'position', 'active', 'note'),
     }),
     ('Office', {
-      'fields': ('address1', 'address2', 'room', 'postalcode', 'city', 'country',),
+      'fields': ('address1', 'address2', 'room', 'postalcode', 'city', 'country'),
       'classes': ['wide'],
     }),
     ('Contact', {
-      'fields': ('email', 'phone', 'fax',),
+      'fields': ('email', 'phone', 'cellphone', 'fax'),
       'classes': ['wide'],
     }),
   )
-  list_display  = ('__unicode__', 'employer', 'department', 'position', 'email', 'phone',)
+  list_display  = ('__unicode__', 'employer', 'department', 'position', 'email', 'phone', 'cellphone')
   list_filter   = ('employer', 'department', 'position', 'active')
-  search_fields = ('lastname',)
+  search_fields = ('firstname', 'lastname',)
   ordering      = ('lastname',)
 
 
 class RackAdmin(admin.ModelAdmin):
-  fields       = ('site', 'label', 'capacity', 'note')
+  fields       = ('site', 'label', 'capacity', 'note', 'tags')
   list_display = ('site', 'label',)
   list_filter  = ('site',)
   ordering     = ('site',)
@@ -61,25 +61,26 @@ class HardwareUnitAdmin(admin.ModelAdmin):
   fieldsets = (
     (None, {
       'fields': (('cluster', 'role', 'specifications',),),
+      #'fields': (('cluster', 'role', 'specifications', 'label'),),
     }),
     ('Physical location', {
       'fields': (('rack', 'first_slot',),),
     }),
   )
 
-  list_filter  = ('cluster', 'rack', 'role', 'specifications')
   list_display = ('__unicode__', 'cluster', 'rack', 'role', 'specifications')
+  list_filter  = ('cluster', 'rack', 'role', 'specifications')
   inlines = [InterfaceInline]
 
 
 class RoleAdmin(admin.ModelAdmin):
-  fields = ('label',)
+  fields = ('label', 'tags',)
 
 
 class HardwareSpecificationsAdmin(admin.ModelAdmin):
   fieldsets = (
     ('Vendor-specific', {
-      'fields': ('vendor', 'name', 'system_id',),
+      'fields': ('vendor', 'name', 'system_id'),
     }),
     ('Dimensions', {
       'fields': ('slots_capacity', 'slots_size',),
@@ -91,25 +92,25 @@ class HardwareSpecificationsAdmin(admin.ModelAdmin):
 
 class NetworkAdmin(admin.ModelAdmin):
   list_display = ('name', 'cidr', 'domain', 'prefix', '_max_hosts', 'count_ips_assigned', 'count_ips_free')
-  fields       = ('name', 'netaddress', 'netmask', 'domain', 'prefix',)
+  fields       = ('name', 'netaddress', 'netmask', 'domain', 'prefix', 'tags')
 
 
 class CompanyAdmin(admin.ModelAdmin):
-  fields       = ('name', 'address1', 'address2', 'postalcode', 'city', 'country', 'website')
+  fields       = ('name', 'vendor', 'address1', 'address2', 'postalcode', 'city', 'country', 'website', 'tags')
   list_display = ('name', 'address1', 'city', 'country', 'website')
   list_filter  = ('country',)
 
 
 class PositionAdmin(admin.ModelAdmin):
-  fields = ('label',)
+  fields = ('label', 'tags',)
 
 
 class DepartmentAdmin(admin.ModelAdmin):
-  fields = ('label',)
+  fields = ('label', 'tags',)
 
 
 class WarrantyAdmin(admin.ModelAdmin):
-  list_display = ('label', 'date_from', 'months', 'date_to',)
+  list_display = ('label', 'date_from', 'months', 'date_to')
 
 
 

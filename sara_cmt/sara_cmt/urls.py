@@ -35,3 +35,6 @@ databrowse.site.register(Company)
 databrowse.site.register(Position)
 databrowse.site.register(Department)
 databrowse.site.register(Warranty)
+from tagging.models import *
+databrowse.site.register(Tag)
+databrowse.site.register(TaggedItem)

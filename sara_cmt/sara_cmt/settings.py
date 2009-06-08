@@ -82,8 +82,7 @@ TEMPLATE_DIRS = (
 
 FIXTURE_DIRS = (
   # A fixture is a collection of files that contain serialized contents of the database.
-  #path.normpath(path.join(CMTS_PATH, 'fixtures')),
-  'fixtures',
+  os.path.normpath(os.path.join(os.path.dirname(__file__), 'fixtures')),
 )
 
 
@@ -97,4 +96,5 @@ INSTALLED_APPS = (
     'sara_cmt.cluster',
     'sara_cmt.django_cli',
     'south',
+    'tagging',
 )

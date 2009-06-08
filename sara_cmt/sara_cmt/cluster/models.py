@@ -8,6 +8,8 @@ logger = Logger().getLogger()
 from sara_cmt.django_cli import ModelExtension
 
 from datetime import date
+import tagging
+from tagging.fields import TagField
 
 
 
@@ -32,6 +34,7 @@ class MACAddressField(models.CharField):
 class Cluster(models.Model, ModelExtension):
   name = models.CharField(max_length=30, unique=True)
   note = models.TextField(blank=True)
+  tags = TagField()
 
   class Meta:
     ordering = ['name']
@@ -39,6 +42,13 @@ class Cluster(models.Model, ModelExtension):
 
   def __unicode__(self):
     return self.name or None
+
+
+#try:
+#  tagging.register(Cluster)
+#except tagging.AlreadyRegistered:
+#  logger.debug('Cluster has already been registered')
+#  pass
 
 
 class Location(models.Model, ModelExtension):
@@ -54,10 +64,6 @@ class Location(models.Model, ModelExtension):
   country    = models.CharField(max_length=30, blank=True)
   room       = models.CharField(max_length=30, blank=True)
 
-  class Meta:
-    abstract = True
-
-
   def __unicode__(self):
     return '%s, %s' % (country, postalcode)
 
@@ -70,6 +76,8 @@ class Site(Location):
   
   name = models.SlugField(max_length=30, editable=False, unique=True)
   note = models.TextField(blank=True)
+
+  tags = TagField()
 
   class Meta:
     ordering = ['country', 'city', 'address1']
@@ -94,6 +102,9 @@ class Company(Location):
   
   name    = models.CharField(max_length=30)
   website = models.URLField(verify_exists=True)
+  vendor  = models.BooleanField()
+
+  tags    = TagField()
 
   def __unicode__(self):
     return self.name
@@ -105,12 +116,16 @@ class Company(Location):
 class Position(models.Model, ModelExtension):
   label = models.CharField(max_length=30, help_text="'Account Manager' for example")
 
+  tags  = TagField()
+
   def __unicode__(self):
     return self.label
 
 
 class Department(models.Model, ModelExtension):
   label = models.CharField(max_length=50, help_text="'High Performance Computing & Visualisation' for example")
+  
+  tags  = TagField()
 
   def __unicode__(self):
     return self.label
@@ -118,12 +133,12 @@ class Department(models.Model, ModelExtension):
 
 class Contact(Location):
   """
-    Contactpersons can be linked to different sites, hardware, or its vendors.
+    Contacts can be linked to different sites, hardware, or its vendors.
     This makes it possible to lookup contactpersons in case of problems on a
     site or with specific hardware.
   """
   
-  employer  = models.ForeignKey(Company, related_name='employees')
+  employer  = models.ForeignKey(Company, related_name='employees', limit_choices_to = {'vendor': False})
   department = models.ForeignKey(Department, related_name='employees', null=True, blank=True)
   position  = models.ForeignKey(Position, related_name='contacts')
   added_on  = models.DateField(editable=False, default=date.today)
@@ -134,7 +149,10 @@ class Contact(Location):
   lastname  = models.CharField(verbose_name='last name', max_length=30)
   email     = models.EmailField()
   phone     = models.CharField(max_length=17)
+  cellphone = models.CharField(max_length=17)
   fax       = models.CharField(max_length=17, blank=True)
+
+  tags      = TagField()
 
   def __unicode__(self):
     return self.fullname()
@@ -158,6 +176,8 @@ class Rack(models.Model, ModelExtension):
   label    = models.SlugField(max_length=30)
   note     = models.TextField(default='', blank=True)
   capacity = models.PositiveIntegerField(verbose_name='number of slots')
+
+  tags      = TagField()
 
   class Meta:
     ordering = ('site', 'label',)
@@ -207,6 +227,8 @@ class Warranty(models.Model, ModelExtension):
   months     = models.PositiveIntegerField()
   date_to    = models.DateField(verbose_name='expires at', editable=False)
 
+  tags = TagField()
+
   class Meta:
     verbose_name_plural = 'warranties'
 
@@ -239,6 +261,8 @@ class Role(models.Model, ModelExtension):
   label = models.CharField(max_length=30, unique=True)
   note  = models.TextField(blank=True)
 
+  tags = TagField()
+
   class Meta:
     verbose_name = 'role'
     verbose_name_plural = 'roles'
@@ -257,10 +281,13 @@ class HardwareUnit(models.Model, ModelExtension):
   warranty     = models.ForeignKey('Warranty', null=True, blank=True, related_name='hardware')
   rack         = models.ForeignKey('Rack', related_name='contents')
 
+  #label        = models.CharField(max_length=30)
   service_tag  = models.CharField(max_length=30, blank=True, unique=True)
   serialnumber = models.CharField(max_length=30, blank=True, unique=True)
   first_slot   = models.PositiveIntegerField()
   hostname     = models.CharField(max_length=30, blank=True)
+
+  tags = TagField()
 
   class Meta:
     verbose_name = "piece of hardware"
@@ -307,6 +334,8 @@ class Network(models.Model, ModelExtension):
   netmask    = models.IPAddressField(help_text='example: 255.255.255.0')
   domain     = models.CharField(max_length=30, help_text='example: irc.sara.nl')
   prefix     = models.CharField(max_length=10, blank=True, help_text='example: ib-')
+
+  tags = TagField()
 
   class Meta:
     verbose_name = 'network'
@@ -393,6 +422,8 @@ class Interface(models.Model, ModelExtension):
   ip        = models.IPAddressField(editable=False, null=True, blank=True)
   #extern_ip = models.IPAddressField(null=True, blank=True)
 
+  tags = TagField()
+
   def __unicode__(self):
     return self.name or 'anonymous'
 
@@ -425,6 +456,8 @@ class Interface(models.Model, ModelExtension):
 class InterfaceType(models.Model, ModelExtension):
   label = models.CharField(max_length=30, help_text="'DRAC 4' for example")
   vendor = models.ForeignKey('Company', null=True, blank=True, related_name='interfaces')
+
+  tags = TagField()
 
   class Meta:
     verbose_name = 'type of interface'
