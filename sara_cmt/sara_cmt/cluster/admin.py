@@ -7,7 +7,7 @@ from sara_cmt.cluster.models import Cluster, Site, Contact, Rack, Interface, Int
 
 class ClusterAdmin(admin.ModelAdmin):
   list_display = ('name',)
-  fields       = ('name', 'note', 'tags')
+  fields       = ('name', 'note',)
 
 
 class SiteAdmin(admin.ModelAdmin):
@@ -36,7 +36,7 @@ class ContactAdmin(admin.ModelAdmin):
 
 
 class RackAdmin(admin.ModelAdmin):
-  fields       = ('site', 'label', 'capacity', 'note', 'tags')
+  fields       = ('site', 'label', 'capacity', 'note',)
   list_display = ('site', 'label',)
   list_filter  = ('site',)
   ordering     = ('site',)
@@ -44,11 +44,11 @@ class RackAdmin(admin.ModelAdmin):
 
 class InterfaceAdmin(admin.ModelAdmin):
   list_display = ('__unicode__', 'ip', 'hwaddress', 'type')
-  list_filter  = ('network','type')
+  list_filter  = ('network','type',)
 
 
 class InterfaceTypeAdmin(admin.ModelAdmin):
-  list_display = ('label', 'vendor')
+  list_display = ('label', 'vendor',)
   list_filter  = ('vendor',)
 
 
@@ -74,7 +74,7 @@ class HardwareUnitAdmin(admin.ModelAdmin):
 
 
 class RoleAdmin(admin.ModelAdmin):
-  fields = ('label', 'tags',)
+  fields = ('label',)
 
 
 class HardwareSpecificationsAdmin(admin.ModelAdmin):
@@ -92,21 +92,21 @@ class HardwareSpecificationsAdmin(admin.ModelAdmin):
 
 class NetworkAdmin(admin.ModelAdmin):
   list_display = ('name', 'cidr', 'domain', 'prefix', '_max_hosts', 'count_ips_assigned', 'count_ips_free')
-  fields       = ('name', 'netaddress', 'netmask', 'domain', 'prefix', 'tags')
+  fields       = ('name', 'netaddress', 'netmask', 'domain', 'prefix',)
 
 
 class CompanyAdmin(admin.ModelAdmin):
-  fields       = ('name', 'vendor', 'address1', 'address2', 'postalcode', 'city', 'country', 'website', 'tags')
+  fields       = ('name', 'vendor', 'address1', 'address2', 'postalcode', 'city', 'country', 'website',)
   list_display = ('name', 'address1', 'city', 'country', 'website')
   list_filter  = ('country',)
 
 
 class PositionAdmin(admin.ModelAdmin):
-  fields = ('label', 'tags',)
+  fields = ('label',)
 
 
 class DepartmentAdmin(admin.ModelAdmin):
-  fields = ('label', 'tags',)
+  fields = ('label',)
 
 
 class WarrantyAdmin(admin.ModelAdmin):
