@@ -352,7 +352,7 @@ class ModelExtension():
       except sqlite3.IntegrityError, err:
         print IntegrityError, err
 
-      logger.info('Current values: %s' % self.__dict__)
+      logger.debug('Current values: %s' % self.__dict__)
 
       #for field in missing:
       #  input = raw_input(field.verbose_name+': ')
@@ -376,7 +376,7 @@ class ModelExtension():
     objects = ModelExtension.search_objects(model, value, subfields)
     object_count = len(objects)
     if object_count is 0:
-      logger.info('No matching object found; Change your query.')
+      logger.warning('No matching object found; Change your query.')
       pass
     elif object_count is 1:
       object = objects.pop()

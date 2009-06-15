@@ -4,12 +4,12 @@ Date   : feb 13th 2009
 Author : Sil Westerveld
 E-mail : sil.westerveld@sara.nl
 
-The CMTSARA-templates rely on the Django Template Engine, documented at:
+The SARA_CMT-templates rely on the Django Template Engine, documented at:
 
   http://docs.djangoproject.com/en/dev/topics/templates/#topics-templates
 
-Some quickstart info, for writing your own CMTSARA-templates, can be found in
-the README file of the CMTSARA-package.
+Some quickstart info, for writing your own SARA_CMT-templates, can be found in
+the README file of the SARA_CMT-package.
 
 ############################################################### {% endcomment %}
 {% include 'ported/header' %}

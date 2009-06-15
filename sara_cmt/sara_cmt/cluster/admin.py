@@ -60,7 +60,7 @@ class InterfaceInline(admin.TabularInline):
 class HardwareUnitAdmin(admin.ModelAdmin):
   fieldsets = (
     (None, {
-      'fields': (('cluster', 'role', 'specifications',),),
+      'fields': (('cluster', 'role', 'specifications', 'warranty', ),),
       #'fields': (('cluster', 'role', 'specifications', 'label'),),
     }),
     ('Physical location', {
