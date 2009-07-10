@@ -3,8 +3,8 @@ import os
 SARACMT_BASE = os.path.normpath(os.path.dirname(__file__))
 PROJECT_BASE = os.path.normpath(os.path.join(SARACMT_BASE, os.path.pardir))
 
-DEBUG = False
-#DEBUG = True
+#DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -95,6 +95,6 @@ INSTALLED_APPS = (
     'django.contrib.webdesign',
     'sara_cmt.cluster',
     'sara_cmt.django_cli',
-    'south',
     'tagging',
+    'south',
 )

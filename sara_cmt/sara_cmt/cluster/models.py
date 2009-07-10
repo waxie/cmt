@@ -6,39 +6,27 @@ from sara_cmt.logger import Logger
 logger = Logger().getLogger()
 
 from sara_cmt.django_cli import ModelExtension
+from datetime import datetime
 
-from datetime import date
-import tagging
+#import tagging
 from tagging.fields import TagField
+from sara_cmt import settings
+
+
+# !!! TODO: classes for templates !!!
 
 
 
-class MACAddressField(models.CharField):
-  """
-    Model field for a MAC-address, based on a CharField.
-  """
 
-  __metaclass__ = models.SubfieldBase
-
-  def __init__(self, *args, **kwargs):
-    kwargs['max_length'] = 17
-    kwargs['unique'] = True
-    super(MACAddressField, self).__init__(*args, **kwargs)
-
-  def save(self, force_insert=False, force_update=False):
-    # TODO: strip macaddress and check for uniqueness in case a macaddress is given
-
-    super(MACAddressField, self).save(force_insert, force_update)
-
-
-class Cluster(models.Model, ModelExtension):
+######
+#
+# Classes of sara_cmt.core
+#
+class Cluster(ModelExtension):
   name = models.CharField(max_length=30, unique=True)
-  note = models.TextField(blank=True)
-  tags = TagField()
 
   class Meta:
     ordering = ['name']
-
 
   def __unicode__(self):
     return self.name or None
@@ -51,250 +39,26 @@ class Cluster(models.Model, ModelExtension):
 #  pass
 
 
-class Location(models.Model, ModelExtension):
-  """
-    A class to hold information about the physical location of a model. In the
-    case of CMTSARA it is a superclass of Site, ContactPerson and Company.
-  """
-  
-  address1   = models.CharField(verbose_name='address', max_length=30)
-  address2   = models.CharField(verbose_name='address', max_length=30, blank=True)
-  postalcode = models.CharField(max_length=9, blank=True)
-  city       = models.CharField(max_length=30)
-  country    = models.CharField(max_length=30, blank=True)
-  room       = models.CharField(max_length=30, blank=True)
 
-  def __unicode__(self):
-    return '%s, %s' % (country, postalcode)
-
-
-class Site(Location):
-  """
-    A site is a physical location which houses a collection of racks. It can be
-    a(n address of a) building, or more detailed a specific room in a building.
-  """
-  
-  name = models.SlugField(max_length=30, editable=False, unique=True)
-  note = models.TextField(blank=True)
-
-  tags = TagField()
-
-  class Meta:
-    ordering = ['country', 'city', 'address1']
-
-
-  def __unicode__(self):
-    return self.name
-
-  def save(self, force_insert=False, force_update=False):
-    if self.room:
-      self.name = '%s - %s (%s)' % (self.city, self.address1, self.room)
-    else:
-      self.name = '%s - %s' % (self.city, self.address1)
-    super(Site, self).save(force_insert, force_update)
-
-
-class Company(Location):
-  """
-    The Company-model can be linked to hardware. This way you are able to define
-    contactpersons for a specific piece of hardware.
-  """
-  
-  name    = models.CharField(max_length=30)
-  website = models.URLField(verify_exists=True)
-  vendor  = models.BooleanField()
-
-  tags    = TagField()
-
-  def __unicode__(self):
-    return self.name
-
-  class Meta:
-    verbose_name_plural = 'companies'
-
-
-class Position(models.Model, ModelExtension):
-  label = models.CharField(max_length=30, help_text="'Account Manager' for example")
-
-  tags  = TagField()
-
-  def __unicode__(self):
-    return self.label
-
-
-class Department(models.Model, ModelExtension):
-  label = models.CharField(max_length=50, help_text="'High Performance Computing & Visualisation' for example")
-  
-  tags  = TagField()
-
-  def __unicode__(self):
-    return self.label
-
-
-class Contact(Location):
-  """
-    Contacts can be linked to different sites, hardware, or its vendors.
-    This makes it possible to lookup contactpersons in case of problems on a
-    site or with specific hardware.
-  """
-  
-  employer  = models.ForeignKey(Company, related_name='employees', limit_choices_to = {'vendor': False})
-  department = models.ForeignKey(Department, related_name='employees', null=True, blank=True)
-  position  = models.ForeignKey(Position, related_name='contacts')
-  added_on  = models.DateField(editable=False, default=date.today)
-  active    = models.BooleanField(editable=True, default=True)
-  note      = models.TextField(default='', blank=True)
-  
-  firstname = models.CharField(verbose_name='first name', max_length=30)
-  lastname  = models.CharField(verbose_name='last name', max_length=30)
-  email     = models.EmailField()
-  phone     = models.CharField(max_length=17)
-  cellphone = models.CharField(max_length=17)
-  fax       = models.CharField(max_length=17, blank=True)
-
-  tags      = TagField()
-
-  def __unicode__(self):
-    return self.fullname()
-
-  def fullname(self):
-    return '%s %s' % (self.firstname, self.lastname)
-
-  class Meta:
-    ordering = ('lastname', 'firstname')
-    unique_together = ('firstname', 'lastname')
-
-
-class Rack(models.Model, ModelExtension):
-  """
-    A Rack is a standardized system for mounting various HardwareUnits in a
-    stack of slots. It is located on a site.
-  """
-
-  site     = models.ForeignKey(Site, verbose_name='is located at', related_name='racks')
-
-  label    = models.SlugField(max_length=30)
-  note     = models.TextField(default='', blank=True)
-  capacity = models.PositiveIntegerField(verbose_name='number of slots')
-
-  tags      = TagField()
-
-  class Meta:
-    ordering = ('site', 'label',)
-    verbose_name = 'rack'
-    verbose_name_plural = 'racks'
-
-
-  # !!! TODO: Get rid of this !!!
-  def __unicode__(self):
-    try:
-      assert self.label is not None, "rack hasn't got a label"
-      return self.label
-    except AssertionError, e:
-      print AssertionError, e
-      return '[None]'
-
-
-class HardwareSpecifications(models.Model, ModelExtension):
-  """
-    The Model-model is being used to specify some extra information about a
-    specific type (model) of hardware.
-  """
-  
-  vendor         = models.ForeignKey(Company, related_name='model specifications')
-
-  name           = models.CharField(max_length=30, unique=True)
-  system_id      = models.CharField(max_length=30, blank=True)
-  slots_size     = models.PositiveIntegerField(help_text='size in U for example')
-  slots_capacity = models.PositiveIntegerField(default=0, help_text='capacity in U for example')
-  
-  class Meta:
-    verbose_name_plural = 'hardware specifications'
-    ordering = ('vendor', 'name')
-
-
-  def __unicode__(self):
-    return '%s (%s)' % (self.name, self.vendor)
-
-
-class Warranty(models.Model, ModelExtension):
-  """
-    A class which contains warranty information of a (collection of) hardware.
-  """
-
-  label      = models.CharField(max_length=30, unique=True)
-  date_from  = models.DateField(verbose_name='valid from')
-  months     = models.PositiveIntegerField()
-  date_to    = models.DateField(verbose_name='expires at', editable=False)
-
-  tags = TagField()
-
-  class Meta:
-    verbose_name_plural = 'warranties'
-
-
-  def __unicode__(self):
-    return self.label
-
-  def save(self, force_insert=False, force_update=False):
-    """
-      Before saving to the database, the date of expiration has to be calculated.
-    """
-    try:
-      self.date_to = self.date_from.replace(
-        year = self.date_from.year + (self.date_from.month-1 + self.months) / 12,
-        month = (self.date_from.month + self.months) %12
-      )
-      super(Warranty, self).save(force_insert, force_update)
-    except AttributeError, e:
-      logger.error(e)
-
-
-class Role(models.Model, ModelExtension):
-  """
-    This describes a possible role of a HardwareUnit in the cluster. A piece of
-    hardware can have a role like 'switch', 'compute node', 'patchpanel', 'pdu',
-    'admin node', 'login node', etc...
-    Those roles can be used for all kinds of rules on HardwareUnits which exist
-    in the cluster.
-  """
-  label = models.CharField(max_length=30, unique=True)
-  note  = models.TextField(blank=True)
-
-  tags = TagField()
-
-  class Meta:
-    verbose_name = 'role'
-    verbose_name_plural = 'roles'
-
-
-  def __unicode__(self):
-    return self.label
-
-
-
-class HardwareUnit(models.Model, ModelExtension):
+class HardwareUnit(ModelExtension):
   cluster      = models.ForeignKey('Cluster', related_name='hardware')
-  role         = models.ForeignKey('Role', related_name='hardware')
-  networks     = models.ManyToManyField('Network', through='Interface')
-  specifications = models.ForeignKey('HardwareSpecifications', null=True, blank=True, related_name='hardware')
-  warranty     = models.ForeignKey('Warranty', null=True, blank=True, related_name='hardware')
+  role         = models.ManyToManyField('Role', related_name='hardware')
+  networks     = models.ManyToManyField('Network', related_name='hardware', through='Interface')
+  specifications = models.ForeignKey('HardwareSpecifications', related_name='hardware', null=True, blank=True)
+  warranty     = models.ForeignKey('WarrantyContract', related_name='hardware', null=True, blank=True)
   rack         = models.ForeignKey('Rack', related_name='contents')
 
   #label        = models.CharField(max_length=30)
-  service_tag  = models.CharField(max_length=30, blank=True, unique=True)
-  serialnumber = models.CharField(max_length=30, blank=True, unique=True)
+  service_tag  = models.CharField(max_length=30, blank=True, unique=True) # should be a field of WarrantyContract
+  serialnumber = models.CharField(max_length=30, blank=True, unique=True) # should be a field of Specifications
   first_slot   = models.PositiveIntegerField()
   hostname     = models.CharField(max_length=30, blank=True)
-
-  tags = TagField()
 
   class Meta:
     verbose_name = "piece of hardware"
     verbose_name_plural = "hardware pieces"
-    ordering = ['rack__label', 'first_slot']
+    ordering = ['cluster__name', 'rack__label', 'first_slot']
     unique_together = [('rack', 'first_slot')]
-    
 
   def __unicode__(self):
     try:
@@ -322,7 +86,46 @@ class HardwareUnit(models.Model, ModelExtension):
       pass
     
 
-class Network(models.Model, ModelExtension):
+class Interface(ModelExtension):
+  network   = models.ForeignKey('Network', related_name='interfaces')
+  hardware  = models.ForeignKey('HardwareUnit', related_name='interfaces', verbose_name='machine') # ??? host ???
+  type      = models.ForeignKey('InterfaceType', related_name='interfaces', verbose_name='type')
+  name      = models.CharField(max_length=30, blank=True, help_text='Automagically generated if kept empty') # TODO: Default name has to be based on the prefix of the network
+  hwaddress = models.CharField(max_length=17, blank=True, verbose_name='hardware address', help_text="6 Octets, optionally delimited by a space ' ', a hyphen '-', or a colon ':'.", unique=True)
+  ip        = models.IPAddressField(editable=False, null=True, blank=True)
+  #extern_ip = models.IPAddressField(null=True, blank=True)
+
+
+  def __unicode__(self):
+    return self.name or 'anonymous'
+
+  def save(self, force_insert=False, force_update=False):
+    """
+      First check for a correct IP address before saving the object. 
+      Pick a new one in the related network when the IP hasn't been set yet, or
+      when the network has been changed.
+    """
+    try:
+      assert isinstance(self.network, Network), "network doesn't exist"
+
+      ip = IP(self.ip or 0)
+      try:
+        network = IP('%s/%s' % (self.network.netaddress, self.network.netmask))
+      except ValueError, e:
+        print ValueError, e
+
+      # Pick a new IP when it's not defined yet or when the network has been changed
+      if ip not in network:
+        self.ip = self.network.pick_ip()
+
+      self.name = '%s%s' % (self.network.prefix, self.hardware.hostname)
+
+      super(Interface, self).save(force_insert, force_update)
+    except AssertionError, e:
+      print AssertionError, e
+    
+
+class Network(ModelExtension):
   """
     Class with information about a network. Networks are connected with
     Interfaces (and HardwareUnits as equipment through Interface).
@@ -335,12 +138,9 @@ class Network(models.Model, ModelExtension):
   domain     = models.CharField(max_length=30, help_text='example: irc.sara.nl')
   prefix     = models.CharField(max_length=10, blank=True, help_text='example: ib-')
 
-  tags = TagField()
-
   class Meta:
     verbose_name = 'network'
     verbose_name_plural = 'networks'
-
 
   def __unicode__(self):
     return self.name
@@ -411,53 +211,239 @@ class Network(models.Model, ModelExtension):
   def cidr(self):
     network = IP("%s/%s" % (self.netaddress, self.netmask))
     return network.strNormal()
-    
 
-class Interface(models.Model, ModelExtension):
-  network   = models.ForeignKey('Network', related_name='interfaces')
-  hardware  = models.ForeignKey('HardwareUnit', related_name='interfaces', verbose_name='machine')
-  type      = models.ForeignKey('InterfaceType', related_name='interfaces', verbose_name='type')
-  name      = models.CharField(max_length=30, blank=True, help_text='Automagically generated if kept empty') # TODO: Default name has to be based on the prefix of the network
-  hwaddress = MACAddressField(null=True, blank=True, verbose_name='hardware address', help_text="6 Octets, optionally delimited by a space ' ', a hyphen '-', or a colon ':'.")
-  ip        = models.IPAddressField(editable=False, null=True, blank=True)
-  #extern_ip = models.IPAddressField(null=True, blank=True)
 
-  tags = TagField()
+class Rack(ModelExtension):
+  """
+    A Rack is a standardized system for mounting various HardwareUnits in a
+    stack of slots. It is located on a site.
+  """
 
+  address  = models.ForeignKey('Address', verbose_name='is located at', related_name='racks')
+
+  label    = models.SlugField(max_length=30)
+  #note     = models.TextField(default='', blank=True)
+  capacity = models.PositiveIntegerField(verbose_name='number of slots')
+
+
+  class Meta:
+    ordering = ('address', 'label',)
+    verbose_name = 'rack'
+    verbose_name_plural = 'racks'
+
+
+  # !!! TODO: Get rid of this !!!
   def __unicode__(self):
-    return self.name or 'anonymous'
-
-  def save(self, force_insert=False, force_update=False):
-    """
-      First check for a correct IP address before saving the object. 
-      Pick a new one in the related network when the IP hasn't been set yet, or
-      when the network has been changed.
-    """
     try:
-      assert isinstance(self.network, Network), "network doesn't exist"
-
-      ip = IP(self.ip or 0)
-      try:
-        network = IP('%s/%s' % (self.network.netaddress, self.network.netmask))
-      except ValueError, e:
-        print ValueError, e
-
-      # Pick a new IP when it's not defined yet or when the network has been changed
-      if ip not in network:
-        self.ip = self.network.pick_ip()
-
-      self.name = '%s%s' % (self.network.prefix, self.hardware.hostname)
-
-      super(Interface, self).save(force_insert, force_update)
+      assert self.label is not None, "rack hasn't got a label"
+      return self.label
     except AssertionError, e:
       print AssertionError, e
+      return '[None]'
+
+#
+#
+#
+######
 
 
-class InterfaceType(models.Model, ModelExtension):
+
+######
+#
+# Classes for sara_cmt.locations
+#
+
+class Address(ModelExtension):
+  """
+    A class to hold information about the physical location of a model. In the
+    case of CMTSARA it is a superclass of Site, ContactPerson and Company.
+  """
+  
+  address1   = models.CharField(verbose_name='address', max_length=30)
+  address2   = models.CharField(verbose_name='address', max_length=30, blank=True)
+  postalcode = models.CharField(max_length=9, blank=True)
+  city       = models.CharField(max_length=30)
+  country    = models.CharField(max_length=30, blank=True)
+
+  class Meta:
+    unique_together = ('address1', 'city')
+    verbose_name_plural = 'addresses'
+
+
+  def __unicode__(self):
+    return '%s - %s' % (self.city, self.address1)
+
+
+class Room(ModelExtension):
+  address = models.ForeignKey(Address, related_name='rooms')
+
+  floor   = models.IntegerField(max_length=2)
+  label   = models.CharField(max_length=30, blank=False)
+
+  class Meta:
+    unique_together = ('address', 'floor', 'label')
+    
+  def __unicode__(self):
+    return unicode(floor)
+
+
+class Site(ModelExtension):
+  """
+  """
+  name = models.CharField(max_length=30, unique=True)
+  #note = models.TextField(blank=True)
+
+  def __unicode__(self):
+    return self.name
+
+#  def save(self, force_insert=False, force_update=True):
+#    self.latest_edit = datetime.now()
+#    super(Site, self).save(force_insert, force_update)
+#  #  #super(self.__class__, self).save(force_insert, force_update)
+
+#
+#
+#
+######
+
+
+######
+#
+# Classes for sara_cmt.contacts
+#
+
+class Company(ModelExtension):
+  """
+    The Company-model can be linked to hardware. This way you are able to define
+    contactpersons for a specific piece of hardware.
+  """
+  
+  buildings = models.ManyToManyField(Address)
+  #type    = models.ChoiceField() # !!! TODO: add choices like vendor / support / partner / etc... !!!
+  name    = models.CharField(max_length=64)
+  website = models.URLField()
+
+  def __unicode__(self):
+    return self.name
+
+  class Meta:
+    verbose_name_plural = 'companies'
+
+
+class Connection(ModelExtension):
+  """
+    Contacts can be linked to different sites, hardware, or its vendors.
+    This makes it possible to lookup contactpersons in case of problems on a
+    site or with specific hardware.
+  """
+  address = models.ForeignKey(Address)
+  #phone     = models.ForeignKey(Telephonenumber, related_name='phone')
+  #cellphone = models.ForeignKey(Telephonenumber, related_name='cellphone')
+  #fax       = models.ForeignKey(Telephonenumber, related_name='fax')
+  phone = models.ManyToManyField('Telephonenumber', related_name='phone')
+  cellphone = models.ManyToManyField('Telephonenumber', related_name='cellphone')
+  employer  = models.ForeignKey(Company, related_name='employees')
+
+  active    = models.BooleanField(editable=True)
+  firstname = models.CharField(verbose_name='first name', max_length=30)
+  lastname  = models.CharField(verbose_name='last name', max_length=30)
+  email     = models.EmailField()
+
+  def __unicode__(self):
+    return self.fullname()
+
+  def fullname(self):
+    return '%s %s' % (self.firstname, self.lastname)
+
+  def address1(self):
+    return address.address1
+
+  def address2(self):
+    return address.address2
+
+  class Meta:
+    ordering = ('lastname', 'firstname')
+    unique_together = ('firstname', 'lastname')
+
+
+class Telephonenumber(ModelExtension):
+  NUMBER_CHOICES = (
+    ('T', 'Telephone'),
+    ('C', 'Cellphone'),
+    ('F', 'Fax')
+  )
+  country_code      = models.IntegerField(max_length=4)
+  areacode          = models.CharField(max_length=4) # because it can start with a zero
+  subscriber_number = models.IntegerField(max_length=15)
+  #connection = models.ForeignKey(Connection, blank=False, null=False)
+  ##connection = models.ManyToManyField(Connection, blank=False, null=False)
+  type = models.CharField(max_length=1, choices=NUMBER_CHOICES)
+
+
+  # !!! TODO: link to company / contact / etc... !!!
+
+  def __unicode__(self):
+    return '+%i(%s)%s-%i' % (self.country_code, self.areacode[:1], self.areacode[1:], self.subscriber_number)
+
+
+#
+#
+#
+#####
+
+
+######
+#
+# Classes for sara_cmt.specifications
+#
+
+
+class HardwareSpecifications(ModelExtension):
+  """
+    The Model-model is being used to specify some extra information about a
+    specific type (model) of hardware.
+  """
+  vendor         = models.ForeignKey(Company, related_name='model specifications')
+
+  name           = models.CharField(max_length=30, unique=True)
+  system_id      = models.CharField(max_length=30, blank=True)
+  slots_size     = models.PositiveIntegerField(help_text='size in U for example')
+  slots_capacity = models.PositiveIntegerField(default=0, help_text='capacity in U for example')
+  
+  class Meta:
+    verbose_name_plural = 'hardware specifications'
+    ordering = ('vendor', 'name')
+
+
+  def __unicode__(self):
+    return '%s (%s)' % (self.name, self.vendor)
+
+
+class Role(ModelExtension):
+  """
+    This describes a possible role of a HardwareUnit in the cluster. A piece of
+    hardware can have a role like 'switch', 'compute node', 'patchpanel', 'pdu',
+    'admin node', 'login node', etc...
+    Those roles can be used for all kinds of rules on HardwareUnits which exist
+    in the cluster.
+  """
+  label = models.CharField(max_length=30, unique=True)
+  #note  = models.TextField(blank=True)
+
+
+  class Meta:
+    verbose_name = 'role'
+    verbose_name_plural = 'roles'
+
+
+  def __unicode__(self):
+    return self.label
+
+
+class InterfaceType(ModelExtension):
   label = models.CharField(max_length=30, help_text="'DRAC 4' for example")
   vendor = models.ForeignKey('Company', null=True, blank=True, related_name='interfaces')
 
-  tags = TagField()
 
   class Meta:
     verbose_name = 'type of interface'
@@ -466,3 +452,52 @@ class InterfaceType(models.Model, ModelExtension):
 
   def __unicode__(self):
     return self.label
+
+#
+#
+#
+######
+
+
+######
+#
+# Classes for sara_cmt.support
+#
+
+# !!! TODO: WarrantyContract and WarrantyType !!
+
+class WarrantyType(ModelExtension):
+  contact = models.ForeignKey(Connection, blank=True, null=True)
+  label = models.CharField(max_length=30, unique=True)
+
+
+class WarrantyContract(ModelExtension):
+  """
+    A class which contains warranty information of a (collection of) hardware.
+  """
+  type = models.ForeignKey(WarrantyType, blank=True, null=True)
+  label      = models.CharField(max_length=30, unique=True)
+  date_from  = models.DateField(verbose_name='valid from')
+  months     = models.PositiveIntegerField()
+  date_to    = models.DateField(verbose_name='expires at', editable=False)
+
+
+  class Meta:
+    verbose_name_plural = 'warranties'
+
+
+  def __unicode__(self):
+    return self.label
+
+  def save(self, force_insert=False, force_update=False):
+    """
+      Before saving to the database, the date of expiration has to be calculated.
+    """
+    try:
+      self.date_to = self.date_from.replace(
+        year = self.date_from.year + (self.date_from.month-1 + self.months) / 12,
+        month = (self.date_from.month + self.months) %12
+      )
+      super(Warranty, self).save(force_insert, force_update)
+    except AttributeError, e:
+      logger.error(e)

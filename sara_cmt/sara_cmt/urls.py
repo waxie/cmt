@@ -1,8 +1,6 @@
 from django.conf.urls.defaults import *
 from django.contrib import databrowse
 
-#from sara_cmt import cluster
-
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
@@ -20,21 +18,34 @@ urlpatterns = patterns('',
     (r'^db/(.*)', databrowse.site.root),
 )
 
-from cluster.models import *
+# core
+from sara_cmt.cluster.models import Cluster, HardwareUnit, Interface, Network, Rack
 databrowse.site.register(Cluster)
-databrowse.site.register(Site)
-databrowse.site.register(Contact)
-databrowse.site.register(Rack)
-databrowse.site.register(Interface)
-databrowse.site.register(InterfaceType)
 databrowse.site.register(HardwareUnit)
-databrowse.site.register(Role)
+databrowse.site.register(Interface)
 databrowse.site.register(Network)
-databrowse.site.register(HardwareSpecifications)
+databrowse.site.register(Rack)
+# locations
+from sara_cmt.cluster.models import Address, Room, Site
+databrowse.site.register(Address)
+databrowse.site.register(Room)
+databrowse.site.register(Site)
+# contacts
+from sara_cmt.cluster.models import Company, Telephonenumber, Connection
 databrowse.site.register(Company)
-databrowse.site.register(Position)
-databrowse.site.register(Department)
-databrowse.site.register(Warranty)
+databrowse.site.register(Telephonenumber)
+databrowse.site.register(Connection)
+# specifications
+from sara_cmt.cluster.models import HardwareSpecifications, Role, InterfaceType
+databrowse.site.register(HardwareSpecifications)
+databrowse.site.register(Role)
+databrowse.site.register(InterfaceType)
+# support
+from sara_cmt.cluster.models import WarrantyContract, WarrantyType
+databrowse.site.register(WarrantyContract)
+databrowse.site.register(WarrantyType)
+
+# tags
 from tagging.models import *
 databrowse.site.register(Tag)
 databrowse.site.register(TaggedItem)

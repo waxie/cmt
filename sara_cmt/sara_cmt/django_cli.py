@@ -12,10 +12,22 @@ import sara_cmt
 from django.db import models
 CLUSTER_MODELS = 'sara_cmt.cluster.models'
 
-class ModelExtension():
+import tagging
+from tagging.fields import TagField
+from datetime import date, datetime
+
+class ModelExtension(models.Model):
   """
     The ModelExtension of Django-CLI is meant as a Mixin for a Django Model.
   """
+  tags       = TagField()
+  created_on = models.DateField(auto_now_add=True, editable=False)
+  updated_on = models.DateTimeField(auto_now=True, editable=False)
+  note       = models.TextField(blank=True)
+
+  class Meta:
+    abstract = True
+
 
 #####
 #
@@ -76,12 +88,14 @@ class ModelExtension():
     """
     def empty_qset(model): return models.query.QuerySet.none(model.objects.all())
 
-    qset = empty_qset(model)#models.query.QuerySet.none(model.objects.all()) # empty QuerySet
+    #qset = empty_qset(model)#models.query.QuerySet.none(model.objects.all()) # empty QuerySet
+    qset = models.query.QuerySet.none(model.objects.all()) # empty QuerySet
     for query in queries.items():
       qset_part = ModelExtension._query_to_qset(model, query)
       if not qset_part:
         # Nothing found, so an empty QuerySet could be returned immediately.
-        return empty_qset(model)#models.query.QuerySet.none(model.objects.all())
+        #return empty_qset(model)#models.query.QuerySet.none(model.objects.all())
+        return models.query.QuerySet.none(model.objects.all())
       elif not qset:
         # First QuerySet has been found.
         qset = qset_part
@@ -91,7 +105,8 @@ class ModelExtension():
         qset &= qset_part
         if not qset:
           # Intersection of QuerySets is empty, so return it immediately.
-          return empty_qset(model)#models.query.QuerySet.none(model.objects.all())
+          #return empty_qset(model)#models.query.QuerySet.none(model.objects.all())
+          return models.query.QuerySet.none(model.objects.all())
     #logger.debug("Queries '%s' gave QuerySet: %s" % (queries,qset))
     return qset
 
