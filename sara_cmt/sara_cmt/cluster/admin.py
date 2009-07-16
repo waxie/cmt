@@ -133,7 +133,7 @@ class ConnectionAdmin(admin.ModelAdmin):
   list_filter   = ('employer', 'active')
   search_fields = ('firstname', 'lastname',)
   ordering      = ('lastname',)
-  #inlines = [PhoneInline]#, CellphoneInline, FaxInline]
+  inlines = [PhoneInline]#, CellphoneInline, FaxInline]
 
 
 class RackAdmin(admin.ModelAdmin):
@@ -196,9 +196,9 @@ class WarrantyTypeAdmin(admin.ModelAdmin):
 
 
 
-admin.site.register(Cluster, ClusterAdmin)
+#admin.site.register(Cluster, ClusterAdmin)
 admin.site.register(HardwareUnit, HardwareUnitAdmin)
-admin.site.register(Interface, InterfaceAdmin)
+#admin.site.register(Interface, InterfaceAdmin)
 admin.site.register(Network, NetworkAdmin)
 admin.site.register(Rack, RackAdmin)
 
@@ -206,12 +206,12 @@ admin.site.register(Address, AddressAdmin)
 admin.site.register(Room, RoomAdmin) #
 admin.site.register(Site, SiteAdmin)
 
-admin.site.register(Company, CompanyAdmin)
+#admin.site.register(Company, CompanyAdmin)
 #admin.site.register(Telephonenumber, TelephonenumberAdmin) #
-admin.site.register(Telephonenumber) #
+#admin.site.register(Telephonenumber) #
 admin.site.register(Connection, ConnectionAdmin)
 
-admin.site.register(HardwareSpecifications, HardwareSpecificationsAdmin)
+#admin.site.register(HardwareSpecifications, HardwareSpecificationsAdmin)
 admin.site.register(Role, RoleAdmin)
 admin.site.register(InterfaceType, InterfaceTypeAdmin)
 

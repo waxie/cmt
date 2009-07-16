@@ -340,8 +340,8 @@ class Connection(ModelExtension):
   #phone     = models.ForeignKey(Telephonenumber, related_name='phone')
   #cellphone = models.ForeignKey(Telephonenumber, related_name='cellphone')
   #fax       = models.ForeignKey(Telephonenumber, related_name='fax')
-  phone = models.ManyToManyField('Telephonenumber', related_name='phone')
-  cellphone = models.ManyToManyField('Telephonenumber', related_name='cellphone')
+  #phone = models.ManyToManyField('Telephonenumber', related_name='phone')
+  #cellphone = models.ManyToManyField('Telephonenumber', related_name='cellphone')
   employer  = models.ForeignKey(Company, related_name='employees')
 
   active    = models.BooleanField(editable=True)
@@ -375,7 +375,7 @@ class Telephonenumber(ModelExtension):
   country_code      = models.IntegerField(max_length=4)
   areacode          = models.CharField(max_length=4) # because it can start with a zero
   subscriber_number = models.IntegerField(max_length=15)
-  #connection = models.ForeignKey(Connection, blank=False, null=False)
+  connection = models.ForeignKey(Connection, blank=False, null=False)
   ##connection = models.ManyToManyField(Connection, blank=False, null=False)
   type = models.CharField(max_length=1, choices=NUMBER_CHOICES)
 

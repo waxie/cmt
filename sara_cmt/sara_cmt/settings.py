@@ -1,5 +1,9 @@
 import os
 
+# Documentation of settings can be found on:
+#
+#   http://docs.djangoproject.com/en/dev/ref/settings/
+
 SARACMT_BASE = os.path.normpath(os.path.dirname(__file__))
 PROJECT_BASE = os.path.normpath(os.path.join(SARACMT_BASE, os.path.pardir))
 
@@ -17,7 +21,7 @@ MANAGERS = ADMINS
 # The database settings are imported, due to confidential data which should be
 # excluded from the SVN repository. An example of the needed info for database
 # configuration is commented out.
-import settings_db
+from settings_db import *
 #DATABASE_ENGINE    = '' # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
 #DATABASE_NAME      = '' # Or path to database file if using sqlite3.
 #DATABASE_USER      = '' # Not used with sqlite3.
