@@ -48,15 +48,13 @@ class HardwareUnit(ModelExtension):
   warranty     = models.ForeignKey('WarrantyContract', related_name='hardware', null=True, blank=True)
   rack         = models.ForeignKey('Rack', related_name='contents')
 
-  #label        = models.CharField(max_length=30)
-  service_tag  = models.CharField(max_length=30, blank=True, unique=True) # should be a field of WarrantyContract
   serialnumber = models.CharField(max_length=30, blank=True, unique=True) # should be a field of Specifications
   first_slot   = models.PositiveIntegerField()
   hostname     = models.CharField(max_length=30, blank=True)
 
   class Meta:
-    verbose_name = "piece of hardware"
-    verbose_name_plural = "hardware pieces"
+    #verbose_name = "piece of hardware"
+    verbose_name_plural = "hardware"
     ordering = ['cluster__name', 'rack__label', 'first_slot']
     unique_together = [('rack', 'first_slot')]
 
@@ -253,6 +251,21 @@ class Rack(ModelExtension):
 # Classes for sara_cmt.locations
 #
 
+class Country(ModelExtension):
+  name         = models.CharField(max_length=30, unique=True)
+  country_code = models.PositiveIntegerField()
+  # Country codes can be found on:
+  #   http://www.itu.int/dms_pub/itu-t/opb/sp/T-SP-E.164D-2009-PDF-E.pdf
+
+  class Meta:
+    unique_together = ('name', 'country_code')
+    verbose_name_plural = 'countries'
+
+
+  def __unicode__(self):
+    return self.name
+
+
 class Address(ModelExtension):
   """
     A class to hold information about the physical location of a model. In the
@@ -263,7 +276,8 @@ class Address(ModelExtension):
   address2   = models.CharField(verbose_name='address', max_length=30, blank=True)
   postalcode = models.CharField(max_length=9, blank=True)
   city       = models.CharField(max_length=30)
-  country    = models.CharField(max_length=30, blank=True)
+  country    = models.ForeignKey(Country, null=True, blank=True)
+  #country    = models.CharField(max_length=30, blank=True)
 
   class Meta:
     unique_together = ('address1', 'city')
@@ -284,7 +298,7 @@ class Room(ModelExtension):
     unique_together = ('address', 'floor', 'label')
     
   def __unicode__(self):
-    return unicode(floor)
+    return unicode(self.label)
 
 
 class Site(ModelExtension):
@@ -337,12 +351,7 @@ class Connection(ModelExtension):
     site or with specific hardware.
   """
   address = models.ForeignKey(Address)
-  #phone     = models.ForeignKey(Telephonenumber, related_name='phone')
-  #cellphone = models.ForeignKey(Telephonenumber, related_name='cellphone')
-  #fax       = models.ForeignKey(Telephonenumber, related_name='fax')
-  #phone = models.ManyToManyField('Telephonenumber', related_name='phone')
-  #cellphone = models.ManyToManyField('Telephonenumber', related_name='cellphone')
-  employer  = models.ForeignKey(Company, related_name='employees')
+  company = models.ForeignKey(Company)
 
   active    = models.BooleanField(editable=True)
   firstname = models.CharField(verbose_name='first name', max_length=30)
@@ -372,18 +381,17 @@ class Telephonenumber(ModelExtension):
     ('C', 'Cellphone'),
     ('F', 'Fax')
   )
-  country_code      = models.IntegerField(max_length=4)
+  country      = models.ForeignKey(Country)
+  #country_code      = models.IntegerField(max_length=4)
   areacode          = models.CharField(max_length=4) # because it can start with a zero
-  subscriber_number = models.IntegerField(max_length=15)
+  subscriber_number = models.IntegerField(verbose_name='number', max_length=15)
   connection = models.ForeignKey(Connection, blank=False, null=False)
-  ##connection = models.ManyToManyField(Connection, blank=False, null=False)
   type = models.CharField(max_length=1, choices=NUMBER_CHOICES)
-
 
   # !!! TODO: link to company / contact / etc... !!!
 
   def __unicode__(self):
-    return '+%i(%s)%s-%i' % (self.country_code, self.areacode[:1], self.areacode[1:], self.subscriber_number)
+    return '+%i(%s)%s-%i' % (self.country.country_code, self.areacode[:1], self.areacode[1:], self.subscriber_number)
 
 
 #
@@ -407,11 +415,12 @@ class HardwareSpecifications(ModelExtension):
 
   name           = models.CharField(max_length=30, unique=True)
   system_id      = models.CharField(max_length=30, blank=True)
-  slots_size     = models.PositiveIntegerField(help_text='size in U for example')
+  rackspace      = models.PositiveIntegerField(help_text='size in U for example')
   slots_capacity = models.PositiveIntegerField(default=0, help_text='capacity in U for example')
   
   class Meta:
-    verbose_name_plural = 'hardware specifications'
+    verbose_name = 'model'
+    #verbose_name_plural = 'specifications'
     ordering = ('vendor', 'name')
 
 
@@ -480,6 +489,7 @@ class WarrantyContract(ModelExtension):
   date_from  = models.DateField(verbose_name='valid from')
   months     = models.PositiveIntegerField()
   date_to    = models.DateField(verbose_name='expires at', editable=False)
+  service_tag = models.CharField(max_length=30, blank=True, unique=True)
 
 
   class Meta:

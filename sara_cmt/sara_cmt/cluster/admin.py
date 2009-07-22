@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from sara_cmt.cluster.models import Cluster, HardwareUnit, Interface, Network, Rack
-from sara_cmt.cluster.models import Address, Room, Site
+from sara_cmt.cluster.models import Country, Address, Room, Site
 from sara_cmt.cluster.models import Company, Telephonenumber, Connection
 from sara_cmt.cluster.models import HardwareSpecifications, Role, InterfaceType
 from sara_cmt.cluster.models import WarrantyContract, WarrantyType
@@ -21,7 +21,7 @@ class GlobalAdmin(admin.ModelAdmin):
   fields = ('note', 'tags')
   list_filter = ('created_on', 'updated_on', 'tags')
   list_per_page = 50
-  extra_fieldset = ('Additional', {'fields': fields, 'classes': ('collapse',)})
+  extra_fieldset = ('Additional fields', {'fields': fields, 'classes': ('collapse',)})
 
 #
 #
@@ -35,6 +35,11 @@ class GlobalAdmin(admin.ModelAdmin):
 # Inlines
 #
 
+class AddressInline(admin.TabularInline):
+  model = Address
+  exclude = GlobalAdmin.fields
+  
+
 class InterfaceInline(admin.TabularInline):
   model = Interface
   exclude = GlobalAdmin.fields
@@ -43,23 +48,12 @@ class InterfaceInline(admin.TabularInline):
 
 class PhoneInline(admin.TabularInline):
   model = Telephonenumber
-  #model = Connection
   exclude = GlobalAdmin.fields
-  #fk_name = 'phone'
 
 
-class CellphoneInline(admin.TabularInline):
-  model = Telephonenumber
-  #model = Connection
+class RoomInline(admin.TabularInline):
+  model = Room
   exclude = GlobalAdmin.fields
-  #fk_name = 'cellphone'
-
-
-class FaxInline(admin.TabularInline):
-  model = Telephonenumber
-  #model = Connection
-  exclude = GlobalAdmin.fields
-  #fk_name = 'fax'
 
 #
 #
@@ -77,13 +71,15 @@ class ClusterAdmin(admin.ModelAdmin):
 class HardwareUnitAdmin(admin.ModelAdmin):
   fieldsets = (
     (None, {
-      'fields': (('cluster', 'specifications', 'warranty', ),),
-      #'fields': (('cluster', 'role', 'specifications', 'warranty', ),),
-      #'fields': (('cluster', 'role', 'specifications', 'label'),),
+      'fields': (('cluster', 'role'), ),
+    }),
+    ('Machine specifications', {
+      'fields': (('specifications', 'warranty'),)
     }),
     ('Physical location', {
-      'fields': (('rack', 'first_slot',),),
+      'fields': (('rack', 'first_slot'),)
     }),
+    GlobalAdmin.extra_fieldset
   )
 
   list_display = ('__unicode__', 'cluster', 'rack', 'specifications')
@@ -100,6 +96,15 @@ class SiteAdmin(admin.ModelAdmin):
   ordering     = ('name',)
 
 
+class CountryAdmin(admin.ModelAdmin):
+  fieldsets = (
+    ('None', {'fields': (('name', 'country_code'),)}),
+    GlobalAdmin.extra_fieldset
+  )
+  list_display = ('country_code', 'name')
+  ordering = ('name',)
+
+
 class AddressAdmin(admin.ModelAdmin):
   #date_hierarchy = 'created_on'
   fieldsets = (
@@ -109,31 +114,29 @@ class AddressAdmin(admin.ModelAdmin):
   list_display = ('address1', 'postalcode', 'city', 'country')
   list_filter  = ('city', 'country') + GlobalAdmin.list_filter
   search_fields = ('address1',)
+  
+  inlines = [RoomInline]
 
 
 class RoomAdmin(admin.ModelAdmin):
   list_filter = ('address', 'floor')
+  list_display = ('address', 'floor')
+  ordering = ('floor',)
 
 
 class ConnectionAdmin(admin.ModelAdmin):
-  #fieldsets = (
-  #  ('Summary', {
-  #    'fields': ('firstname', 'lastname', 'employer', 'active', 'note'),
-  #  }),
-  #  ('Office', {
-  #    'fields': ('address1', 'address2', 'postalcode', 'city', 'country'),
-  #    'classes': ['wide'],
-  #  }),
-  #  ('Contact', {
-  #    'fields': ('email', 'phone', 'cellphone', 'fax'),
-  #    'classes': ['wide'],
-  #  }),
-  #)
-  list_display  = ('__unicode__', 'employer', 'email')#, 'phone', 'cellphone')
-  list_filter   = ('employer', 'active')
-  search_fields = ('firstname', 'lastname',)
+  fieldsets = (
+    ('Summary', {
+      'fields': (('firstname', 'lastname', 'active'), ('email', 'company')),
+      'classes': ['wide'],
+    }),
+    GlobalAdmin.extra_fieldset
+  )
+  list_display  = ('__unicode__', 'company', 'email')
+  list_filter   = ('company', 'active')
+  search_fields = ('firstname', 'lastname')
   ordering      = ('lastname',)
-  inlines = [PhoneInline]#, CellphoneInline, FaxInline]
+  inlines = [PhoneInline]
 
 
 class RackAdmin(admin.ModelAdmin):
@@ -160,11 +163,12 @@ class RoleAdmin(admin.ModelAdmin):
 class HardwareSpecificationsAdmin(admin.ModelAdmin):
   fieldsets = (
     ('Vendor-specific', {
-      'fields': ('vendor', 'name', 'system_id'),
+      'fields': ('vendor', ('name', 'system_id')),
     }),
     ('Dimensions', {
-      'fields': ('slots_capacity', 'slots_size'),
+      'fields': ('slots_capacity', 'rackspace'),
     }),
+    GlobalAdmin.extra_fieldset
   )
 
   list_display = ('vendor', 'name')
@@ -179,6 +183,8 @@ class CompanyAdmin(admin.ModelAdmin):
   fields       = ('name', 'website', 'buildings')
   list_display = ('name', 'website')
   filter_horizontal = ('buildings',)
+
+  #inlines = [AddressInline]
 
 
 #class TelephonenumberAdmin(admin.ModelAdmin):
@@ -196,22 +202,23 @@ class WarrantyTypeAdmin(admin.ModelAdmin):
 
 
 
-#admin.site.register(Cluster, ClusterAdmin)
+admin.site.register(Cluster, ClusterAdmin)
 admin.site.register(HardwareUnit, HardwareUnitAdmin)
-#admin.site.register(Interface, InterfaceAdmin)
+admin.site.register(Interface, InterfaceAdmin)
 admin.site.register(Network, NetworkAdmin)
 admin.site.register(Rack, RackAdmin)
 
+admin.site.register(Country, CountryAdmin)
 admin.site.register(Address, AddressAdmin)
 admin.site.register(Room, RoomAdmin) #
 admin.site.register(Site, SiteAdmin)
 
-#admin.site.register(Company, CompanyAdmin)
+admin.site.register(Company, CompanyAdmin)
 #admin.site.register(Telephonenumber, TelephonenumberAdmin) #
-#admin.site.register(Telephonenumber) #
+admin.site.register(Telephonenumber) #
 admin.site.register(Connection, ConnectionAdmin)
 
-#admin.site.register(HardwareSpecifications, HardwareSpecificationsAdmin)
+admin.site.register(HardwareSpecifications, HardwareSpecificationsAdmin)
 admin.site.register(Role, RoleAdmin)
 admin.site.register(InterfaceType, InterfaceTypeAdmin)
 
