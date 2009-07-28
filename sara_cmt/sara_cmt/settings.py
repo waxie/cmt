@@ -12,6 +12,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
+  ('Sil Westerveld', 'sil.westerveld@sara.nl'),
   #('Your Name', 'your_email@domain.com'),
 )
 
@@ -104,6 +105,7 @@ INSTALLED_APPS = (
     'django.contrib.webdesign',
     'sara_cmt.cluster',
     'sara_cmt.django_cli',
+    'django_extensions',
     'tagging',
     'south',
 )

@@ -3,7 +3,7 @@ from django.contrib import admin
 from sara_cmt.cluster.models import Cluster, HardwareUnit, Interface, Network, Rack
 from sara_cmt.cluster.models import Country, Address, Room, Site
 from sara_cmt.cluster.models import Company, Telephonenumber, Connection
-from sara_cmt.cluster.models import HardwareSpecifications, Role, InterfaceType
+from sara_cmt.cluster.models import HardwareModel, Role, InterfaceType
 from sara_cmt.cluster.models import WarrantyContract, WarrantyType
 
 # Some info about the Django admin site can be found at:
@@ -83,14 +83,17 @@ class HardwareUnitAdmin(admin.ModelAdmin):
   )
 
   list_display = ('__unicode__', 'cluster', 'rack', 'specifications')
-  #list_display = ('__unicode__', 'cluster', 'rack', 'role', 'specifications')
-  list_filter  = ('cluster', 'rack', 'specifications')
-  #list_filter  = ('cluster', 'rack', 'role', 'specifications')
+  list_filter  = ('cluster', 'rack', 'role', 'specifications')
   inlines = [InterfaceInline]
+
+  #filter_horizontal = ('role',)
 
 
 class SiteAdmin(admin.ModelAdmin):
-  fields       = ('name',) + GlobalAdmin.fields
+  fieldsets = (
+    (None, {'fields': ('name',)}),
+    GlobalAdmin.extra_fieldset
+  )
   list_display = ('name',) + GlobalAdmin.list_filter
   list_filter  = GlobalAdmin.list_filter
   ordering     = ('name',)
@@ -108,65 +111,93 @@ class CountryAdmin(admin.ModelAdmin):
 class AddressAdmin(admin.ModelAdmin):
   #date_hierarchy = 'created_on'
   fieldsets = (
-    ('Location', {'fields': (('address1', 'address2'), ('postalcode', 'city'), 'country'), 'classes': ('wide',)}),
+    ('Location', {'fields': ('address', 'postalcode', 'city', 'country'), 'classes': ('wide',)}),
     GlobalAdmin.extra_fieldset
   )
-  list_display = ('address1', 'postalcode', 'city', 'country')
-  list_filter  = ('city', 'country') + GlobalAdmin.list_filter
-  search_fields = ('address1',)
+  list_display  = ('address', 'postalcode', 'city', 'country')
+  list_filter   = ('city', 'country') + GlobalAdmin.list_filter
+  search_fields = ('address',)
   
   inlines = [RoomInline]
 
 
 class RoomAdmin(admin.ModelAdmin):
+  fieldsets = (
+    (None, {'fields': (('address', 'floor', 'label'),)}),
+    GlobalAdmin.extra_fieldset
+  )
   list_filter = ('address', 'floor')
-  list_display = ('address', 'floor')
-  ordering = ('floor',)
+  list_display = ('address', 'floor', 'label')
+  ordering = ('address', 'floor')
 
 
 class ConnectionAdmin(admin.ModelAdmin):
   fieldsets = (
     ('Summary', {
-      'fields': (('firstname', 'lastname', 'active'), ('email', 'company')),
+      'fields': (('name', 'active'), ('email', 'company', 'address')),
       'classes': ['wide'],
     }),
     GlobalAdmin.extra_fieldset
   )
   list_display  = ('__unicode__', 'company', 'email')
   list_filter   = ('company', 'active')
-  search_fields = ('firstname', 'lastname')
-  ordering      = ('lastname',)
-  inlines = [PhoneInline]
+  search_fields = ('name',)
+  #ordering      = ('name',)
+  inlines       = [PhoneInline]
 
 
 class RackAdmin(admin.ModelAdmin):
-  fields       = ('address', 'label', 'capacity', 'note',)
+  fieldsets = (
+    (None, {
+      'fields': (('address', 'label', 'capacity'),),
+    }),
+    GlobalAdmin.extra_fieldset
+  )
   list_display = ('address', 'label',)
   list_filter  = ('address',)
   ordering     = ('address',)
 
 
 class InterfaceAdmin(admin.ModelAdmin):
+  fieldsets = (
+    ('Physical', {
+      'fields': (('type', 'hardware'), 'hwaddress'),
+    }),
+    ('Network', {
+      'fields': ('network', 'hostname'),
+    }),
+    GlobalAdmin.extra_fieldset
+  )
+  list_display = ('__unicode__', 'hwaddress', 'type')
   list_display = ('__unicode__', 'ip', 'hwaddress', 'type')
   list_filter  = ('network','type',)
 
 
 class InterfaceTypeAdmin(admin.ModelAdmin):
-  list_display = ('label', 'vendor',)
+  fieldsets = (
+    ('Properties', {
+      'fields': ('label', 'vendor'),
+    }),
+    GlobalAdmin.extra_fieldset
+  )
+  list_display = ('label', 'vendor')
   list_filter  = ('vendor',)
 
 
 class RoleAdmin(admin.ModelAdmin):
-  fields = ('label',)
+  fieldsets = (
+    (None, {'fields': ('label',)}),
+    GlobalAdmin.extra_fieldset
+  )
 
 
-class HardwareSpecificationsAdmin(admin.ModelAdmin):
+class HardwareModelAdmin(admin.ModelAdmin):
   fieldsets = (
     ('Vendor-specific', {
-      'fields': ('vendor', ('name', 'system_id')),
+      'fields': ('vendor', ('name', 'model_id')),
     }),
     ('Dimensions', {
-      'fields': ('slots_capacity', 'rackspace'),
+      'fields': ('expansions', 'rackspace'),
     }),
     GlobalAdmin.extra_fieldset
   )
@@ -175,28 +206,64 @@ class HardwareSpecificationsAdmin(admin.ModelAdmin):
 
 
 class NetworkAdmin(admin.ModelAdmin):
-  list_display = ('name', 'cidr', 'domain', 'prefix', '_max_hosts', 'count_ips_assigned', 'count_ips_free')
-  fields       = ('name', 'netaddress', 'netmask', 'domain', 'prefix',)
+  fieldsets = (
+    (None, {
+      'fields': (('name', 'prefix', 'domain'), ('netaddress', 'netmask', 'vlan')),
+    }),
+    GlobalAdmin.extra_fieldset
+  )
+  list_display = ('name', 'vlan', 'cidr', 'domain', 'prefix', '_max_hosts', 'count_ips_assigned', 'count_ips_free')
 
 
 class CompanyAdmin(admin.ModelAdmin):
-  fields       = ('name', 'website', 'buildings')
+  fieldsets = (
+    (None, {
+      'fields': ('name',),
+    }),
+    ('Contact info', {
+      'fields': ('website', 'addresses'),
+    }),
+    GlobalAdmin.extra_fieldset
+  )
   list_display = ('name', 'website')
-  filter_horizontal = ('buildings',)
-
-  #inlines = [AddressInline]
+  filter_horizontal = ('addresses',)
 
 
-#class TelephonenumberAdmin(admin.ModelAdmin):
-#  pass
-#  #list_filter = ('country_code', 'areacode')
+class TelephonenumberAdmin(admin.ModelAdmin):
+  fieldsets = (
+    ('Owner', {
+      'fields': (('connection', 'type'),)
+    }),
+    ('Number', {
+      'fields': (('country', 'areacode', 'subscriber_number'),)
+    }),
+    GlobalAdmin.extra_fieldset
+  )
+  list_filter = ('type', 'country', 'areacode')
 
 
 class WarrantyContractAdmin(admin.ModelAdmin):
+  fieldsets = (
+    (None, {
+      'fields': ('label', 'type'),
+    }),
+    ('Period', {
+      'fields': ('date_from', 'months',),
+    }),
+    GlobalAdmin.extra_fieldset
+  )
+
   list_display = ('label', 'date_from', 'months', 'date_to')
 
 
 class WarrantyTypeAdmin(admin.ModelAdmin):
+  fieldsets = (
+    (None, {
+      'fields': ('label', 'contact'),
+    }),
+    GlobalAdmin.extra_fieldset
+  )
+  
   list_display = ('label', 'contact')
 
 
@@ -210,17 +277,16 @@ admin.site.register(Rack, RackAdmin)
 
 admin.site.register(Country, CountryAdmin)
 admin.site.register(Address, AddressAdmin)
-admin.site.register(Room, RoomAdmin) #
+admin.site.register(Room, RoomAdmin)
 admin.site.register(Site, SiteAdmin)
 
 admin.site.register(Company, CompanyAdmin)
-#admin.site.register(Telephonenumber, TelephonenumberAdmin) #
-admin.site.register(Telephonenumber) #
+admin.site.register(Telephonenumber, TelephonenumberAdmin)
 admin.site.register(Connection, ConnectionAdmin)
 
-admin.site.register(HardwareSpecifications, HardwareSpecificationsAdmin)
+admin.site.register(HardwareModel, HardwareModelAdmin)
 admin.site.register(Role, RoleAdmin)
 admin.site.register(InterfaceType, InterfaceTypeAdmin)
 
 admin.site.register(WarrantyContract, WarrantyContractAdmin)
-admin.site.register(WarrantyType, WarrantyTypeAdmin) #
+admin.site.register(WarrantyType, WarrantyTypeAdmin)

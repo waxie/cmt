@@ -6,10 +6,9 @@ from sara_cmt.logger import Logger
 logger = Logger().getLogger()
 
 from sara_cmt.django_cli import ModelExtension
-from datetime import datetime
 
-#import tagging
 from tagging.fields import TagField
+from django_extensions.db.fields import CreationDateTimeField, ModificationDateTimeField
 from sara_cmt import settings
 
 
@@ -44,11 +43,12 @@ class HardwareUnit(ModelExtension):
   cluster      = models.ForeignKey('Cluster', related_name='hardware')
   role         = models.ManyToManyField('Role', related_name='hardware')
   networks     = models.ManyToManyField('Network', related_name='hardware', through='Interface')
-  specifications = models.ForeignKey('HardwareSpecifications', related_name='hardware', null=True, blank=True)
+  specifications = models.ForeignKey('HardwareModel', related_name='hardware', null=True, blank=True)
   warranty     = models.ForeignKey('WarrantyContract', related_name='hardware', null=True, blank=True)
   rack         = models.ForeignKey('Rack', related_name='contents')
 
   serialnumber = models.CharField(max_length=30, blank=True, unique=True) # should be a field of Specifications
+  service_tag  = models.CharField(max_length=30, blank=True, unique=True)
   first_slot   = models.PositiveIntegerField()
   hostname     = models.CharField(max_length=30, blank=True)
 
@@ -88,14 +88,13 @@ class Interface(ModelExtension):
   network   = models.ForeignKey('Network', related_name='interfaces')
   hardware  = models.ForeignKey('HardwareUnit', related_name='interfaces', verbose_name='machine') # ??? host ???
   type      = models.ForeignKey('InterfaceType', related_name='interfaces', verbose_name='type')
-  name      = models.CharField(max_length=30, blank=True, help_text='Automagically generated if kept empty') # TODO: Default name has to be based on the prefix of the network
+  hostname  = models.CharField(max_length=30, blank=True, help_text='Automagically generated if kept empty') # TODO: Default name has to be based on the prefix of the network
   hwaddress = models.CharField(max_length=17, blank=True, verbose_name='hardware address', help_text="6 Octets, optionally delimited by a space ' ', a hyphen '-', or a colon ':'.", unique=True)
   ip        = models.IPAddressField(editable=False, null=True, blank=True)
-  #extern_ip = models.IPAddressField(null=True, blank=True)
 
 
   def __unicode__(self):
-    return self.name or 'anonymous'
+    return self.hostname or 'anonymous'
 
   def save(self, force_insert=False, force_update=False):
     """
@@ -116,7 +115,7 @@ class Interface(ModelExtension):
       if ip not in network:
         self.ip = self.network.pick_ip()
 
-      self.name = '%s%s' % (self.network.prefix, self.hardware.hostname)
+      self.hostname = '%s%s' % (self.network.prefix, self.hardware.hostname)
 
       super(Interface, self).save(force_insert, force_update)
     except AssertionError, e:
@@ -134,6 +133,7 @@ class Network(ModelExtension):
   netaddress = models.IPAddressField(help_text='example: 192.168.1.0')
   netmask    = models.IPAddressField(help_text='example: 255.255.255.0')
   domain     = models.CharField(max_length=30, help_text='example: irc.sara.nl')
+  vlan       = models.PositiveIntegerField(max_length=3, null=True, blank=True)
   prefix     = models.CharField(max_length=10, blank=True, help_text='example: ib-')
 
   class Meta:
@@ -220,7 +220,6 @@ class Rack(ModelExtension):
   address  = models.ForeignKey('Address', verbose_name='is located at', related_name='racks')
 
   label    = models.SlugField(max_length=30)
-  #note     = models.TextField(default='', blank=True)
   capacity = models.PositiveIntegerField(verbose_name='number of slots')
 
 
@@ -253,7 +252,7 @@ class Rack(ModelExtension):
 
 class Country(ModelExtension):
   name         = models.CharField(max_length=30, unique=True)
-  country_code = models.PositiveIntegerField()
+  country_code = models.PositiveIntegerField(help_text='''Example: In case of The Netherlands it's 31''')
   # Country codes can be found on:
   #   http://www.itu.int/dms_pub/itu-t/opb/sp/T-SP-E.164D-2009-PDF-E.pdf
 
@@ -272,15 +271,13 @@ class Address(ModelExtension):
     case of CMTSARA it is a superclass of Site, ContactPerson and Company.
   """
   
-  address1   = models.CharField(verbose_name='address', max_length=30)
-  address2   = models.CharField(verbose_name='address', max_length=30, blank=True)
+  country    = models.ForeignKey(Country, null=True, blank=True, related_name='addresses')
+  address    = models.CharField(max_length=60)
   postalcode = models.CharField(max_length=9, blank=True)
   city       = models.CharField(max_length=30)
-  country    = models.ForeignKey(Country, null=True, blank=True)
-  #country    = models.CharField(max_length=30, blank=True)
 
   class Meta:
-    unique_together = ('address1', 'city')
+    unique_together = ('address', 'city')
     verbose_name_plural = 'addresses'
 
 
@@ -332,7 +329,8 @@ class Company(ModelExtension):
     contactpersons for a specific piece of hardware.
   """
   
-  buildings = models.ManyToManyField(Address)
+  addresses = models.ManyToManyField(Address)
+
   #type    = models.ChoiceField() # !!! TODO: add choices like vendor / support / partner / etc... !!!
   name    = models.CharField(max_length=64)
   website = models.URLField()
@@ -350,19 +348,19 @@ class Connection(ModelExtension):
     This makes it possible to lookup contactpersons in case of problems on a
     site or with specific hardware.
   """
-  address = models.ForeignKey(Address)
-  company = models.ForeignKey(Company)
+  address = models.ForeignKey(Address, related_name='connections')
+  company = models.ForeignKey(Company, related_name='companies')
 
-  active    = models.BooleanField(editable=True)
-  firstname = models.CharField(verbose_name='first name', max_length=30)
-  lastname  = models.CharField(verbose_name='last name', max_length=30)
-  email     = models.EmailField()
+  active = models.BooleanField(editable=True, default=True)
+  name   = models.CharField(verbose_name='full name', max_length=60)
+  email  = models.EmailField(blank=True, null=True)
 
   def __unicode__(self):
     return self.fullname()
 
-  def fullname(self):
-    return '%s %s' % (self.firstname, self.lastname)
+  def _lastname(self):
+    return name.split()[-1]
+  lastname = property(_lastname)
 
   def address1(self):
     return address.address1
@@ -371,8 +369,8 @@ class Connection(ModelExtension):
     return address.address2
 
   class Meta:
-    ordering = ('lastname', 'firstname')
-    unique_together = ('firstname', 'lastname')
+    #ordering = ('lastname',)
+    unique_together = ('company', 'name')
 
 
 class Telephonenumber(ModelExtension):
@@ -381,11 +379,10 @@ class Telephonenumber(ModelExtension):
     ('C', 'Cellphone'),
     ('F', 'Fax')
   )
-  country      = models.ForeignKey(Country)
-  #country_code      = models.IntegerField(max_length=4)
+  country      = models.ForeignKey(Country, related_name='telephone numbers')
+  connection = models.ForeignKey(Connection, blank=False, null=False, related_name='telephone numbers')
   areacode          = models.CharField(max_length=4) # because it can start with a zero
   subscriber_number = models.IntegerField(verbose_name='number', max_length=15)
-  connection = models.ForeignKey(Connection, blank=False, null=False)
   type = models.CharField(max_length=1, choices=NUMBER_CHOICES)
 
   # !!! TODO: link to company / contact / etc... !!!
@@ -406,17 +403,17 @@ class Telephonenumber(ModelExtension):
 #
 
 
-class HardwareSpecifications(ModelExtension):
+class HardwareModel(ModelExtension):
   """
     The Model-model is being used to specify some extra information about a
     specific type (model) of hardware.
   """
-  vendor         = models.ForeignKey(Company, related_name='model specifications')
+  vendor = models.ForeignKey(Company, related_name='model specifications')
 
-  name           = models.CharField(max_length=30, unique=True)
-  system_id      = models.CharField(max_length=30, blank=True)
-  rackspace      = models.PositiveIntegerField(help_text='size in U for example')
-  slots_capacity = models.PositiveIntegerField(default=0, help_text='capacity in U for example')
+  name       = models.CharField(max_length=30, unique=True)
+  model_id   = models.CharField(max_length=30, blank=True)
+  rackspace  = models.PositiveIntegerField(help_text='size in U for example')
+  expansions = models.PositiveIntegerField(default=0, help_text='number of expansion slots')
   
   class Meta:
     verbose_name = 'model'
@@ -473,23 +470,28 @@ class InterfaceType(ModelExtension):
 # Classes for sara_cmt.support
 #
 
-# !!! TODO: WarrantyContract and WarrantyType !!
-
 class WarrantyType(ModelExtension):
-  contact = models.ForeignKey(Connection, blank=True, null=True)
+  """
+A type of warranty offered by a company.
+  """
+  contact = models.ForeignKey(Connection, related_name='warranty types')
+
   label = models.CharField(max_length=30, unique=True)
+
+  def __unicode__(self):
+    return self.label
 
 
 class WarrantyContract(ModelExtension):
   """
-    A class which contains warranty information of a (collection of) hardware.
+    A class which contains warranty information of (a collection of) hardware.
   """
-  type = models.ForeignKey(WarrantyType, blank=True, null=True)
-  label      = models.CharField(max_length=30, unique=True)
-  date_from  = models.DateField(verbose_name='valid from')
-  months     = models.PositiveIntegerField()
-  date_to    = models.DateField(verbose_name='expires at', editable=False)
-  service_tag = models.CharField(max_length=30, blank=True, unique=True)
+  type = models.ForeignKey(WarrantyType, blank=True, null=True, related_name='contracts')
+
+  label       = models.CharField(max_length=30, unique=True)
+  date_from   = models.DateField(verbose_name='valid from')
+  months      = models.PositiveIntegerField()
+  date_to     = models.DateField(verbose_name='expires at', editable=False)
 
 
   class Meta:
@@ -506,7 +508,7 @@ class WarrantyContract(ModelExtension):
     try:
       self.date_to = self.date_from.replace(
         year = self.date_from.year + (self.date_from.month-1 + self.months) / 12,
-        month = (self.date_from.month + self.months) %12
+        month = (self.date_from.month + self.months) % 12
       )
       super(Warranty, self).save(force_insert, force_update)
     except AttributeError, e:

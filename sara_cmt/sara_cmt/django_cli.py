@@ -14,15 +14,17 @@ CLUSTER_MODELS = 'sara_cmt.cluster.models'
 
 import tagging
 from tagging.fields import TagField
-from datetime import date, datetime
+#from datetime import date, datetime
+#import django_extensions.db.fields
+from django_extensions.db.fields import CreationDateTimeField, ModificationDateTimeField
 
 class ModelExtension(models.Model):
   """
     The ModelExtension of Django-CLI is meant as a Mixin for a Django Model.
   """
   tags       = TagField()
-  created_on = models.DateField(auto_now_add=True, editable=False)
-  updated_on = models.DateTimeField(auto_now=True, editable=False)
+  created_on = CreationDateTimeField() #models.DateField(auto_now_add=True, editable=False)
+  updated_on = ModificationDateTimeField() #models.DateTimeField(auto_now=True, editable=False)
   note       = models.TextField(blank=True)
 
   class Meta:
@@ -138,7 +140,8 @@ class ModelExtension(models.Model):
         qset = eval(wrapper_cmd)
       else:
         # Then the query was like: '<attr>=<val>'.
-        wrapper_cmd = "%s.%s.objects.filter(%s=%s)" % (CLUSTER_MODELS, model.__name__, attr, val)
+        #wrapper_cmd = "%s.%s.objects.filter(%s=%s)" % (CLUSTER_MODELS, model.__name__, attr, val)
+        wrapper_cmd = "%s.%s.objects.filter(%s=%s)" % (CLUSTER_MODELS, model.__name__, attr, repr(val))
         logger.debug("Built command to filter '%s': %s" % (query,wrapper_cmd))
         qset = eval(wrapper_cmd)
     else:

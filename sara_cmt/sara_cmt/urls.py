@@ -39,8 +39,8 @@ databrowse.site.register(Company)
 databrowse.site.register(Telephonenumber)
 databrowse.site.register(Connection)
 # specifications
-from sara_cmt.cluster.models import HardwareSpecifications, Role, InterfaceType
-databrowse.site.register(HardwareSpecifications)
+from sara_cmt.cluster.models import HardwareModel, Role, InterfaceType
+databrowse.site.register(HardwareModel)
 databrowse.site.register(Role)
 databrowse.site.register(InterfaceType)
 # support
