@@ -283,7 +283,7 @@ class Address(ModelExtension):
 
 
   def __unicode__(self):
-    return '%s - %s' % (self.city, self.address1)
+    return '%s - %s' % (self.city, self.address)
 
 
 class Room(ModelExtension):
@@ -357,11 +357,8 @@ class Connection(ModelExtension):
   #  return name.split()[-1]
   #lastname = property(_lastname)
 
-  def address1(self):
-    return address.address1
-
-  def address2(self):
-    return address.address2
+  def address(self):
+    return address.address
 
   class Meta:
     #ordering = ('lastname',)
