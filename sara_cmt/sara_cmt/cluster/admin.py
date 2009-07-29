@@ -149,13 +149,13 @@ class ConnectionAdmin(admin.ModelAdmin):
 class RackAdmin(admin.ModelAdmin):
   fieldsets = (
     (None, {
-      'fields': (('address', 'label', 'capacity'),),
+      'fields': (('room', 'label', 'capacity'),),
     }),
     GlobalAdmin.extra_fieldset
   )
-  list_display = ('address', 'label',)
-  list_filter  = ('address',)
-  ordering     = ('address',)
+  list_display = ('room', 'label',)
+  list_filter  = ('room',)
+  ordering     = ('room',)
 
 
 class InterfaceAdmin(admin.ModelAdmin):

@@ -137,6 +137,7 @@ class Network(ModelExtension):
   prefix     = models.CharField(max_length=10, blank=True, help_text='example: ib-')
 
   class Meta:
+    ordering = ('name', 'domain',)
     verbose_name = 'network'
     verbose_name_plural = 'networks'
 
@@ -217,14 +218,14 @@ class Rack(ModelExtension):
     stack of slots. It is located on a site.
   """
 
-  address  = models.ForeignKey('Address', verbose_name='is located at', related_name='racks')
+  room = models.ForeignKey('Room')
 
   label    = models.SlugField(max_length=30)
   capacity = models.PositiveIntegerField(verbose_name='number of slots')
 
 
   class Meta:
-    ordering = ('address', 'label',)
+    ordering = ('room', 'label',)
     verbose_name = 'rack'
     verbose_name_plural = 'racks'
 
@@ -302,15 +303,9 @@ class Site(ModelExtension):
   """
   """
   name = models.CharField(max_length=30, unique=True)
-  #note = models.TextField(blank=True)
 
   def __unicode__(self):
     return self.name
-
-#  def save(self, force_insert=False, force_update=True):
-#    self.latest_edit = datetime.now()
-#    super(Site, self).save(force_insert, force_update)
-#  #  #super(self.__class__, self).save(force_insert, force_update)
 
 #
 #
@@ -358,9 +353,9 @@ class Connection(ModelExtension):
   def __unicode__(self):
     return self.fullname()
 
-  def _lastname(self):
-    return name.split()[-1]
-  lastname = property(_lastname)
+  #def _lastname(self):
+  #  return name.split()[-1]
+  #lastname = property(_lastname)
 
   def address1(self):
     return address.address1
@@ -434,11 +429,11 @@ class Role(ModelExtension):
     in the cluster.
   """
   label = models.CharField(max_length=30, unique=True)
-  #note  = models.TextField(blank=True)
 
 
   class Meta:
-    verbose_name = 'role'
+    ordering = ['label']
+    verbose_name = ('role')
     verbose_name_plural = 'roles'
 
 
