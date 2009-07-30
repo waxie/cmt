@@ -29,7 +29,8 @@ databrowse.site.register(Interface)
 databrowse.site.register(Network)
 databrowse.site.register(Rack)
 # locations
-from sara_cmt.cluster.models import Address, Room, Site
+from sara_cmt.cluster.models import Country, Address, Room, Site
+databrowse.site.register(Country)
 databrowse.site.register(Address)
 databrowse.site.register(Room)
 databrowse.site.register(Site)

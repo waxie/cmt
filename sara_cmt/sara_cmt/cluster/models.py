@@ -299,6 +299,7 @@ class Room(ModelExtension):
     return unicode(self.label)
 
 
+# ??? What todo with this model ???
 class Site(ModelExtension):
   """
   """
@@ -351,13 +352,14 @@ class Connection(ModelExtension):
   email  = models.EmailField(blank=True, null=True)
 
   def __unicode__(self):
-    return self.fullname()
+    return self.name
+    #return self.fullname()
 
   #def _lastname(self):
   #  return name.split()[-1]
   #lastname = property(_lastname)
 
-  def address(self):
+  def _address(self):
     return address.address
 
   class Meta:
@@ -381,6 +383,9 @@ class Telephonenumber(ModelExtension):
 
   def __unicode__(self):
     return '+%i(%s)%s-%i' % (self.country.country_code, self.areacode[:1], self.areacode[1:], self.subscriber_number)
+
+  class Meta:
+    ordering = ('connection',)
 
 
 #

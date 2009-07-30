@@ -194,7 +194,8 @@ class RoleAdmin(admin.ModelAdmin):
 class HardwareModelAdmin(admin.ModelAdmin):
   fieldsets = (
     ('Vendor-specific', {
-      'fields': ('vendor', ('name', 'model_id')),
+      'fields': ('vendor', 'name'),
+      #'fields': ('vendor', ('name', 'model_id')),
     }),
     ('Dimensions', {
       'fields': ('expansions', 'rackspace'),
@@ -239,6 +240,7 @@ class TelephonenumberAdmin(admin.ModelAdmin):
     }),
     GlobalAdmin.extra_fieldset
   )
+  list_display = ('connection', 'type', '__unicode__')
   list_filter = ('type', 'country', 'areacode')
 
 
