@@ -203,7 +203,8 @@ class HardwareModelAdmin(admin.ModelAdmin):
     GlobalAdmin.extra_fieldset
   )
 
-  list_display = ('vendor', 'name')
+  list_display = ('vendor', 'name', 'tags')
+  list_filter = ('vendor', 'tags')
 
 
 class NetworkAdmin(admin.ModelAdmin):

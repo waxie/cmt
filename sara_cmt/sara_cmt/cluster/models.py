@@ -408,7 +408,7 @@ class HardwareModel(ModelExtension):
   vendor = models.ForeignKey(Company, related_name='model specifications')
 
   name       = models.CharField(max_length=30, unique=True)
-  model_id   = models.CharField(max_length=30, blank=True)
+  #model_id   = models.CharField(max_length=30, blank=True)
   rackspace  = models.PositiveIntegerField(help_text='size in U for example')
   expansions = models.PositiveIntegerField(default=0, help_text='number of expansion slots')
   
@@ -444,7 +444,7 @@ class Role(ModelExtension):
 
 
 class InterfaceType(ModelExtension):
-  label = models.CharField(max_length=30, help_text="'DRAC 4' for example")
+  label = models.CharField(max_length=60, help_text="'DRAC 4' for example")
   vendor = models.ForeignKey('Company', null=True, blank=True, related_name='interfaces')
 
 
