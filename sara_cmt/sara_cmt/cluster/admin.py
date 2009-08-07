@@ -70,11 +70,11 @@ class ClusterAdmin(admin.ModelAdmin):
 
 class HardwareUnitAdmin(admin.ModelAdmin):
   fieldsets = (
-    (None, {
-      'fields': (('cluster', 'role'), ),
+    ('Host info', {
+      'fields': (('cluster', 'label', 'role'),),
     }),
     ('Machine specifications', {
-      'fields': (('specifications', 'warranty'),)
+      'fields': (('specifications', 'warranty'),('service_tag', 'serialnumber'))
     }),
     ('Physical location', {
       'fields': (('rack', 'first_slot'),)

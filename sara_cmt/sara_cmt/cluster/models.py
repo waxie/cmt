@@ -47,10 +47,10 @@ class HardwareUnit(ModelExtension):
   warranty     = models.ForeignKey('WarrantyContract', related_name='hardware', null=True, blank=True)
   rack         = models.ForeignKey('Rack', related_name='contents')
 
-  serialnumber = models.CharField(max_length=30, blank=True, unique=True) # should be a field of Specifications
-  service_tag  = models.CharField(max_length=30, blank=True, unique=True)
+  serialnumber = models.CharField(max_length=30, blank=True, null=True, unique=True) # should be a field of Specifications
+  service_tag  = models.CharField(max_length=30, blank=True, null=True, unique=True)
   first_slot   = models.PositiveIntegerField()
-  hostname     = models.CharField(max_length=30, blank=True)
+  label        = models.CharField(max_length=30, blank=True)
 
   class Meta:
     #verbose_name = "piece of hardware"
@@ -60,25 +60,25 @@ class HardwareUnit(ModelExtension):
 
   def __unicode__(self):
     try:
-      assert self.hostname, "piece of hardware hasn't got a hostname yet"
-      return self.hostname
+      assert self.label, "piece of hardware hasn't got a label yet"
+      return self.label
     except AssertionError, e:
       return e
       
   def save(self, force_insert=False, force_update=False):
     """
-      First check if the hostname has already been filled in. If it's still
-      emtpy, then set it to the default basename (based on rack# and node#).
+      First check if the label has already been filled in. If it's still empty,
+      then set it to the default basename (based on rack# and node#).
     """
-    if not self.hostname:
-      self.hostname = self.default_basename()
+    if not self.label:
+      self.label = self.default_label()
 
     super(HardwareUnit, self).save(force_insert, force_update)
 
-  def default_basename(self):
+  def default_label(self):
     # TODO: make dynamic for different types of clusters
     try:
-      assert self.rack.label is not None and self.first_slot is not None, 'not able to generate hostname'
+      assert self.rack.label is not None and self.first_slot is not None, 'not able to generate a label'
       return 'r%sn%s' % (self.rack.label, self.first_slot)
     except:
       pass
@@ -115,7 +115,7 @@ class Interface(ModelExtension):
       if ip not in network:
         self.ip = self.network.pick_ip()
 
-      self.hostname = '%s%s' % (self.network.prefix, self.hardware.hostname)
+      self.hostname = '%s%s' % (self.network.prefix, self.hardware.label)
 
       super(Interface, self).save(force_insert, force_update)
     except AssertionError, e:
@@ -218,7 +218,7 @@ class Rack(ModelExtension):
     stack of slots. It is located on a site.
   """
 
-  room = models.ForeignKey('Room')
+  room = models.ForeignKey('Room', related_name='racks')
 
   label    = models.SlugField(max_length=30)
   capacity = models.PositiveIntegerField(verbose_name='number of slots')
@@ -230,14 +230,8 @@ class Rack(ModelExtension):
     verbose_name_plural = 'racks'
 
 
-  # !!! TODO: Get rid of this !!!
   def __unicode__(self):
-    try:
-      assert self.label is not None, "rack hasn't got a label"
-      return self.label
-    except AssertionError, e:
-      print AssertionError, e
-      return '[None]'
+    return '%s_%s' % (self.room.label,self.label)
 
 #
 #
@@ -445,10 +439,12 @@ class Role(ModelExtension):
 
 class InterfaceType(ModelExtension):
   label = models.CharField(max_length=60, help_text="'DRAC 4' for example")
+  # ??? TODO: add a CharField for version ???
   vendor = models.ForeignKey('Company', null=True, blank=True, related_name='interfaces')
 
 
   class Meta:
+    ordering = ['label']
     verbose_name = 'type of interface'
     verbose_name_plural = 'types of interfaces'
 
@@ -507,6 +503,6 @@ class WarrantyContract(ModelExtension):
         year = self.date_from.year + (self.date_from.month-1 + self.months) / 12,
         month = (self.date_from.month + self.months) % 12
       )
-      super(Warranty, self).save(force_insert, force_update)
+      super(WarrantyContract, self).save(force_insert, force_update)
     except AttributeError, e:
       logger.error(e)

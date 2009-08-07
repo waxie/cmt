@@ -301,10 +301,21 @@ def queries_to_dict(queries):
   # like {('<attr>':'<val>')+}.
 
   result = {}
+  logger.debug('queries: %s'%queries)
   for query in queries:
+    logger.debug('query  : %s'%query)
     query = query.split(',')
+    # Queries with a comma in the assignment are broken now, so first fix them:
+    index = len(query)-1
+    while index > 1:
+      if '=' not in query[index]:
+        query[index-1] = ','.join([query[index-1],query.pop(index)])
+      index-=1
+
+
     for q in query:
-      (opt,val) = q.split('=')
+      logger.debug('q      : %s'%q)
+      (opt,val) = q.split('=',1)
       if result.has_key(opt):
         if isinstance(result[opt], ListType):
           # This option has been parsed multiple times
