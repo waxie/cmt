@@ -83,7 +83,7 @@ class HardwareUnitAdmin(admin.ModelAdmin):
   )
 
   list_display = ('__unicode__', 'cluster', 'rack', 'specifications')
-  list_filter  = ('cluster', 'rack', 'role', 'specifications')
+  list_filter  = ('cluster', 'rack', 'role', 'specifications') + GlobalAdmin.list_filter
   inlines = [InterfaceInline]
 
   #filter_horizontal = ('role',)
@@ -105,6 +105,7 @@ class CountryAdmin(admin.ModelAdmin):
     GlobalAdmin.extra_fieldset
   )
   list_display = ('country_code', 'name')
+  list_filter  = GlobalAdmin.list_filter
   ordering = ('name',)
 
 
@@ -126,7 +127,7 @@ class RoomAdmin(admin.ModelAdmin):
     (None, {'fields': (('address', 'floor', 'label'),)}),
     GlobalAdmin.extra_fieldset
   )
-  list_filter = ('address', 'floor')
+  list_filter = ('address', 'floor') + GlobalAdmin.list_filter
   list_display = ('address', 'floor', 'label')
   ordering = ('address', 'floor')
 
@@ -140,7 +141,7 @@ class ConnectionAdmin(admin.ModelAdmin):
     GlobalAdmin.extra_fieldset
   )
   list_display  = ('__unicode__', 'company', 'email')
-  list_filter   = ('company', 'active')
+  list_filter   = ('company', 'active') + GlobalAdmin.list_filter
   search_fields = ('name',)
   #ordering      = ('name',)
   inlines       = [PhoneInline]
@@ -154,7 +155,7 @@ class RackAdmin(admin.ModelAdmin):
     GlobalAdmin.extra_fieldset
   )
   list_display = ('room', 'label',)
-  list_filter  = ('room',)
+  list_filter  = ('room',) + GlobalAdmin.list_filter
   ordering     = ('room',)
 
 
@@ -170,7 +171,7 @@ class InterfaceAdmin(admin.ModelAdmin):
   )
   list_display = ('__unicode__', 'hwaddress', 'type')
   list_display = ('__unicode__', 'ip', 'hwaddress', 'type')
-  list_filter  = ('network','type',)
+  list_filter  = ('network','type',) + GlobalAdmin.list_filter
 
 
 class InterfaceTypeAdmin(admin.ModelAdmin):
@@ -181,7 +182,7 @@ class InterfaceTypeAdmin(admin.ModelAdmin):
     GlobalAdmin.extra_fieldset
   )
   list_display = ('label', 'vendor')
-  list_filter  = ('vendor',)
+  list_filter  = ('vendor',) + GlobalAdmin.list_filter
 
 
 class RoleAdmin(admin.ModelAdmin):
@@ -189,6 +190,7 @@ class RoleAdmin(admin.ModelAdmin):
     (None, {'fields': ('label',)}),
     GlobalAdmin.extra_fieldset
   )
+  list_filter = GlobalAdmin.list_filter
 
 
 class HardwareModelAdmin(admin.ModelAdmin):
@@ -204,7 +206,7 @@ class HardwareModelAdmin(admin.ModelAdmin):
   )
 
   list_display = ('vendor', 'name', 'tags')
-  list_filter = ('vendor', 'tags')
+  list_filter  = ('vendor', 'tags') + GlobalAdmin.list_filter
 
 
 class NetworkAdmin(admin.ModelAdmin):
@@ -215,6 +217,7 @@ class NetworkAdmin(admin.ModelAdmin):
     GlobalAdmin.extra_fieldset
   )
   list_display = ('name', 'vlan', 'cidr', 'domain', 'prefix', '_max_hosts', 'count_ips_assigned', 'count_ips_free')
+  list_filter  = GlobalAdmin.list_filter
 
 
 class CompanyAdmin(admin.ModelAdmin):
@@ -228,6 +231,7 @@ class CompanyAdmin(admin.ModelAdmin):
     GlobalAdmin.extra_fieldset
   )
   list_display = ('name', 'website')
+  list_filter  = GlobalAdmin.list_filter
   filter_horizontal = ('addresses',)
 
 
@@ -242,7 +246,7 @@ class TelephonenumberAdmin(admin.ModelAdmin):
     GlobalAdmin.extra_fieldset
   )
   list_display = ('connection', 'type', '__unicode__')
-  list_filter = ('type', 'country', 'areacode')
+  list_filter  = ('type', 'country', 'areacode') + GlobalAdmin.list_filter
 
 
 class WarrantyContractAdmin(admin.ModelAdmin):
@@ -257,6 +261,7 @@ class WarrantyContractAdmin(admin.ModelAdmin):
   )
 
   list_display = ('label', 'date_from', 'months', 'date_to')
+  list_filter  = GlobalAdmin.list_filter
 
 
 class WarrantyTypeAdmin(admin.ModelAdmin):
@@ -268,6 +273,7 @@ class WarrantyTypeAdmin(admin.ModelAdmin):
   )
   
   list_display = ('label', 'contact')
+  list_filter  = GlobalAdmin.list_filter
 
 
 
