@@ -82,7 +82,7 @@ class HardwareUnitAdmin(admin.ModelAdmin):
     GlobalAdmin.extra_fieldset
   )
 
-  list_display = ('__unicode__', 'cluster', 'rack', 'specifications')
+  list_display = ('__unicode__', 'cluster', 'address', 'rack', 'specifications')
   list_filter  = ('cluster', 'rack', 'role', 'specifications') + GlobalAdmin.list_filter
   inlines = [InterfaceInline]
 
@@ -115,7 +115,7 @@ class AddressAdmin(admin.ModelAdmin):
     ('Location', {'fields': ('address', 'postalcode', 'city', 'country'), 'classes': ('wide',)}),
     GlobalAdmin.extra_fieldset
   )
-  list_display  = ('address', 'postalcode', 'city', 'country')
+  list_display  = ('address', 'postalcode', 'city', 'country', 'companies')
   list_filter   = ('city', 'country') + GlobalAdmin.list_filter
   search_fields = ('address',)
   
@@ -154,7 +154,7 @@ class RackAdmin(admin.ModelAdmin):
     }),
     GlobalAdmin.extra_fieldset
   )
-  list_display = ('room', 'label',)
+  list_display = ('address', 'room', 'label',)
   list_filter  = ('room',) + GlobalAdmin.list_filter
   ordering     = ('room',)
 
@@ -230,7 +230,7 @@ class CompanyAdmin(admin.ModelAdmin):
     }),
     GlobalAdmin.extra_fieldset
   )
-  list_display = ('name', 'website')
+  list_display = ('name', 'website', 'get_addresses')
   list_filter  = GlobalAdmin.list_filter
   filter_horizontal = ('addresses',)
 

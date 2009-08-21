@@ -14,8 +14,6 @@ CLUSTER_MODELS = 'sara_cmt.cluster.models'
 
 import tagging
 from tagging.fields import TagField
-#from datetime import date, datetime
-#import django_extensions.db.fields
 from django_extensions.db.fields import CreationDateTimeField, ModificationDateTimeField
 
 class ModelExtension(models.Model):
@@ -23,8 +21,8 @@ class ModelExtension(models.Model):
     The ModelExtension of Django-CLI is meant as a Mixin for a Django Model.
   """
   tags       = TagField()
-  created_on = CreationDateTimeField() #models.DateField(auto_now_add=True, editable=False)
-  updated_on = ModificationDateTimeField() #models.DateTimeField(auto_now=True, editable=False)
+  created_on = CreationDateTimeField()
+  updated_on = ModificationDateTimeField()
   note       = models.TextField(blank=True)
 
   class Meta:
@@ -61,7 +59,7 @@ class ModelExtension(models.Model):
       Returns FKs from the result of _required_fields.
     """
     required = [field for field in ModelExtension._required_fields(model)
-      if not isinstance(field, ForeignKey)]
+      if isinstance(field, ForeignKey)]
     return required
 
 
@@ -83,21 +81,20 @@ class ModelExtension(models.Model):
     return isinstance(field, ForeignKey)
 
   @staticmethod
-  def _queries_to_qset(model, queries):
+  def queries_to_qset(model, queries):
     """
       Make a QuerySet, based on one or more given queries. Delegate each query
       to _query_to_qset and return the intersection of the returned QuerySets.
     """
-    def empty_qset(model): return models.query.QuerySet.none(model.objects.all())
+    #def empty_qset(model): return models.query.QuerySet.none(model.objects.all())
 
-    #qset = empty_qset(model)#models.query.QuerySet.none(model.objects.all()) # empty QuerySet
-    qset = models.query.QuerySet.none(model.objects.all()) # empty QuerySet
+    qset = models.query.EmptyQuerySet()
+    # Start with an empty QuerySet and intersect the QuerySets of the queries
     for query in queries.items():
       qset_part = ModelExtension._query_to_qset(model, query)
       if not qset_part:
         # Nothing found, so an empty QuerySet could be returned immediately.
-        #return empty_qset(model)#models.query.QuerySet.none(model.objects.all())
-        return models.query.QuerySet.none(model.objects.all())
+        return models.query.EmptyQuerySet()
       elif not qset:
         # First QuerySet has been found.
         qset = qset_part
@@ -107,9 +104,9 @@ class ModelExtension(models.Model):
         qset &= qset_part
         if not qset:
           # Intersection of QuerySets is empty, so return it immediately.
-          #return empty_qset(model)#models.query.QuerySet.none(model.objects.all())
-          return models.query.QuerySet.none(model.objects.all())
-    #logger.debug("Queries '%s' gave QuerySet: %s" % (queries,qset))
+          return models.query.EmptyQuerySet()
+
+    logger.debug("Queries '%s' gave QuerySet: %s" % (queries,qset))
     return qset
 
   @staticmethod
@@ -139,8 +136,7 @@ class ModelExtension(models.Model):
         logger.debug("Built command to filter '%s': %s" % (query,wrapper_cmd))
         qset = eval(wrapper_cmd)
       else:
-        # Then the query was like: '<attr>=<val>'.
-        #wrapper_cmd = "%s.%s.objects.filter(%s=%s)" % (CLUSTER_MODELS, model.__name__, attr, val)
+        # In that case the query was like: '<attr>=<val>'.
         wrapper_cmd = "%s.%s.objects.filter(%s=%s)" % (CLUSTER_MODELS, model.__name__, attr, repr(val))
         logger.debug("Built command to filter '%s': %s" % (query,wrapper_cmd))
         qset = eval(wrapper_cmd)
@@ -151,12 +147,14 @@ class ModelExtension(models.Model):
       to = fld.rel.to
       attrs = partitioned[2].split('+')
       # Make an empty QuerySet to fill with the union of multiple QuerySets
-      qset = models.query.QuerySet.none(to.objects.all())
+      qset = models.query.EmptyQuerySet()
       for attr in attrs:
-        wrapper_cmd = "%s.%s.objects.filter(%s__%s=%s)" % (CLUSTER_MODELS, model.__name__, fld.name, attr, val)
+        wrapper_cmd = "%s.%s.objects.filter(%s__%s=%s)" % (CLUSTER_MODELS, model.__name__, fld.name, attr, repr(val))
         logger.debug("Built command to filter '%s': %s" % (query,wrapper_cmd))
+        result = eval(wrapper_cmd)
+        logger.debug('Result of filter: %s' % result)
         # Unite the resulting QuerySet with the so far constructed QuerySet
-        qset |= eval(wrapper_cmd)
+        qset |= result #eval(wrapper_cmd)
 
     #logger.debug("Query '%s' gave QuerySet (with ID's):\n%s (%s)"
     #              % (query,qset,[item.id for item in qset]))
@@ -459,3 +457,14 @@ class ModelExtension(models.Model):
     return result
 
 ##############
+
+
+class ObjectManager():
+  pass
+
+
+class QueryManager():
+  pass
+
+
+

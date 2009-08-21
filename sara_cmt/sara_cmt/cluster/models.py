@@ -58,6 +58,10 @@ class HardwareUnit(ModelExtension):
     ordering = ['cluster__name', 'rack__label', 'first_slot']
     unique_together = [('rack', 'first_slot')]
 
+  def _address(self):
+    return self.rack.address
+  address = property(_address)
+
   def __unicode__(self):
     try:
       assert self.label, "piece of hardware hasn't got a label yet"
@@ -230,8 +234,13 @@ class Rack(ModelExtension):
     verbose_name_plural = 'racks'
 
 
+  def _address(self):
+    return self.room.address
+  address = property(_address)
+
+
   def __unicode__(self):
-    return '%s_%s' % (self.room.label,self.label)
+    return 'rack %s'%(self.label)
 
 #
 #
@@ -271,6 +280,10 @@ class Address(ModelExtension):
   postalcode = models.CharField(max_length=9, blank=True)
   city       = models.CharField(max_length=30)
 
+  def _companies(self):
+    return ' | '.join([comp.name for comp in self._companies.all()]) or '-'
+  companies = property(_companies)
+
   class Meta:
     unique_together = ('address', 'city')
     verbose_name_plural = 'addresses'
@@ -290,7 +303,8 @@ class Room(ModelExtension):
     unique_together = ('address', 'floor', 'label')
     
   def __unicode__(self):
-    return unicode(self.label)
+    #return unicode('%s - %s'%(self.address,self.label))
+    return self.label
 
 
 # ??? What todo with this model ???
@@ -319,11 +333,14 @@ class Company(ModelExtension):
     contactpersons for a specific piece of hardware.
   """
   
-  addresses = models.ManyToManyField(Address)
+  addresses = models.ManyToManyField(Address, related_name='_companies')
 
   #type    = models.ChoiceField() # !!! TODO: add choices like vendor / support / partner / etc... !!!
   name    = models.CharField(max_length=64)
   website = models.URLField()
+
+  def get_addresses(self):
+    return ' | '.join([address.address for address in self.addresses.all()]) or '-'
 
   def __unicode__(self):
     return self.name
@@ -358,6 +375,7 @@ class Connection(ModelExtension):
 
   class Meta:
     #ordering = ('lastname',)
+    verbose_name = 'contact'
     unique_together = ('company', 'name')
 
 
@@ -367,8 +385,8 @@ class Telephonenumber(ModelExtension):
     ('C', 'Cellphone'),
     ('F', 'Fax')
   )
-  country      = models.ForeignKey(Country, related_name='telephone numbers')
-  connection = models.ForeignKey(Connection, blank=False, null=False, related_name='telephone numbers')
+  country      = models.ForeignKey(Country, related_name='telephone_numbers')
+  connection = models.ForeignKey(Connection, blank=False, null=False, related_name='telephone_numbers')
   areacode          = models.CharField(max_length=4) # because it can start with a zero
   subscriber_number = models.IntegerField(verbose_name='number', max_length=15)
   type = models.CharField(max_length=1, choices=NUMBER_CHOICES)
