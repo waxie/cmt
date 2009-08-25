@@ -11,6 +11,8 @@ from tagging.fields import TagField
 from django_extensions.db.fields import CreationDateTimeField, ModificationDateTimeField
 from sara_cmt import settings
 
+import datetime
+
 
 # !!! TODO: classes for templates !!!
 
@@ -62,6 +64,14 @@ class HardwareUnit(ModelExtension):
     return self.rack.address
   address = property(_address)
 
+  def _room(self):
+    return self.rack.room
+  room = property(_room)
+
+  def _in_support(self):
+    return not self.warranty.expired
+  in_support = property(_in_support)
+
   def __unicode__(self):
     try:
       assert self.label, "piece of hardware hasn't got a label yet"
@@ -86,19 +96,31 @@ class HardwareUnit(ModelExtension):
       return 'r%sn%s' % (self.rack.label, self.first_slot)
     except:
       pass
+
+
+class Alias(ModelExtension):
+  label     = models.CharField(max_length=30)
+
+  class Meta:
+    verbose_name_plural = 'aliasses'
+
+  def _interfaces(self):
+    return ' | '.join([interface.label for interface in self._interfaces.all()]) or '-'
+  interfaces = property(_interfaces)
     
 
 class Interface(ModelExtension):
   network   = models.ForeignKey('Network', related_name='interfaces')
   hardware  = models.ForeignKey('HardwareUnit', related_name='interfaces', verbose_name='machine') # ??? host ???
   type      = models.ForeignKey('InterfaceType', related_name='interfaces', verbose_name='type')
-  hostname  = models.CharField(max_length=30, blank=True, help_text='Automagically generated if kept empty') # TODO: Default name has to be based on the prefix of the network
+  label     = models.CharField(max_length=30, blank=True, help_text='Automagically generated if kept empty') # TODO: Default name has to be based on the prefix of the network
+  aliasses  = models.ManyToManyField(Alias, blank=True, null=True, related_name='_interfaces')
   hwaddress = models.CharField(max_length=17, blank=True, verbose_name='hardware address', help_text="6 Octets, optionally delimited by a space ' ', a hyphen '-', or a colon ':'.", unique=True)
   ip        = models.IPAddressField(editable=False, null=True, blank=True)
 
 
   def __unicode__(self):
-    return self.hostname or 'anonymous'
+    return self.label or 'anonymous'
 
   def save(self, force_insert=False, force_update=False):
     """
@@ -119,7 +141,7 @@ class Interface(ModelExtension):
       if ip not in network:
         self.ip = self.network.pick_ip()
 
-      self.hostname = '%s%s' % (self.network.prefix, self.hardware.label)
+      self.label = '%s%s' % (self.network.prefix, self.hardware.label)
 
       super(Interface, self).save(force_insert, force_update)
     except AssertionError, e:
@@ -501,26 +523,15 @@ class WarrantyContract(ModelExtension):
 
   label       = models.CharField(max_length=30, unique=True)
   date_from   = models.DateField(verbose_name='valid from')
-  months      = models.PositiveIntegerField()
-  date_to     = models.DateField(verbose_name='expires at', editable=False)
+  date_to     = models.DateField(verbose_name='expires at')
 
 
   class Meta:
     verbose_name_plural = 'warranties'
 
+  def is_expired(self):
+    return self.date_to < datetime.date.today()
+  expired = property(is_expired)
 
   def __unicode__(self):
     return self.label
-
-  def save(self, force_insert=False, force_update=False):
-    """
-      Before saving to the database, the date of expiration has to be calculated.
-    """
-    try:
-      self.date_to = self.date_from.replace(
-        year = self.date_from.year + (self.date_from.month-1 + self.months) / 12,
-        month = (self.date_from.month + self.months) % 12
-      )
-      super(WarrantyContract, self).save(force_insert, force_update)
-    except AttributeError, e:
-      logger.error(e)

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from sara_cmt.cluster.models import Cluster, HardwareUnit, Interface, Network, Rack
+from sara_cmt.cluster.models import Cluster, HardwareUnit, Alias, Interface, Network, Rack
 from sara_cmt.cluster.models import Country, Address, Room, Site
 from sara_cmt.cluster.models import Company, Telephonenumber, Connection
 from sara_cmt.cluster.models import HardwareModel, Role, InterfaceType
@@ -82,7 +82,7 @@ class HardwareUnitAdmin(admin.ModelAdmin):
     GlobalAdmin.extra_fieldset
   )
 
-  list_display = ('__unicode__', 'cluster', 'address', 'rack', 'specifications')
+  list_display = ('__unicode__', 'cluster', 'address', 'room', 'rack', 'specifications', 'in_support')
   list_filter  = ('cluster', 'rack', 'role', 'specifications') + GlobalAdmin.list_filter
   inlines = [InterfaceInline]
 
@@ -159,13 +159,17 @@ class RackAdmin(admin.ModelAdmin):
   ordering     = ('room',)
 
 
+class AliasAdmin(admin.ModelAdmin):
+  pass
+
+
 class InterfaceAdmin(admin.ModelAdmin):
   fieldsets = (
     ('Physical', {
       'fields': (('type', 'hardware'), 'hwaddress'),
     }),
     ('Network', {
-      'fields': ('network', 'hostname'),
+      'fields': ('network', ('label', 'aliasses')),
     }),
     GlobalAdmin.extra_fieldset
   )
@@ -255,12 +259,12 @@ class WarrantyContractAdmin(admin.ModelAdmin):
       'fields': ('label', 'type'),
     }),
     ('Period', {
-      'fields': ('date_from', 'months',),
+      'fields': ('date_from', 'date_to'),
     }),
     GlobalAdmin.extra_fieldset
   )
 
-  list_display = ('label', 'date_from', 'months', 'date_to')
+  list_display = ('label', 'date_from', 'date_to', 'expired')
   list_filter  = GlobalAdmin.list_filter
 
 
@@ -280,6 +284,7 @@ class WarrantyTypeAdmin(admin.ModelAdmin):
 
 admin.site.register(Cluster, ClusterAdmin)
 admin.site.register(HardwareUnit, HardwareUnitAdmin)
+admin.site.register(Alias, AliasAdmin)
 admin.site.register(Interface, InterfaceAdmin)
 admin.site.register(Network, NetworkAdmin)
 admin.site.register(Rack, RackAdmin)
