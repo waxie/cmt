@@ -1,0 +1,100 @@
+r28n1 interface mac=00:14:22:1E:D8:26 network=admin ip=192.168.147.36 hostname=gb-r28n1
+r28n1 interface mac=00:14:22:1D:3F:59 network=console ip=192.168.139.36 hostname=dr-r28n1
+r28n1 interface mac=00:00:00:00:28:01 network=infiniband ip=192.168.155.36 hostname=ib-r28n1
+r28n1 dell dell(model=1850)
+r28n1 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n2 interface mac=00:14:22:1E:F7:38 network=admin ip=192.168.147.37 hostname=gb-r28n2
+r28n2 interface mac=00:14:22:1B:2D:15 network=console ip=192.168.139.37 hostname=dr-r28n2
+r28n2 interface mac=00:00:00:00:28:02 network=infiniband ip=192.168.155.37 hostname=ib-r28n2
+r28n2 dell dell(model=1850)
+r28n2 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n3 interface mac=00:14:22:1E:F9:D0 network=admin ip=192.168.147.38 hostname=gb-r28n3
+r28n3 interface mac=00:14:22:1D:BB:E2 network=console ip=192.168.139.38 hostname=dr-r28n3
+r28n3 interface mac=00:00:00:00:28:03 network=infiniband ip=192.168.155.38 hostname=ib-r28n3
+r28n3 dell dell(model=1850)
+r28n3 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n4 interface mac=00:14:22:1D:BB:54 network=console ip=192.168.139.39 hostname=dr-r28n4
+r28n4 interface mac=00:00:00:00:28:04 network=infiniband ip=192.168.155.39 hostname=ib-r28n4
+r28n4 interface mac=00:14:22:23:BB:16 network=admin ip=192.168.147.39 hostname=gb-r28n4
+r28n4 dell dell(model=1850)
+r28n4 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n5 interface mac=00:14:22:1E:F9:B8 network=admin ip=192.168.147.40 hostname=gb-r28n5
+r28n5 interface mac=00:14:22:1D:BB:DE network=console ip=192.168.139.40 hostname=dr-r28n5
+r28n5 interface mac=00:00:00:00:28:05 network=infiniband ip=192.168.155.40 hostname=ib-r28n5
+r28n5 dell dell(model=1850)
+r28n5 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n6 interface mac=00:14:22:1E:FB:FD network=admin ip=192.168.147.41 hostname=gb-r28n6
+r28n6 interface mac=00:14:22:1D:4C:69 network=console ip=192.168.139.41 hostname=dr-r28n6
+r28n6 interface mac=00:00:00:00:28:06 network=infiniband ip=192.168.155.41 hostname=ib-r28n6
+r28n6 dell dell(model=1850)
+r28n6 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n7 interface mac=00:14:22:1E:F9:04 network=admin ip=192.168.147.42 hostname=gb-r28n7
+r28n7 interface mac=00:14:22:1D:3F:F0 network=console ip=192.168.139.42 hostname=dr-r28n7
+r28n7 interface mac=00:00:00:00:28:07 network=infiniband ip=192.168.155.42 hostname=ib-r28n7
+r28n7 dell dell(model=1850)
+r28n7 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n8 interface mac=00:14:22:1E:F9:97 network=admin ip=192.168.147.43 hostname=gb-r28n8
+r28n8 interface mac=00:14:22:1D:BB:ED network=console ip=192.168.139.43 hostname=dr-r28n8
+r28n8 interface mac=00:00:00:00:28:08 network=infiniband ip=192.168.155.43 hostname=ib-r28n8
+r28n8 dell dell(model=1850)
+r28n8 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n9 interface mac=00:14:22:1E:F7:4D network=admin ip=192.168.147.44 hostname=gb-r28n9
+r28n9 interface mac=00:14:22:1B:2D:EB network=console ip=192.168.139.44 hostname=dr-r28n9
+r28n9 interface mac=00:00:00:00:28:09 network=infiniband ip=192.168.155.44 hostname=ib-r28n9
+r28n9 dell dell(model=1850)
+r28n9 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n10 interface mac=00:14:22:1E:F9:D6 network=admin ip=192.168.147.45 hostname=gb-r28n10
+r28n10 interface mac=00:14:22:1D:BB:E9 network=console ip=192.168.139.45 hostname=dr-r28n10
+r28n10 interface mac=00:00:00:00:28:10 network=infiniband ip=192.168.155.45 hostname=ib-r28n10
+r28n10 dell dell(model=1850)
+r28n10 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n11 interface mac=00:14:22:1F:B9:E2 network=admin ip=192.168.147.46 hostname=gb-r28n11
+r28n11 interface mac=00:14:22:1D:B9:8A network=console ip=192.168.139.46 hostname=dr-r28n11
+r28n11 interface mac=00:00:00:00:28:11 network=infiniband ip=192.168.155.46 hostname=ib-r28n11
+r28n11 dell dell(model=1850)
+r28n11 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n12 interface mac=00:14:22:1E:FA:11 network=admin ip=192.168.147.47 hostname=gb-r28n12
+r28n12 interface mac=00:14:22:1D:B9:80 network=console ip=192.168.139.47 hostname=dr-r28n12
+r28n12 interface mac=00:00:00:00:28:12 network=infiniband ip=192.168.155.47 hostname=ib-r28n12
+r28n12 dell dell(model=1850)
+r28n12 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n13 interface mac=00:14:22:1E:F1:DE network=admin ip=192.168.147.48 hostname=gb-r28n13
+r28n13 interface mac=00:14:22:1D:BA:28 network=console ip=192.168.139.48 hostname=dr-r28n13
+r28n13 interface mac=00:00:00:00:28:13 network=infiniband ip=192.168.155.48 hostname=ib-r28n13
+r28n13 dell dell(model=1850)
+r28n13 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n14 interface mac=00:14:22:1E:FC:30 network=admin ip=192.168.147.49 hostname=gb-r28n14
+r28n14 interface mac=00:14:22:1D:BA:1E network=console ip=192.168.139.49 hostname=dr-r28n14
+r28n14 interface mac=00:00:00:00:28:14 network=infiniband ip=192.168.155.49 hostname=ib-r28n14
+r28n14 dell dell(model=1850)
+r28n14 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n15 interface mac=00:14:22:1E:FA:08 network=admin ip=192.168.147.50 hostname=gb-r28n15
+r28n15 interface mac=00:14:22:1D:B9:93 network=console ip=192.168.139.50 hostname=dr-r28n15
+r28n15 interface mac=00:00:00:00:28:15 network=infiniband ip=192.168.155.50 hostname=ib-r28n15
+r28n15 dell dell(model=1850)
+r28n15 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n16 interface mac=00:14:22:1E:FA:29 network=admin ip=192.168.147.51 hostname=gb-r28n16
+r28n16 interface mac=00:14:22:1D:B9:8F network=console ip=192.168.139.51 hostname=dr-r28n16
+r28n16 interface mac=00:00:00:00:28:16 network=infiniband ip=192.168.155.51 hostname=ib-r28n16
+r28n16 dell dell(model=1850)
+r28n16 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n17 interface mac=00:14:22:1E:DB:1B network=admin ip=192.168.147.52 hostname=gb-r28n17
+r28n17 interface mac=00:01:00:00:00:02 network=infiniband ip=192.168.155.52 hostname=ib-r28n17
+r28n17 interface mac=00:14:22:1D:2D:C2 network=console ip=192.168.139.52 hostname=dr-r28n17
+r28n17 dell dell(model=1850)
+r28n17 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n18 interface mac=00:14:22:1E:DA:CD network=admin ip=192.168.147.53 hostname=gb-r28n18
+r28n18 interface mac=00:00:00:00:04:10 network=infiniband ip=192.168.155.53 hostname=ib-r28n18
+r28n18 interface mac=00:14:22:1D:41:09 network=console ip=192.168.139.53 hostname=dr-r28n18
+r28n18 dell dell(model=1850)
+r28n18 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n19 interface mac=00:14:22:1E:DA:E8 network=admin ip=192.168.147.54 hostname=gb-r28n19
+r28n19 interface mac=00:14:22:1D:2D:B7 network=console ip=192.168.139.54 hostname=dr-r28n19
+r28n19 interface mac=00:00:00:00:04:11 network=infiniband ip=192.168.155.54 hostname=ib-r28n19
+r28n19 dell dell(model=1850)
+r28n19 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj
+r28n20 interface mac=00:13:72:4D:C5:28 network=admin ip=192.168.147.55 hostname=gb-r28n20
+r28n20 interface mac=00:14:22:1D:3F:E8 network=console ip=192.168.139.55 hostname=dr-r28n20
+r28n20 interface mac=00:00:00:00:04:12 network=infiniband ip=192.168.155.55 hostname=ib-r28n20
+r28n20 dell dell(model=1850)
+r28n20 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchj

@@ -1,0 +1,100 @@
+r43n1 interface mac=00:1C:23:BB:11:30 network=console ip=192.168.140.30 hostname=dr-r43n1
+r43n1 interface mac=00:19:B9:EA:1F:19 network=admin ip=192.168.148.32 hostname=gb-r43n1
+r43n1 interface mac=00:19:B9:EA:1F:1B network=gb2 ip=192.168.161.62 hostname=gb2-r43n1
+r43n1 dell dell(model=1950)
+r43n1 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n2 interface mac=00:1C:23:BB:14:3E network=console ip=192.168.140.31 hostname=dr-r43n2
+r43n2 interface mac=00:19:B9:EA:4E:7E network=admin ip=192.168.148.33 hostname=gb-r43n2
+r43n2 interface mac=00:19:B9:EA:4E:80 network=gb2 ip=192.168.161.63 hostname=gb2-r43n2
+r43n2 dell dell(model=1950)
+r43n2 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n3 interface mac=00:1C:23:BB:27:83 network=console ip=192.168.140.32 hostname=dr-r43n3
+r43n3 interface mac=00:19:B9:EA:1F:0F network=admin ip=192.168.148.34 hostname=gb-r43n3
+r43n3 interface mac=00:19:B9:EA:1F:11 network=gb2 ip=192.168.161.64 hostname=gb2-r43n3
+r43n3 dell dell(model=1950)
+r43n3 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n4 interface mac=00:1C:23:BB:11:44 network=console ip=192.168.140.33 hostname=dr-r43n4
+r43n4 interface mac=00:19:B9:EA:12:64 network=admin ip=192.168.148.35 hostname=gb-r43n4
+r43n4 interface mac=00:19:B9:EA:12:66 network=gb2 ip=192.168.161.65 hostname=gb2-r43n4
+r43n4 dell dell(model=1950)
+r43n4 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n5 interface mac=00:1C:23:BB:0D:69 network=console ip=192.168.140.34 hostname=dr-r43n5
+r43n5 interface mac=00:19:B9:EA:17:F9 network=admin ip=192.168.148.36 hostname=gb-r43n5
+r43n5 interface mac=00:19:B9:EA:17:FB network=gb2 ip=192.168.161.66 hostname=gb2-r43n5
+r43n5 dell dell(model=1950)
+r43n5 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n6 interface mac=00:1C:23:BB:0D:75 network=console ip=192.168.140.35 hostname=dr-r43n6
+r43n6 interface mac=00:19:B9:EA:18:7B network=admin ip=192.168.148.37 hostname=gb-r43n6
+r43n6 interface mac=00:19:B9:EA:18:7D network=gb2 ip=192.168.161.67 hostname=gb2-r43n6
+r43n6 dell dell(model=1950)
+r43n6 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n7 interface mac=00:1C:23:BB:16:03 network=console ip=192.168.140.36 hostname=dr-r43n7
+r43n7 interface mac=00:19:B9:EA:4C:9A network=admin ip=192.168.148.38 hostname=gb-r43n7
+r43n7 interface mac=00:19:B9:EA:4C:9C network=gb2 ip=192.168.161.68 hostname=gb2-r43n7
+r43n7 dell dell(model=1950)
+r43n7 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n8 interface mac=00:1C:23:BC:82:C4 network=console ip=192.168.140.37 hostname=dr-r43n8
+r43n8 interface mac=00:19:B9:EA:4F:C8 network=admin ip=192.168.148.39 hostname=gb-r43n8
+r43n8 interface mac=00:19:B9:EA:4F:CA network=gb2 ip=192.168.161.69 hostname=gb2-r43n8
+r43n8 dell dell(model=1950)
+r43n8 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n9 interface mac=00:1C:23:BB:0D:63 network=console ip=192.168.140.38 hostname=dr-r43n9
+r43n9 interface mac=00:19:B9:EA:17:DB network=admin ip=192.168.148.40 hostname=gb-r43n9
+r43n9 interface mac=00:19:B9:EA:17:DD network=gb2 ip=192.168.161.70 hostname=gb2-r43n9
+r43n9 dell dell(model=1950)
+r43n9 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n10 interface mac=00:1C:23:BC:82:C2 network=console ip=192.168.140.39 hostname=dr-r43n10
+r43n10 interface mac=00:19:B9:EA:50:7C network=admin ip=192.168.148.41 hostname=gb-r43n10
+r43n10 interface mac=00:19:B9:EA:50:7E network=gb2 ip=192.168.161.71 hostname=gb2-r43n10
+r43n10 dell dell(model=1950)
+r43n10 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n11 interface mac=00:1C:23:BC:8E:75 network=console ip=192.168.140.40 hostname=dr-r43n11
+r43n11 interface mac=00:19:B9:EA:4E:5B network=admin ip=192.168.148.42 hostname=gb-r43n11
+r43n11 interface mac=00:19:B9:EA:4E:5D network=gb2 ip=192.168.161.72 hostname=gb2-r43n11
+r43n11 dell dell(model=1950)
+r43n11 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n12 interface mac=00:1C:23:BC:8A:6A network=console ip=192.168.140.41 hostname=dr-r43n12
+r43n12 interface mac=00:19:B9:EA:4E:A1 network=admin ip=192.168.148.43 hostname=gb-r43n12
+r43n12 interface mac=00:19:B9:EA:4E:A3 network=gb2 ip=192.168.161.73 hostname=gb2-r43n12
+r43n12 dell dell(model=1950)
+r43n12 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n13 interface mac=00:1C:23:BC:8E:83 network=console ip=192.168.140.42 hostname=dr-r43n13
+r43n13 interface mac=00:19:B9:EA:3E:A0 network=admin ip=192.168.148.44 hostname=gb-r43n13
+r43n13 interface mac=00:19:B9:EA:3E:A2 network=gb2 ip=192.168.161.74 hostname=gb2-r43n13
+r43n13 dell dell(model=1950)
+r43n13 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n14 interface mac=00:1C:23:BC:8A:46 network=console ip=192.168.140.43 hostname=dr-r43n14
+r43n14 interface mac=00:19:B9:EA:1A:E1 network=admin ip=192.168.148.45 hostname=gb-r43n14
+r43n14 interface mac=00:19:B9:EA:1A:E3 network=gb2 ip=192.168.161.75 hostname=gb2-r43n14
+r43n14 dell dell(model=1950)
+r43n14 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n15 interface mac=00:1C:23:BC:8A:30 network=console ip=192.168.140.44 hostname=dr-r43n15
+r43n15 interface mac=00:19:B9:EA:22:36 network=admin ip=192.168.148.46 hostname=gb-r43n15
+r43n15 interface mac=00:19:B9:EA:22:38 network=gb2 ip=192.168.161.76 hostname=gb2-r43n15
+r43n15 dell dell(model=1950)
+r43n15 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n16 interface mac=00:1C:23:BC:8E:6D network=console ip=192.168.140.45 hostname=dr-r43n16
+r43n16 interface mac=00:19:B9:EA:1C:1C network=admin ip=192.168.148.47 hostname=gb-r43n16
+r43n16 interface mac=00:19:B9:EA:1C:1E network=gb2 ip=192.168.161.77 hostname=gb2-r43n16
+r43n16 dell dell(model=1950)
+r43n16 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n17 interface mac=00:1C:23:BC:8C:62 network=console ip=192.168.140.46 hostname=dr-r43n17
+r43n17 interface mac=00:19:B9:EA:3D:72 network=admin ip=192.168.148.48 hostname=gb-r43n17
+r43n17 interface mac=00:19:B9:EA:3D:74 network=gb2 ip=192.168.161.78 hostname=gb2-r43n17
+r43n17 dell dell(model=1950)
+r43n17 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n18 interface mac=00:1C:23:BC:8E:55 network=console ip=192.168.140.47 hostname=dr-r43n18
+r43n18 interface mac=00:19:B9:EA:1C:03 network=admin ip=192.168.148.49 hostname=gb-r43n18
+r43n18 interface mac=00:19:B9:EA:1C:05 network=gb2 ip=192.168.161.79 hostname=gb2-r43n18
+r43n18 dell dell(model=1950)
+r43n18 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n19 interface mac=00:1C:23:BC:8E:7B network=console ip=192.168.140.48 hostname=dr-r43n19
+r43n19 interface mac=00:19:B9:EA:1C:35 network=admin ip=192.168.148.50 hostname=gb-r43n19
+r43n19 interface mac=00:19:B9:EA:1C:37 network=gb2 ip=192.168.161.80 hostname=gb2-r43n19
+r43n19 dell dell(model=1950)
+r43n19 properties properties=cores8,mem8gb,q_serial,f_gigabit
+r43n20 interface mac=00:1C:23:BC:8A:1C network=console ip=192.168.140.49 hostname=dr-r43n20
+r43n20 interface mac=00:19:B9:EA:1C:21 network=admin ip=192.168.148.51 hostname=gb-r43n20
+r43n20 interface mac=00:19:B9:EA:1C:23 network=gb2 ip=192.168.161.81 hostname=gb2-r43n20
+r43n20 dell dell(model=1950)
+r43n20 properties properties=cores8,mem8gb,q_serial,f_gigabit

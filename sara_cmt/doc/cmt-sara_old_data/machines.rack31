@@ -1,0 +1,100 @@
+r31n1 interface mac=00:14:22:1E:FA:5C network=admin ip=192.168.147.96 hostname=gb-r31n1
+r31n1 interface mac=00:14:22:1D:DE:B7 network=console ip=192.168.139.96 hostname=dr-r31n1
+r31n1 interface mac=00:14:22:1E:FA:5D network=gb2 ip=192.168.163.96 hostname=gb2-r31n1
+r31n1 dell dell(model=1850)
+r31n1 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n2 interface mac=00:14:22:1E:FA:4D network=admin ip=192.168.147.97 hostname=gb-r31n2
+r31n2 interface mac=00:14:22:1D:DE:C5 network=console ip=192.168.139.97 hostname=dr-r31n2
+r31n2 interface mac=00:14:22:1E:FA:4E network=gb2 ip=192.168.163.97 hostname=gb2-r31n2
+r31n2 dell dell(model=1850)
+r31n2 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n3 interface mac=00:14:22:1E:FA:5F network=admin ip=192.168.147.98 hostname=gb-r31n3
+r31n3 interface mac=00:14:22:1D:DE:C4 network=console ip=192.168.139.98 hostname=dr-r31n3
+r31n3 interface mac=00:14:22:1E:FA:60 network=gb2 ip=192.168.163.98 hostname=gb2-r31n3
+r31n3 dell dell(model=1850)
+r31n3 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n4 interface mac=00:14:22:1E:FA:71 network=admin ip=192.168.147.99 hostname=gb-r31n4
+r31n4 interface mac=00:14:22:1D:DE:25 network=console ip=192.168.139.99 hostname=dr-r31n4
+r31n4 interface mac=00:14:22:1E:FA:72 network=gb2 ip=192.168.163.99 hostname=gb2-r31n4
+r31n4 dell dell(model=1850)
+r31n4 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n5 interface mac=00:14:22:1E:EB:10 network=admin ip=192.168.147.100 hostname=gb-r31n5
+r31n5 interface mac=00:14:22:1D:DE:B9 network=console ip=192.168.139.100 hostname=dr-r31n5
+r31n5 interface mac=00:14:22:1E:EB:11 network=gb2 ip=192.168.163.100 hostname=gb2-r31n5
+r31n5 dell dell(model=1850)
+r31n5 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n6 interface mac=00:14:22:1E:FA:1D network=admin ip=192.168.147.101 hostname=gb-r31n6
+r31n6 interface mac=00:14:22:1D:DE:C3 network=console ip=192.168.139.101 hostname=dr-r31n6
+r31n6 interface mac=00:14:22:1E:FA:1E network=gb2 ip=192.168.163.101 hostname=gb2-r31n6
+r31n6 dell dell(model=1850)
+r31n6 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n7 interface mac=00:14:22:1E:ED:F1 network=admin ip=192.168.147.102 hostname=gb-r31n7
+r31n7 interface mac=00:14:22:1D:B9:8D network=console ip=192.168.139.102 hostname=dr-r31n7
+r31n7 interface mac=00:14:22:1E:ED:F2 network=gb2 ip=192.168.163.102 hostname=gb2-r31n7
+r31n7 dell dell(model=1850)
+r31n7 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n8 interface mac=00:14:22:1E:F9:CA network=admin ip=192.168.147.103 hostname=gb-r31n8
+r31n8 interface mac=00:14:22:1D:BA:27 network=console ip=192.168.139.103 hostname=dr-r31n8
+r31n8 interface mac=00:14:22:1E:F9:CB network=gb2 ip=192.168.163.103 hostname=gb2-r31n8
+r31n8 dell dell(model=1850)
+r31n8 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n9 interface mac=00:14:22:1E:F9:E5 network=admin ip=192.168.147.104 hostname=gb-r31n9
+r31n9 interface mac=00:14:22:1D:B9:8B network=console ip=192.168.139.104 hostname=dr-r31n9
+r31n9 interface mac=00:14:22:1E:F9:E6 network=gb2 ip=192.168.163.104 hostname=gb2-r31n9
+r31n9 dell dell(model=1850)
+r31n9 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n10 interface mac=00:14:22:1E:FA:33 network=gb2 ip=192.168.163.105 hostname=gb2-r31n10
+r31n10 interface mac=00:14:22:1E:FA:32 network=admin ip=192.168.147.105 hostname=gb-r31n10
+r31n10 interface mac=00:14:22:1D:BA:26 network=console ip=192.168.139.105 hostname=dr-r31n10
+r31n10 dell dell(model=1850)
+r31n10 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n11 interface mac=00:14:22:1E:DA:2E network=admin ip=192.168.147.106 hostname=gb-r31n11
+r31n11 interface mac=00:14:22:1D:2E:5B network=console ip=192.168.139.106 hostname=dr-r31n11
+r31n11 interface mac=00:14:22:1E:DA:2F network=gb2 ip=192.168.163.106 hostname=gb2-r31n11
+r31n11 dell dell(model=1850)
+r31n11 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n12 interface mac=00:14:22:1E:DA:0E network=gb2 ip=192.168.163.107 hostname=gb2-r31n12
+r31n12 interface mac=00:14:22:1E:DA:0D network=admin ip=192.168.147.107 hostname=gb-r31n12
+r31n12 interface mac=00:14:22:1D:2E:4D network=console ip=192.168.139.107 hostname=dr-r31n12
+r31n12 dell dell(model=1850)
+r31n12 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n13 interface mac=00:14:22:1E:D9:F8 network=admin ip=192.168.147.108 hostname=gb-r31n13
+r31n13 interface mac=00:14:22:1D:2E:56 network=console ip=192.168.139.108 hostname=dr-r31n13
+r31n13 interface mac=00:14:22:1E:D9:F9 network=gb2 ip=192.168.163.108 hostname=gb2-r31n13
+r31n13 dell dell(model=1850)
+r31n13 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n14 interface mac=00:14:22:1E:DA:62 network=gb2 ip=192.168.163.109 hostname=gb2-r31n14
+r31n14 interface mac=00:14:22:1E:DA:61 network=admin ip=192.168.147.109 hostname=gb-r31n14
+r31n14 interface mac=00:14:22:1D:2E:59 network=console ip=192.168.139.109 hostname=dr-r31n14
+r31n14 dell dell(model=1850)
+r31n14 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n15 interface mac=00:14:22:1E:DA:10 network=admin ip=192.168.147.110 hostname=gb-r31n15
+r31n15 interface mac=00:14:22:1D:2D:29 network=console ip=192.168.139.110 hostname=dr-r31n15
+r31n15 interface mac=00:14:22:1E:DA:11 network=gb2 ip=192.168.163.110 hostname=gb2-r31n15
+r31n15 dell dell(model=1850)
+r31n15 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n16 interface mac=00:13:72:4D:C1:AE network=gb2 ip=192.168.163.111 hostname=gb2-r31n16
+r31n16 interface mac=00:13:72:4D:C1:AD network=admin ip=192.168.147.111 hostname=gb-r31n16
+r31n16 interface mac=00:14:22:1D:2D:27 network=console ip=192.168.139.111 hostname=dr-r31n16
+r31n16 dell dell(model=1850)
+r31n16 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n17 interface mac=00:14:22:1E:FA:50 network=admin ip=192.168.147.112 hostname=gb-r31n17
+r31n17 interface mac=00:14:22:1D:DE:2C network=console ip=192.168.139.112 hostname=dr-r31n17
+r31n17 interface mac=00:14:22:1E:FA:51 network=gb2 ip=192.168.163.112 hostname=gb2-r31n17
+r31n17 dell dell(model=1850)
+r31n17 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n18 interface mac=00:14:22:1E:FA:6E network=admin ip=192.168.147.113 hostname=gb-r31n18
+r31n18 interface mac=00:14:22:1D:DE:B8 network=console ip=192.168.139.113 hostname=dr-r31n18
+r31n18 interface mac=00:14:22:1E:FA:6F network=gb2 ip=192.168.163.113 hostname=gb2-r31n18
+r31n18 dell dell(model=1850)
+r31n18 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n19 interface mac=00:14:22:1E:FA:00 network=admin ip=192.168.147.114 hostname=gb-r31n19
+r31n19 interface mac=00:14:22:1D:DE:BB network=console ip=192.168.139.114 hostname=dr-r31n19
+r31n19 interface mac=00:14:22:1E:FA:01 network=gb2 ip=192.168.163.114 hostname=gb2-r31n19
+r31n19 dell dell(model=1850)
+r31n19 properties properties=cores2,mem4gb,q_serial,f_gigabit
+r31n20 interface mac=00:14:22:1E:FA:E0 network=admin ip=192.168.147.115 hostname=gb-r31n20
+r31n20 interface mac=00:14:22:1D:DE:B6 network=console ip=192.168.139.115 hostname=dr-r31n20
+r31n20 interface mac=00:14:22:1E:FA:E1 network=gb2 ip=192.168.163.115 hostname=gb2-r31n20
+r31n20 dell dell(model=1850)
+r31n20 properties properties=cores2,mem4gb,q_serial,f_gigabit

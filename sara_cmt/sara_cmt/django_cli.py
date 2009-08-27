@@ -64,14 +64,6 @@ class ModelExtension(models.Model):
 
 
   @staticmethod
-  def _is_complete(model):
-    """
-      Check if all the required fields has been assigned.
-    """
-    return not ModelExtension._missing_fields(model)
-
-
-  @staticmethod
   def _is_fk(model, field):
     """
       Look if a field is defined as a ForeignKey. Returns a boolean.
@@ -80,7 +72,7 @@ class ModelExtension(models.Model):
       field = model._meta.get_field(field)
     return isinstance(field, ForeignKey)
 
-  @staticmethod
+  @staticmethod # !!! TODO: move to QueryManager !!!
   def queries_to_qset(model, queries):
     """
       Make a QuerySet, based on one or more given queries. Delegate each query
@@ -109,7 +101,7 @@ class ModelExtension(models.Model):
     logger.debug("Queries '%s' gave QuerySet: %s" % (queries,qset))
     return qset
 
-  @staticmethod
+  @staticmethod # !!! TODO: move to QueryManager !!!
   def _query_to_qset(model, query):
     """
       Make a QuerySet, based on a single given query.
@@ -163,7 +155,7 @@ class ModelExtension(models.Model):
       
 
 
-  @staticmethod
+  @staticmethod # !!! TODO: move to QueryManager !!!
   def _values(model, fields=None):
     """
       This function is like the QuerySet.values() in Django. Difference is that
@@ -184,7 +176,7 @@ class ModelExtension(models.Model):
     return vqset
 
 
-  @staticmethod
+  @staticmethod # !!! TODO: move to QueryManager !!!
   def search_object_ids(model, value, fields=None):
     """
       Search for objects of the given model. This method will find objects with
@@ -206,7 +198,7 @@ class ModelExtension(models.Model):
     return matching_indices
 
 
-  @staticmethod
+  @staticmethod # !!! TODO: move to QueryManager !!!
   def search_objects(model, value, fields=None):
     """
       Search for objects of the given model. This method will find objects with
@@ -219,7 +211,7 @@ class ModelExtension(models.Model):
     return objects
 
 
-  @staticmethod
+  @staticmethod # !!! TODO: move to QueryManager.objects_from_query !!!
   def objects_from_dict(model, arg_dict):
     """
       Search for objects of the given model. This method will find objects with
@@ -277,6 +269,13 @@ class ModelExtension(models.Model):
 # </STATIC METHODS>
 #
 #####
+
+
+  def is_complete(self):
+    """
+      Check if all the required fields has been assigned.
+    """
+    return not self._missing_fields()
 
     
   def setattrs_from_dict(self, arg_dict):
@@ -426,7 +425,8 @@ class ModelExtension(models.Model):
     else:
       self.__setattr__(field.name, value)
 
-    if ModelExtension._is_complete(self):
+    if self.is_complete():
+    #if ModelExtension._is_complete(self):
       try:
         self.save() # !!! TODO: disable at dry-runs
       except (sqlite3.IntegrityError, ValueError), err:
@@ -456,15 +456,21 @@ class ModelExtension(models.Model):
 
     return result
 
+
 ##############
 
 
+
 class ObjectManager():
-  pass
+  def __init__(self):
+    logger.info('Initialized an ObjectManager')
+
+    
 
 
 class QueryManager():
-  pass
+  def __init__(self):
+    logger.info('Initialized QueryManager')
 
 
 

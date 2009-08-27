@@ -1,0 +1,100 @@
+r23n1 interface mac=00:14:22:1E:F2:44 network=admin ip=192.168.146.189 hostname=gb-r23n1
+r23n1 interface mac=00:14:22:1B:2D:19 network=console ip=192.168.138.189 hostname=dr-r23n1
+r23n1 interface mac=00:00:00:00:04:13 network=infiniband ip=192.168.154.189 hostname=ib-r23n1
+r23n1 dell dell(model=1850)
+r23n1 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n2 interface mac=00:14:22:1E:F2:56 network=admin ip=192.168.146.190 hostname=gb-r23n2
+r23n2 interface mac=00:14:22:1B:2D:16 network=console ip=192.168.138.190 hostname=dr-r23n2
+r23n2 interface mac=00:00:00:00:04:14 network=infiniband ip=192.168.154.190 hostname=ib-r23n2
+r23n2 dell dell(model=1850)
+r23n2 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n3 interface mac=00:14:22:1E:F5:DB network=admin ip=192.168.146.191 hostname=gb-r23n3
+r23n3 interface mac=00:14:22:1B:2D:A4 network=console ip=192.168.138.191 hostname=dr-r23n3
+r23n3 interface mac=00:00:00:00:04:15 network=infiniband ip=192.168.154.191 hostname=ib-r23n3
+r23n3 dell dell(model=1850)
+r23n3 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n4 interface mac=00:14:22:1E:F5:C6 network=admin ip=192.168.146.192 hostname=gb-r23n4
+r23n4 interface mac=00:14:22:1B:2D:9F network=console ip=192.168.138.192 hostname=dr-r23n4
+r23n4 interface mac=00:00:00:00:04:16 network=infiniband ip=192.168.154.192 hostname=ib-r23n4
+r23n4 dell dell(model=1850)
+r23n4 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n5 interface mac=00:14:22:1E:F5:4B network=admin ip=192.168.146.193 hostname=gb-r23n5
+r23n5 interface mac=00:14:22:1B:2F:02 network=console ip=192.168.138.193 hostname=dr-r23n5
+r23n5 interface mac=00:00:00:00:04:17 network=infiniband ip=192.168.154.193 hostname=ib-r23n5
+r23n5 dell dell(model=1850)
+r23n5 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n6 interface mac=00:14:22:1E:F5:C0 network=admin ip=192.168.146.194 hostname=gb-r23n6
+r23n6 interface mac=00:14:22:1B:2E:73 network=console ip=192.168.138.194 hostname=dr-r23n6
+r23n6 interface mac=00:00:00:00:04:18 network=infiniband ip=192.168.154.194 hostname=ib-r23n6
+r23n6 dell dell(model=1850)
+r23n6 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n7 interface mac=00:14:22:1E:DA:D0 network=admin ip=192.168.146.195 hostname=gb-r23n7
+r23n7 interface mac=00:14:22:1D:2D:B9 network=console ip=192.168.138.195 hostname=dr-r23n7
+r23n7 interface mac=00:00:00:00:04:19 network=infiniband ip=192.168.154.195 hostname=ib-r23n7
+r23n7 dell dell(model=1850)
+r23n7 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n8 interface mac=00:14:22:1E:DB:09 network=admin ip=192.168.146.196 hostname=gb-r23n8
+r23n8 interface mac=00:14:22:1D:2D:B4 network=console ip=192.168.138.196 hostname=dr-r23n8
+r23n8 interface mac=00:00:00:00:04:20 network=infiniband ip=192.168.154.196 hostname=ib-r23n8
+r23n8 dell dell(model=1850)
+r23n8 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n9 interface mac=00:14:22:1E:DA:FD network=admin ip=192.168.146.197 hostname=gb-r23n9
+r23n9 interface mac=00:14:22:1D:2D:B8 network=console ip=192.168.138.197 hostname=dr-r23n9
+r23n9 interface mac=00:00:00:00:04:21 network=infiniband ip=192.168.154.197 hostname=ib-r23n9
+r23n9 dell dell(model=1850)
+r23n9 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n10 interface mac=00:14:22:1E:DA:EB network=admin ip=192.168.146.198 hostname=gb-r23n10
+r23n10 interface mac=00:14:22:1D:2D:C5 network=console ip=192.168.138.198 hostname=dr-r23n10
+r23n10 interface mac=00:00:00:00:04:22 network=infiniband ip=192.168.154.198 hostname=ib-r23n10
+r23n10 dell dell(model=1850)
+r23n10 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n11 interface mac=00:14:22:1E:D9:47 network=admin ip=192.168.146.199 hostname=gb-r23n11
+r23n11 interface mac=00:14:22:1D:2E:55 network=console ip=192.168.138.199 hostname=dr-r23n11
+r23n11 interface mac=00:00:00:00:04:23 network=infiniband ip=192.168.154.199 hostname=ib-r23n11
+r23n11 dell dell(model=1850)
+r23n11 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n12 interface mac=00:14:22:1E:EF:B5 network=admin ip=192.168.146.200 hostname=gb-r23n12
+r23n12 interface mac=00:14:22:1D:4B:D6 network=console ip=192.168.138.200 hostname=dr-r23n12
+r23n12 interface mac=00:00:00:00:04:24 network=infiniband ip=192.168.154.200 hostname=ib-r23n12
+r23n12 dell dell(model=1850)
+r23n12 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n13 interface mac=00:14:22:1E:D9:32 network=admin ip=192.168.146.201 hostname=gb-r23n13
+r23n13 interface mac=00:14:22:1D:2E:54 network=console ip=192.168.138.201 hostname=dr-r23n13
+r23n13 interface mac=00:00:00:00:04:25 network=infiniband ip=192.168.154.201 hostname=ib-r23n13
+r23n13 dell dell(model=1850)
+r23n13 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n14 interface mac=00:14:22:1E:D9:0B network=admin ip=192.168.146.202 hostname=gb-r23n14
+r23n14 interface mac=00:14:22:1D:2E:4F network=console ip=192.168.138.202 hostname=dr-r23n14
+r23n14 interface mac=00:00:00:00:04:26 network=infiniband ip=192.168.154.202 hostname=ib-r23n14
+r23n14 dell dell(model=1850)
+r23n14 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n15 interface mac=00:14:22:1E:D9:3B network=admin ip=192.168.146.203 hostname=gb-r23n15
+r23n15 interface mac=00:14:22:1D:2E:4E network=console ip=192.168.138.203 hostname=dr-r23n15
+r23n15 interface mac=00:00:00:00:04:27 network=infiniband ip=192.168.154.203 hostname=ib-r23n15
+r23n15 dell dell(model=1850)
+r23n15 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n16 interface mac=00:14:22:1E:FB:97 network=admin ip=192.168.146.204 hostname=gb-r23n16
+r23n16 interface mac=00:14:22:1D:4B:D8 network=console ip=192.168.138.204 hostname=dr-r23n16
+r23n16 interface mac=00:00:00:00:04:28 network=infiniband ip=192.168.154.204 hostname=ib-r23n16
+r23n16 dell dell(model=1850)
+r23n16 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n17 interface mac=00:14:22:1E:F6:23 network=admin ip=192.168.146.205 hostname=gb-r23n17
+r23n17 interface mac=00:14:22:1B:2E:74 network=console ip=192.168.138.205 hostname=dr-r23n17
+r23n17 interface mac=00:00:00:00:04:29 network=infiniband ip=192.168.154.205 hostname=ib-r23n17
+r23n17 dell dell(model=1850)
+r23n17 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n18 interface mac=00:14:22:1E:F6:2F network=admin ip=192.168.146.206 hostname=gb-r23n18
+r23n18 interface mac=00:14:22:1B:2E:70 network=console ip=192.168.138.206 hostname=dr-r23n18
+r23n18 interface mac=00:00:00:00:04:30 network=infiniband ip=192.168.154.206 hostname=ib-r23n18
+r23n18 dell dell(model=1850)
+r23n18 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n19 interface mac=00:14:22:1E:F2:47 network=admin ip=192.168.146.207 hostname=gb-r23n19
+r23n19 interface mac=00:14:22:1B:2D:1C network=console ip=192.168.138.207 hostname=dr-r23n19
+r23n19 interface mac=00:00:00:00:04:31 network=infiniband ip=192.168.154.207 hostname=ib-r23n19
+r23n19 dell dell(model=1850)
+r23n19 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi
+r23n20 interface mac=00:14:22:1E:F2:62 network=admin ip=192.168.146.208 hostname=gb-r23n20
+r23n20 interface mac=00:14:22:1B:2D:9E network=console ip=192.168.138.208 hostname=dr-r23n20
+r23n20 interface mac=00:00:00:00:04:32 network=infiniband ip=192.168.154.208 hostname=ib-r23n20
+r23n20 dell dell(model=1850)
+r23n20 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchi

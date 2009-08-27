@@ -26,7 +26,7 @@ import sys
 
 
 import sara_cmt.cluster.admin
-from sara_cmt.django_cli import ModelExtension
+from sara_cmt.django_cli import ModelExtension, ObjectManager, QueryManager
 from sara_cmt.logger import Logger
 
 
@@ -95,6 +95,20 @@ INTERACTIVE = config_parser.getboolean('defaults','DRYRUN')
 # </CMT-specific settings from file>
 #
 #####
+
+
+
+#####
+#
+# <Managers for database related stuff>
+#
+objects = ObjectManager()
+queries = QueryManager()
+#
+# </Managers for database related stuff>
+#
+#####
+
 
 
 #####

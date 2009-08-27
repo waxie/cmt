@@ -1,0 +1,6 @@
+r52n1 interface mac=00:30:48:C6:A8:02 network=admin alias=tesla1 ip=192.168.145.35 hostname=gb-r52n1
+r52n1 interface mac=00:30:48:9C:7F:BF network=console alias=dr-tesla1 ip=192.168.137.48 hostname=dr-r52n1
+r52n1 properties properties=cores8,cuda,f_tesla,infiniband,mem8gb,q_gpu
+r52n2 interface mac=00:30:48:C6:A4:7C network=admin alias=tesla2 ip=192.168.145.36 hostname=gb-r52n2
+r52n2 interface mac=00:30:48:9C:77:07 network=console alias=dr-tesla2 ip=192.168.137.49 hostname=dr-r52n2
+r52n2 properties properties=cores8,cuda,f_tesla,mem8gb,q_gpu

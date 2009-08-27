@@ -1,0 +1,38 @@
+We want views for:
+  * addresses
+
+
+Objectmodel:
+  * HardwareUnit kan onder meerdere clusters vallen (bv boot <> install.cua)
+
+Fields in models:
+  * HardwareModel.formfactor
+  * Connection.type (leverancier, support, ...)
+  * HardwareUnit.delivered_on
+
+
+Fixtures:
+  * Computenodes; roles and properties
+
+
+Commandline Interface:
+  * Interactive completion per required field
+  * Logging
+
+
+Web Interface:
+  * Authentication with LDAP
+  * Filters:
+    - Racks on Address
+    - Hardware on Room and Address
+
+
+Templates:
+
+
+Feature requests:
+  * Reservering van poorten voor bv SAN, FK naar contactpersoon/klant
+  * Support calls
+  * Colo nummering racks op basis van grid van vloertegels
+  * Database as HPCV internal service
+  * Link Interfaces, Hardware, and Racks via Slots

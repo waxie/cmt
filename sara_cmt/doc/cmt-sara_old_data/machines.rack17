@@ -1,0 +1,100 @@
+r17n1 interface mac=00:13:72:67:2F:75 network=admin ip=192.168.146.69 hostname=gb-r17n1
+r17n1 interface mac=00:14:22:1D:3F:F1 network=console ip=192.168.138.69 hostname=dr-r17n1
+r17n1 interface mac=00:00:00:00:02:93 network=infiniband ip=192.168.154.69 hostname=ib-r17n1
+r17n1 dell dell(model=1850)
+r17n1 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n2 interface mac=00:14:22:1E:D9:38 network=admin ip=192.168.146.70 hostname=gb-r17n2
+r17n2 interface mac=00:14:22:1D:40:79 network=console ip=192.168.138.70 hostname=dr-r17n2
+r17n2 interface mac=00:00:00:00:02:94 network=infiniband ip=192.168.154.70 hostname=ib-r17n2
+r17n2 dell dell(model=1850)
+r17n2 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n3 interface mac=00:13:72:63:58:79 network=admin ip=192.168.146.71 hostname=gb-r17n3
+r17n3 interface mac=00:14:22:1D:3F:ED network=console ip=192.168.138.71 hostname=dr-r17n3
+r17n3 interface mac=00:00:00:00:02:95 network=infiniband ip=192.168.154.71 hostname=ib-r17n3
+r17n3 dell dell(model=1850)
+r17n3 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n4 interface mac=00:14:22:1E:D9:1D network=admin ip=192.168.146.72 hostname=gb-r17n4
+r17n4 interface mac=00:14:22:1D:3F:5F network=console ip=192.168.138.72 hostname=dr-r17n4
+r17n4 interface mac=00:00:00:00:02:96 network=infiniband ip=192.168.154.72 hostname=ib-r17n4
+r17n4 dell dell(model=1850)
+r17n4 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n5 interface mac=00:14:22:1E:D8:32 network=admin ip=192.168.146.73 hostname=gb-r17n5
+r17n5 interface mac=00:14:22:1D:3F:EE network=console ip=192.168.138.73 hostname=dr-r17n5
+r17n5 interface mac=00:00:00:00:02:97 network=infiniband ip=192.168.154.73 hostname=ib-r17n5
+r17n5 dell dell(model=1850)
+r17n5 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n6 interface mac=00:14:22:1E:D0:6C network=admin ip=192.168.146.74 hostname=gb-r17n6
+r17n6 interface mac=00:14:22:1D:3F:E2 network=console ip=192.168.138.74 hostname=dr-r17n6
+r17n6 interface mac=00:00:00:00:02:98 network=infiniband ip=192.168.154.74 hostname=ib-r17n6
+r17n6 dell dell(model=1850)
+r17n6 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n7 interface mac=00:14:22:1E:D9:14 network=admin ip=192.168.146.75 hostname=gb-r17n7
+r17n7 interface mac=00:14:22:1D:3E:31 network=console ip=192.168.138.75 hostname=dr-r17n7
+r17n7 interface mac=00:00:00:00:02:99 network=infiniband ip=192.168.154.75 hostname=ib-r17n7
+r17n7 dell dell(model=1850)
+r17n7 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n8 interface mac=00:14:22:1E:D8:FF network=admin ip=192.168.146.76 hostname=gb-r17n8
+r17n8 interface mac=00:14:22:1D:40:78 network=console ip=192.168.138.76 hostname=dr-r17n8
+r17n8 interface mac=00:00:00:00:03:00 network=infiniband ip=192.168.154.76 hostname=ib-r17n8
+r17n8 dell dell(model=1850)
+r17n8 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n9 interface mac=00:14:22:1E:D9:35 network=admin ip=192.168.146.77 hostname=gb-r17n9
+r17n9 interface mac=00:14:22:1D:3F:EA network=console ip=192.168.138.77 hostname=dr-r17n9
+r17n9 interface mac=00:00:00:00:03:01 network=infiniband ip=192.168.154.77 hostname=ib-r17n9
+r17n9 dell dell(model=1850)
+r17n9 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n10 interface mac=00:14:22:1E:D9:05 network=admin ip=192.168.146.78 hostname=gb-r17n10
+r17n10 interface mac=00:14:22:1D:40:7C network=console ip=192.168.138.78 hostname=dr-r17n10
+r17n10 interface mac=00:00:00:00:03:02 network=infiniband ip=192.168.154.78 hostname=ib-r17n10
+r17n10 dell dell(model=1850)
+r17n10 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n11 interface mac=00:14:22:1E:F4:28 network=admin ip=192.168.146.79 hostname=gb-r17n11
+r17n11 interface mac=00:14:22:1D:4C:6C network=console ip=192.168.138.79 hostname=dr-r17n11
+r17n11 interface mac=00:00:00:00:03:03 network=infiniband ip=192.168.154.79 hostname=ib-r17n11
+r17n11 dell dell(model=1850)
+r17n11 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n12 interface mac=00:14:22:1E:FA:A1 network=admin ip=192.168.146.80 hostname=gb-r17n12
+r17n12 interface mac=00:14:22:1D:4B:E1 network=console ip=192.168.138.80 hostname=dr-r17n12
+r17n12 interface mac=00:00:00:00:03:04 network=infiniband ip=192.168.154.80 hostname=ib-r17n12
+r17n12 dell dell(model=1850)
+r17n12 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n13 interface mac=00:14:22:1E:FA:B6 network=admin ip=192.168.146.81 hostname=gb-r17n13
+r17n13 interface mac=00:14:22:1D:4B:4D network=console ip=192.168.138.81 hostname=dr-r17n13
+r17n13 interface mac=00:00:00:00:03:05 network=infiniband ip=192.168.154.81 hostname=ib-r17n13
+r17n13 dell dell(model=1850)
+r17n13 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n14 interface mac=00:14:22:1E:FA:CB network=admin ip=192.168.146.82 hostname=gb-r17n14
+r17n14 interface mac=00:14:22:1D:4B:47 network=console ip=192.168.138.82 hostname=dr-r17n14
+r17n14 interface mac=00:00:00:00:03:06 network=infiniband ip=192.168.154.82 hostname=ib-r17n14
+r17n14 dell dell(model=1850)
+r17n14 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n15 interface mac=00:14:22:1E:F8:AC network=admin ip=192.168.146.183 hostname=gb-r17n15
+r17n15 interface mac=00:14:22:1D:F2:D5 network=console ip=192.168.138.183 hostname=dr-r17n15
+r17n15 interface mac=00:00:00:00:04:07 network=infiniband ip=192.168.154.183 hostname=ib-r17n15
+r17n15 dell dell(model=1850)
+r17n15 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n16 interface mac=00:14:22:1E:F0:56 network=admin ip=192.168.146.84 hostname=gb-r17n16
+r17n16 interface mac=00:14:22:1D:BB:47 network=console ip=192.168.138.84 hostname=dr-r17n16
+r17n16 interface mac=00:00:00:00:03:08 network=infiniband ip=192.168.154.84 hostname=ib-r17n16
+r17n16 dell dell(model=1850)
+r17n16 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n17 interface mac=00:13:72:4D:A5:C9 network=admin ip=192.168.146.85 hostname=gb-r17n17
+r17n17 interface mac=00:14:22:1D:BA:1A network=console ip=192.168.138.85 hostname=dr-r17n17
+r17n17 interface mac=00:00:00:00:03:09 network=infiniband ip=192.168.154.85 hostname=ib-r17n17
+r17n17 dell dell(model=1850)
+r17n17 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n18 interface mac=00:14:22:1E:F9:55 network=admin ip=192.168.146.86 hostname=gb-r17n18
+r17n18 interface mac=00:14:22:1D:BB:4E network=console ip=192.168.138.86 hostname=dr-r17n18
+r17n18 interface mac=00:00:00:00:03:10 network=infiniband ip=192.168.154.86 hostname=ib-r17n18
+r17n18 dell dell(model=1850)
+r17n18 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n19 interface mac=00:14:22:1E:F5:F6 network=admin ip=192.168.146.87 hostname=gb-r17n19
+r17n19 interface mac=00:14:22:1B:2D:EA network=console ip=192.168.138.87 hostname=dr-r17n19
+r17n19 interface mac=00:00:00:00:03:11 network=infiniband ip=192.168.154.87 hostname=ib-r17n19
+r17n19 dell dell(model=1850)
+r17n19 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF
+r17n20 interface mac=00:14:22:1E:F2:E3 network=admin ip=192.168.146.88 hostname=gb-r17n20
+r17n20 interface mac=00:14:22:1B:2E:77 network=console ip=192.168.138.88 hostname=dr-r17n20
+r17n20 interface mac=00:00:00:00:03:12 network=infiniband ip=192.168.154.88 hostname=ib-r17n20
+r17n20 dell dell(model=1850)
+r17n20 properties properties=cores2,f_topspin,infiniband,mem4gb,q_express,q_parallel,q_serial,switchF

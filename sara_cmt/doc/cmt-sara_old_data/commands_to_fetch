@@ -1,0 +1,15 @@
+for rack in `seq 5 7` `seq 9 10`; do for node in `seq 1 32`; do cmt-sara --print machine id=r${rack}n${node} >> machines.rack${rack}; echo r${rack}n${node}; done; done
+for rack in 11; do for node in `seq 17 32`; do cmt-sara --print machine id=r${rack}n${node} >> machines.rack${rack}; echo r${rack}n${node}; done; done
+for rack in `seq 14 21` `seq 23 28` `seq 31 37` `seq 40 43`; do for node in `seq 18 32`; do cmt-sara --print machine id=r${rack}n${node} >> machines.rack${rack}; echo r${rack}n${node}; done; done
+for rack in 22; do for node in `seq 1 14`; do cmt-sara --print machine id=r${rack}n${node} >> machines.rack${rack}; echo r${rack}n${node}; done; done
+for rack in 38; do for node in `seq 1 9`; do cmt-sara --print machine id=r${rack}n${node} >> machines.rack${rack}; echo r${rack}n${node}; done; done
+for rack in 39; do for node in `seq 1 16`; do cmt-sara --print machine id=r${rack}n${node} >> machines.rack${rack}; echo r${rack}n${node}; done; done
+for rack in 52; do for node in `seq 1 2`; do cmt-sara --print machine id=r${rack}n${node} >> machines.rack${rack}; echo r${rack}n${node}; done; done
+
+
+for node in 6 7; do cmt-sara --print machine id=fileservern${node} >> machines.fileservers; done
+for node in subtrac2 ftp ganglia ganglia-ng hpc license subtrac; do cmt-sara --print machine id=hpcserver${node} >> machines.hpcservers; done
+for node in n1 n2 n3 n4 n5 n6 install; do cmt-sara --print machine id=ldap${node} >> machines.ldap; done
+for node in bas dennis jaap ramon sil; do cmt-sara --print machine id=project${node} >> machines.projects; done
+for node in login3 login4 batch-ng boot login-ng1 login-ng2 mapserver; do cmt-sara --print machine id=servers${node} >> machines.servers; done
+

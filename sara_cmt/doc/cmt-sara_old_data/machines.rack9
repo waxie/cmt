@@ -1,0 +1,160 @@
+r9n1 interface mac=00:23:AE:FB:6A:3A network=console ip=192.168.137.114 hostname=dr-r9n1
+r9n1 interface mac=00:23:AE:FC:4F:70 network=admin ip=192.168.145.101 hostname=gb-r9n1
+r9n1 interface mac=00:00:00:00:09:01 network=infiniband ip=192.168.153.99 hostname=ib-r9n1
+r9n1 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=1)
+r9n1 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n2 interface mac=00:23:AE:FB:70:25 network=console ip=192.168.137.115 hostname=dr-r9n2
+r9n2 interface mac=00:23:AE:FC:66:FC network=admin ip=192.168.145.102 hostname=gb-r9n2
+r9n2 interface mac=00:00:00:00:09:02 network=infiniband ip=192.168.153.100 hostname=ib-r9n2
+r9n2 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=2)
+r9n2 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n3 interface mac=00:23:AE:FB:70:11 network=console ip=192.168.137.116 hostname=dr-r9n3
+r9n3 interface mac=00:23:AE:FC:66:D4 network=admin ip=192.168.145.103 hostname=gb-r9n3
+r9n3 interface mac=00:00:00:00:09:03 network=infiniband ip=192.168.153.101 hostname=ib-r9n3
+r9n3 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=3)
+r9n3 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n4 interface mac=00:23:AE:FB:70:1A network=console ip=192.168.137.117 hostname=dr-r9n4
+r9n4 interface mac=00:23:AE:FC:6D:68 network=admin ip=192.168.145.104 hostname=gb-r9n4
+r9n4 interface mac=00:00:00:00:09:04 network=infiniband ip=192.168.153.102 hostname=ib-r9n4
+r9n4 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=4)
+r9n4 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n5 interface mac=00:23:AE:FB:6A:C4 network=console ip=192.168.137.118 hostname=dr-r9n5
+r9n5 interface mac=00:23:AE:FC:51:A0 network=admin ip=192.168.145.105 hostname=gb-r9n5
+r9n5 interface mac=00:00:00:00:09:05 network=infiniband ip=192.168.153.103 hostname=ib-r9n5
+r9n5 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=5)
+r9n5 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n6 interface mac=00:23:AE:FB:6B:15 network=console ip=192.168.137.119 hostname=dr-r9n6
+r9n6 interface mac=00:23:AE:FC:52:E4 network=admin ip=192.168.145.106 hostname=gb-r9n6
+r9n6 interface mac=00:00:00:00:09:06 network=infiniband ip=192.168.153.104 hostname=ib-r9n6
+r9n6 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=6)
+r9n6 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n7 interface mac=00:22:19:D2:2C:1E network=console ip=192.168.137.120 hostname=dr-r9n7
+r9n7 interface mac=00:22:19:D2:0D:3C network=admin ip=192.168.145.107 hostname=gb-r9n7
+r9n7 interface mac=00:00:00:00:09:07 network=infiniband ip=192.168.153.105 hostname=ib-r9n7
+r9n7 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=7)
+r9n7 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n8 interface mac=00:23:AE:FB:70:20 network=console ip=192.168.137.121 hostname=dr-r9n8
+r9n8 interface mac=00:23:AE:FC:66:EC network=admin ip=192.168.145.108 hostname=gb-r9n8
+r9n8 interface mac=00:00:00:00:09:08 network=infiniband ip=192.168.153.106 hostname=ib-r9n8
+r9n8 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=8)
+r9n8 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n9 interface mac=00:23:AE:FB:6B:26 network=console ip=192.168.137.122 hostname=dr-r9n9
+r9n9 interface mac=00:23:AE:FC:53:28 network=admin ip=192.168.145.109 hostname=gb-r9n9
+r9n9 interface mac=00:00:00:00:09:09 network=infiniband ip=192.168.153.107 hostname=ib-r9n9
+r9n9 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=9)
+r9n9 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n10 interface mac=00:23:AE:FB:6A:63 network=console ip=192.168.137.123 hostname=dr-r9n10
+r9n10 interface mac=00:23:AE:FC:50:14 network=admin ip=192.168.145.110 hostname=gb-r9n10
+r9n10 interface mac=00:00:00:00:09:10 network=infiniband ip=192.168.153.108 hostname=ib-r9n10
+r9n10 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=10)
+r9n10 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n11 interface mac=00:23:AE:FB:6B:11 network=console ip=192.168.137.124 hostname=dr-r9n11
+r9n11 interface mac=00:23:AE:FC:52:D4 network=admin ip=192.168.145.111 hostname=gb-r9n11
+r9n11 interface mac=00:00:00:00:09:11 network=infiniband ip=192.168.153.109 hostname=ib-r9n11
+r9n11 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=11)
+r9n11 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n12 interface mac=00:23:AE:FB:69:FA network=console ip=192.168.137.125 hostname=dr-r9n12
+r9n12 interface mac=00:23:AE:FC:4E:78 network=admin ip=192.168.145.112 hostname=gb-r9n12
+r9n12 interface mac=00:00:00:00:09:12 network=infiniband ip=192.168.153.110 hostname=ib-r9n12
+r9n12 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=12)
+r9n12 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n13 interface mac=00:23:AE:FB:69:EC network=console ip=192.168.137.126 hostname=dr-r9n13
+r9n13 interface mac=00:23:AE:FC:4E:40 network=admin ip=192.168.145.113 hostname=gb-r9n13
+r9n13 interface mac=00:00:00:00:09:13 network=infiniband ip=192.168.153.111 hostname=ib-r9n13
+r9n13 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=13)
+r9n13 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n14 interface mac=00:23:AE:FB:6A:0E network=console ip=192.168.137.127 hostname=dr-r9n14
+r9n14 interface mac=00:23:AE:FC:4E:C8 network=admin ip=192.168.145.114 hostname=gb-r9n14
+r9n14 interface mac=00:00:00:00:09:14 network=infiniband ip=192.168.153.112 hostname=ib-r9n14
+r9n14 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=14)
+r9n14 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n15 interface mac=00:23:AE:FB:6A:59 network=console ip=192.168.137.128 hostname=dr-r9n15
+r9n15 interface mac=00:23:AE:FC:4F:EC network=admin ip=192.168.145.115 hostname=gb-r9n15
+r9n15 interface mac=00:00:00:00:09:15 network=infiniband ip=192.168.153.113 hostname=ib-r9n15
+r9n15 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=15)
+r9n15 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n16 interface mac=00:23:AE:FB:6A:3D network=console ip=192.168.137.129 hostname=dr-r9n16
+r9n16 interface mac=00:23:AE:FC:4F:7C network=admin ip=192.168.145.116 hostname=gb-r9n16
+r9n16 interface mac=00:00:00:00:09:16 network=infiniband ip=192.168.153.114 hostname=ib-r9n16
+r9n16 dell dell(model=m610 chassis=dr-r9cmc-a chassisslot=16)
+r9n16 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9a
+r9n17 interface mac=00:23:AE:FB:6A:84 network=console ip=192.168.137.130 hostname=dr-r9n17
+r9n17 interface mac=00:23:AE:FC:50:98 network=admin ip=192.168.145.117 hostname=gb-r9n17
+r9n17 interface mac=00:00:00:00:09:17 network=infiniband ip=192.168.153.115 hostname=ib-r9n17
+r9n17 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=1)
+r9n17 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b
+r9n18 interface mac=00:23:AE:FB:6A:DC network=console ip=192.168.137.131 hostname=dr-r9n18
+r9n18 interface mac=00:23:AE:FC:52:00 network=admin ip=192.168.145.118 hostname=gb-r9n18
+r9n18 interface mac=00:00:00:00:09:18 network=infiniband ip=192.168.153.116 hostname=ib-r9n18
+r9n18 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=2)
+r9n18 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b
+r9n19 interface mac=00:23:AE:FB:70:27 network=console ip=192.168.137.132 hostname=dr-r9n19
+r9n19 interface mac=00:23:AE:FC:67:04 network=admin ip=192.168.145.119 hostname=gb-r9n19
+r9n19 interface mac=00:00:00:00:09:19 network=infiniband ip=192.168.153.117 hostname=ib-r9n19
+r9n19 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=3)
+r9n19 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b
+r9n20 interface mac=00:23:AE:FB:6A:CE network=console ip=192.168.137.133 hostname=dr-r9n20
+r9n20 interface mac=00:23:AE:FC:51:C8 network=admin ip=192.168.145.120 hostname=gb-r9n20
+r9n20 interface mac=00:00:00:00:09:20 network=infiniband ip=192.168.153.118 hostname=ib-r9n20
+r9n20 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=4)
+r9n20 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b
+r9n21 interface mac=00:23:AE:FB:6A:9C network=console ip=192.168.137.134 hostname=dr-r9n21
+r9n21 interface mac=00:23:AE:FC:51:00 network=admin ip=192.168.145.121 hostname=gb-r9n21
+r9n21 interface mac=00:00:00:00:09:21 network=infiniband ip=192.168.153.119 hostname=ib-r9n21
+r9n21 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=5)
+r9n21 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b
+r9n22 interface mac=00:23:AE:FB:6B:09 network=console ip=192.168.137.135 hostname=dr-r9n22
+r9n22 interface mac=00:23:AE:FC:52:B4 network=admin ip=192.168.145.122 hostname=gb-r9n22
+r9n22 interface mac=00:00:00:00:09:22 network=infiniband ip=192.168.153.120 hostname=ib-r9n22
+r9n22 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=6)
+r9n22 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b
+r9n23 interface mac=00:23:AE:FB:6B:67 network=console ip=192.168.137.136 hostname=dr-r9n23
+r9n23 interface mac=00:23:AE:FC:54:30 network=admin ip=192.168.145.123 hostname=gb-r9n23
+r9n23 interface mac=00:00:00:00:09:23 network=infiniband ip=192.168.153.121 hostname=ib-r9n23
+r9n23 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=7)
+r9n23 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b
+r9n24 interface mac=00:23:AE:FB:6A:4D network=console ip=192.168.137.137 hostname=dr-r9n24
+r9n24 interface mac=00:23:AE:FC:4F:BC network=admin ip=192.168.145.124 hostname=gb-r9n24
+r9n24 interface mac=00:00:00:00:09:24 network=infiniband ip=192.168.153.122 hostname=ib-r9n24
+r9n24 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=8)
+r9n24 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b
+r9n25 interface mac=00:23:AE:FB:6F:E2 network=console ip=192.168.137.138 hostname=dr-r9n25
+r9n25 interface mac=00:23:AE:FC:66:18 network=admin ip=192.168.145.125 hostname=gb-r9n25
+r9n25 interface mac=00:00:00:00:09:25 network=infiniband ip=192.168.153.123 hostname=ib-r9n25
+r9n25 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=9)
+r9n25 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b
+r9n26 interface mac=00:23:AE:FB:6A:1A network=console ip=192.168.137.139 hostname=dr-r9n26
+r9n26 interface mac=00:23:AE:FC:4E:F8 network=admin ip=192.168.145.126 hostname=gb-r9n26
+r9n26 interface mac=00:00:00:00:09:26 network=infiniband ip=192.168.153.124 hostname=ib-r9n26
+r9n26 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=10)
+r9n26 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b
+r9n27 interface mac=00:23:AE:FB:6B:2C network=console ip=192.168.137.140 hostname=dr-r9n27
+r9n27 interface mac=00:23:AE:FC:53:40 network=admin ip=192.168.145.127 hostname=gb-r9n27
+r9n27 interface mac=00:00:00:00:09:27 network=infiniband ip=192.168.153.125 hostname=ib-r9n27
+r9n27 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=11)
+r9n27 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b
+r9n28 interface mac=00:23:AE:FB:6B:78 network=console ip=192.168.137.141 hostname=dr-r9n28
+r9n28 interface mac=00:23:AE:FC:54:70 network=admin ip=192.168.145.128 hostname=gb-r9n28
+r9n28 interface mac=00:00:00:00:09:28 network=infiniband ip=192.168.153.126 hostname=ib-r9n28
+r9n28 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=12)
+r9n28 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b
+r9n29 interface mac=00:23:AE:FB:6A:DB network=console ip=192.168.137.142 hostname=dr-r9n29
+r9n29 interface mac=00:23:AE:FC:51:FC network=admin ip=192.168.145.129 hostname=gb-r9n29
+r9n29 interface mac=00:00:00:00:09:29 network=infiniband ip=192.168.153.127 hostname=ib-r9n29
+r9n29 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=13)
+r9n29 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b
+r9n30 interface mac=00:23:AE:FB:6B:6C network=console ip=192.168.137.143 hostname=dr-r9n30
+r9n30 interface mac=00:23:AE:FC:54:44 network=admin ip=192.168.145.130 hostname=gb-r9n30
+r9n30 interface mac=00:00:00:00:09:30 network=infiniband ip=192.168.153.128 hostname=ib-r9n30
+r9n30 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=14)
+r9n30 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b
+r9n31 interface mac=00:23:AE:FB:6B:29 network=console ip=192.168.137.144 hostname=dr-r9n31
+r9n31 interface mac=00:23:AE:FC:53:34 network=admin ip=192.168.145.131 hostname=gb-r9n31
+r9n31 interface mac=00:00:00:00:09:31 network=infiniband ip=192.168.153.129 hostname=ib-r9n31
+r9n31 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=15)
+r9n31 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b
+r9n32 interface mac=00:23:AE:FB:6B:1F network=console ip=192.168.137.145 hostname=dr-r9n32
+r9n32 interface mac=00:23:AE:FC:53:0C network=admin ip=192.168.145.132 hostname=gb-r9n32
+r9n32 interface mac=00:00:00:00:09:32 network=infiniband ip=192.168.153.130 hostname=ib-r9n32
+r9n32 dell dell(model=m610 chassis=dr-r9cmc-b chassisslot=16)
+r9n32 properties properties=cores8,f_qlogic,infiniband,mem24gb,q_express,q_parallel,q_serial,r9b

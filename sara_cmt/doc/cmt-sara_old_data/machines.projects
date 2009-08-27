@@ -1,0 +1,15 @@
+projectbas interface mac=00:11:43:30:C4:18 network=console ip=192.168.136.204 hostname=dr-bas
+projectbas interface mac=00:11:43:32:8D:DA network=admin alias=andre ip=192.168.144.204 hostname=bas
+projectbas dell dell(model=1850)
+projectdennis interface mac=00:14:22:1D:ED:FC network=console ip=192.168.136.200 hostname=dr-dennis
+projectdennis interface mac=00:14:22:1E:F2:AD network=admin ip=192.168.144.200 hostname=dennis
+projectdennis dell dell(model=1850)
+projectjaap interface mac=00:14:22:1D:ED:F2 network=console ip=192.168.136.202 hostname=dr-jaap
+projectjaap interface mac=00:14:22:1E:D9:E3 network=admin ip=192.168.144.202 hostname=jaap
+projectjaap dell dell(model=1850)
+projectramon interface mac=00:14:22:1D:ED:FE network=console ip=192.168.136.201 hostname=dr-ramon
+projectramon interface mac=00:14:22:1C:00:7F network=admin ip=192.168.144.201 hostname=ramon
+projectramon dell dell(model=1850)
+projectsil interface mac=00:14:22:1D:ED:5D network=console ip=192.168.136.203 hostname=dr-sil
+projectsil interface mac=00:14:22:1F:04:30 network=admin alias=syl ip=192.168.144.203 hostname=sil
+projectsil dell dell(model=1850)
