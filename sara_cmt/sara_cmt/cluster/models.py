@@ -68,6 +68,10 @@ class HardwareUnit(ModelExtension):
     return self.rack.room
   room = property(_room)
 
+  def _roles(self):
+    return ', '.join([role.label for role in self.role.all()]) or '-'
+  roles = property(_roles)
+
   def _in_support(self):
     return not self.warranty.expired
   in_support = property(_in_support)
@@ -99,7 +103,7 @@ class HardwareUnit(ModelExtension):
 
 
 class Alias(ModelExtension):
-  label     = models.CharField(max_length=30)
+  label     = models.CharField(max_length=30, unique=True)
 
   class Meta:
     verbose_name_plural = 'aliasses'
@@ -107,6 +111,9 @@ class Alias(ModelExtension):
   def _interfaces(self):
     return ' | '.join([interface.label for interface in self._interfaces.all()]) or '-'
   interfaces = property(_interfaces)
+
+  def __unicode__(self):
+    return self.label
     
 
 class Interface(ModelExtension):
@@ -119,8 +126,13 @@ class Interface(ModelExtension):
   ip        = models.IPAddressField(editable=False, null=True, blank=True)
 
 
+  def _fqdn(self):
+    return '%s.%s' % (self.label, self.network.domain)
+  fqdn = property(_fqdn)
+
   def __unicode__(self):
-    return self.label or 'anonymous'
+    return self.fqdn
+    #return self.label or 'anonymous'
 
   def save(self, force_insert=False, force_update=False):
     """
@@ -141,7 +153,7 @@ class Interface(ModelExtension):
       if ip not in network:
         self.ip = self.network.pick_ip()
 
-      self.label = '%s%s' % (self.network.prefix, self.hardware.label)
+      self.label = self.label or '%s%s' % (self.network.prefix, self.hardware.label)
 
       super(Interface, self).save(force_insert, force_update)
     except AssertionError, e:

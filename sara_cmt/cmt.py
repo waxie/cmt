@@ -44,12 +44,12 @@ def crud_validate(func):
   """
   def crudFunc(option, opt_str, value, parser, *args, **kwargs):
     if entities.has_key(value):
-      logger.debug('Validated entity %s as an %s'%(value.__repr__(),entities[value]))
+      #logger.debug('Validated entity %s as an %s'%(value.__repr__(),entities[value]))
       return func(option, opt_str, value, parser, *args, **kwargs)
     else:
       logger.error('''Entity %s not known. Valid entities are: %s''' % (value.__repr__(),entities.keys()))
       sys.exit(1)
-  logger.debug('Decorated function %s'%func.__name__.__repr__())
+  #logger.debug('Decorated function %s'%func.__name__.__repr__())
   return crudFunc
 
 #
@@ -144,7 +144,7 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
   queries = queries_to_dict(my_args) # ??? TODO: tuple-list instead of dict ???
   # First search existing objects which match the given queries.
   logger.debug(my_args)
-  entities_found = ModelExtension._queries_to_qset(entities[value], my_args)
+  entities_found = ModelExtension.queries_to_qset(entities[value], my_args)
 
   if entities_found:
     logger.info('Found %s objects matching query: %s'\
@@ -205,9 +205,10 @@ def change(option, opt_str, value, parser, *args, **kwargs):
 @crud_validate
 def show(option, opt_str, value, parser, *args, **kwargs):
   my_args = collect_args(option, parser)
+  print 'my_args = ', repr(my_args)
   queries = queries_to_dict(my_args) # ??? tuple-set instead of dict ???
   logger.debug(queries)
-  entities_found = ModelExtension._queries_to_qset(entities[value], queries)
+  entities_found = ModelExtension.queries_to_qset(entities[value], queries)
 
   # !!! TODO: either print short, or print long lists !!!
   for entity in entities_found:

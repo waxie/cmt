@@ -82,7 +82,7 @@ class HardwareUnitAdmin(admin.ModelAdmin):
     GlobalAdmin.extra_fieldset
   )
 
-  list_display = ('__unicode__', 'cluster', 'address', 'room', 'rack', 'specifications', 'in_support')
+  list_display = ('__unicode__', 'cluster', 'address', 'room', 'rack', 'first_slot', 'specifications', 'roles', 'in_support')
   list_filter  = ('cluster', 'rack', 'role', 'specifications') + GlobalAdmin.list_filter
   inlines = [InterfaceInline]
 
