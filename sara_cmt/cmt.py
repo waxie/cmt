@@ -77,6 +77,7 @@ logger = Logger().getLogger()
 loglevel_str = config_parser.get('defaults','LOGLEVEL')
 logger.setLevel(config_parser.getint('loglevels',loglevel_str))
 
+
 # Collect package information
 CMTSARA_VERSION = config_parser.get('info','version').strip("'")
 CMTSARA_DESCRIPTION = config_parser.get('info','description').strip("'")
@@ -102,8 +103,8 @@ INTERACTIVE = config_parser.getboolean('defaults','DRYRUN')
 #
 # <Managers for database related stuff>
 #
-objects = ObjectManager()
-queries = QueryManager()
+object_mgr = ObjectManager()
+query_mgr = QueryManager()
 #
 # </Managers for database related stuff>
 #
@@ -216,19 +217,30 @@ def change(option, opt_str, value, parser, *args, **kwargs):
 
 
 
+
+def args_to_dict(my_args):
+  # !!! TODO: implement a function which converts the given args for
+  #           {add,remove,change,show}-method into a dict. !!!
+  pass
+
+
 @crud_validate
 def show(option, opt_str, value, parser, *args, **kwargs):
   my_args = collect_args(option, parser)
-  print 'my_args = ', repr(my_args)
-  queries = queries_to_dict(my_args) # ??? tuple-set instead of dict ???
-  logger.debug(queries)
-  entities_found = ModelExtension.queries_to_qset(entities[value], queries)
 
+  # !!! TODO: split args to dict; implement a generic function for this !!!
+  to_query = {'ent':entities[value], 'get':my_args, 'set':None}
+
+  # Push args to QueryManager and get corresponding the Query-object
+  query_mgr.translate(to_query)
+  #query_mgr.push_args(my_args)
+  query = query_mgr.get_query()
+
+  # Query for the objects, and send them to std::out
+  objects = object_mgr.get_objects(query)
   # !!! TODO: either print short, or print long lists !!!
-  for entity in entities_found:
-    ModelExtension.display(entity)
-
-
+  for object in objects:
+    ModelExtension.display(object)
 
 
 def generate(option, opt_str, value, parser, *args, **kwargs):
@@ -282,102 +294,73 @@ def mac(option, opt_str, value, parser, *args, **kwargs):
 #####
 
 
-#####
+######
+##
+## <Methods for processing of arguments>
+##
+#def queries_to_dict(queries):
+#  """
+#    Build a dictionary from the args given to the optionparser. Args can be
+#    given as a string or an array of strings. For example:
+#    
+#    both 'id=2,hostname=node1,rack=3' and ['id=2', 'hostname=node1', 'rack=3']
+#    
+#    should be translated to:
+#    
+#    {'hostname':'node1', 'rack':'3', 'id':'2'}
 #
-# <Methods for processing of arguments>
+#    When a single option is given multiple times, the value should be a list.
+#    For example:
 #
-def queries_to_dict(queries):
-  """
-    Build a dictionary from the args given to the optionparser. Args can be
-    given as a string or an array of strings. For example:
-    
-    both 'id=2,hostname=node1,rack=3' and ['id=2', 'hostname=node1', 'rack=3']
-    
-    should be translated to:
-    
-    {'hostname':'node1', 'rack':'3', 'id':'2'}
-
-    When a single option is given multiple times, the value should be a list.
-    For example:
-
-    'hostname=node1,rack=3,rack=4' or ['hostname=node1', 'rack=3', 'rack=4']
-
-    should become
-    
-    {'hostname':'node1', 'rack':['3', '4']}
-  """
-  _q = queries
-  # First be sure to have a list with queries
-  if isinstance(queries, StringTypes):
-    queries = [queries]
-  
-  # Now convert the list of single queries to a dictionary, with attributes as
-  # keys and corresponding values as values. So the result will be something
-  # like {('<attr>':'<val>')+}.
-
-  result = {}
-  logger.debug('queries: %s'%queries)
-  for query in queries:
-    logger.debug('query  : %s'%query)
-    query = query.split(',')
-    # Queries with a comma in the assignment are broken now, so first fix them:
-    index = len(query)-1
-    while index > 1:
-      if '=' not in query[index]:
-        query[index-1] = ','.join([query[index-1],query.pop(index)])
-      index-=1
-
-
-    for q in query:
-      logger.debug('q      : %s'%q)
-      (opt,val) = q.split('=',1)
-      if result.has_key(opt):
-        if isinstance(result[opt], ListType):
-          # This option has been parsed multiple times
-          result[opt].append(val)
-        else:
-          # This option has been parsed one time
-          result[opt] = [result[opt],val]
-      else:
-        # Parsing this option for the very first time
-        result[opt] = val
-
-  logger.debug('queries_to_dict(%s) => %s' % (_q, result))
-  return result
+#    'hostname=node1,rack=3,rack=4' or ['hostname=node1', 'rack=3', 'rack=4']
+#
+#    should become
+#    
+#    {'hostname':'node1', 'rack':['3', '4']}
+#  """
+#  _q = queries
+#  # First be sure to have a list with queries
+#  if isinstance(queries, StringTypes):
+#    queries = [queries]
+#  
+#  # Now convert the list of single queries to a dictionary, with attributes as
+#  # keys and corresponding values as values. So the result will be something
+#  # like {('<attr>':'<val>')+}.
+#
+#  result = {}
+#  logger.debug('queries: %s'%queries)
+#  for query in queries:
+#    logger.debug('query  : %s'%query)
+#    query = query.split(',')
+#    # Queries with a comma in the assignment are broken now, so first fix them:
+#    index = len(query)-1
+#    while index > 1:
+#      if '=' not in query[index]:
+#        query[index-1] = ','.join([query[index-1],query.pop(index)])
+#      index-=1
+#
+#
+#    # ??? Don't remember why there's a 2nd loop; it looks useless ???
+#    for q in query:
+#      logger.debug('q      : %s'%q)
+#      (opt,val) = q.split('=',1)
+#      if result.has_key(opt):
+#        if isinstance(result[opt], ListType):
+#          # This option has been parsed multiple times
+#          result[opt].append(val)
+#        else:
+#          # This option has been parsed one time
+#          result[opt] = [result[opt],val]
+#      else:
+#        # Parsing this option for the very first time
+#        result[opt] = val
+#
+#  logger.debug('queries_to_dict(%s) => %s' % (_q, result))
+#  return result
+#
+#
 
 
-def queries_to_lists(queries):
-  """
-    Returns a list of lists. Those lists are based on the the items from the
-    output of queries_to_dict(queries). For example:
-
-    'hostname=node1,rack=3,rack=4' or ['hostname=node1', 'rack=3', 'rack=4']
-
-    should become
-    
-    [['hostname', 'node1'], ['rack', ['3', '4']]]
-  """
-  result = [list(item) for item in queries_to_dict(queries).items()]
-  logger.debug('queries_to_lists(%s) => %s' % (queries, result))
-  return result
-
-
-def queries_to_tuples(queries):
-  """
-    Returns a list of tuples. Those tuples are based on the the items from the
-    output of queries_to_dict(queries). For example:
-
-    'hostname=node1,rack=3,rack=4' or ['hostname=node1', 'rack=3', 'rack=4']
-
-    should become
-    
-    [('hostname', 'node1'), ('rack', ['3', '4'])]
-  """
-  result = queries_to_dict(queries).items()
-  logger.debug('queries_to_tuples(%s) => %s' % (queries, result))
-  return result
-
-  
 def collect_args(option, parser):
   """
     Collects the arguments belonging to the given option, and removes them from
@@ -408,7 +391,6 @@ def collect_args(option, parser):
 
   logger.debug('Collected arguments for %s: %s'%(option,collected))
   return collected
-
 
 
 def main():
@@ -471,9 +453,17 @@ def main():
                     metavar='ENTITY [ATTRIBUTE=VALUE]',
                     nargs=1,
                     help='Remove objects which reflect the given query')
+
+  # TODO: implement the following option(s)
+  parser.add_option('-v', '--verbose',
+                    action='store_true',
+                    dest='verbose',
+                    default=False)
+                    
   
 
   (options, args) = parser.parse_args()
+  logger.debug('(options, args) = (%s, %s)'%(options,args))
 
   if len(sys.argv) == 1:
     # No arguments are given

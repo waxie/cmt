@@ -72,88 +72,6 @@ class ModelExtension(models.Model):
       field = model._meta.get_field(field)
     return isinstance(field, ForeignKey)
 
-  @staticmethod # !!! TODO: move to QueryManager !!!
-  def queries_to_qset(model, queries):
-    """
-      Make a QuerySet, based on one or more given queries. Delegate each query
-      to _query_to_qset and return the intersection of the returned QuerySets.
-    """
-    #def empty_qset(model): return models.query.QuerySet.none(model.objects.all())
-
-    qset = models.query.EmptyQuerySet()
-    # Start with an empty QuerySet and intersect the QuerySets of the queries
-    for query in queries.items():
-      qset_part = ModelExtension._query_to_qset(model, query)
-      if not qset_part:
-        # Nothing found, so an empty QuerySet could be returned immediately.
-        return models.query.EmptyQuerySet()
-      elif not qset:
-        # First QuerySet has been found.
-        qset = qset_part
-      else:
-        # Another QuerySet has been found, so intersect it with the existing
-        # one and check if this intersection is not empty.
-        qset &= qset_part
-        if not qset:
-          # Intersection of QuerySets is empty, so return it immediately.
-          return models.query.EmptyQuerySet()
-
-    logger.debug("Queries '%s' gave QuerySet: %s" % (queries,qset))
-    return qset
-
-  @staticmethod # !!! TODO: move to QueryManager !!!
-  def _query_to_qset(model, query):
-    """
-      Make a QuerySet, based on a single given query.
-
-      The given query has to be a tuple like:
-        ('<attr>','<val>')
-        ('<FK>','<val>')
-        ('<FK>__<attr>[+<attr>]*','<val>')
-    """
-    # Split the query to decide which path should be followed. The path depends
-    # on the possible elements in the argument.
-    attr, val = query
-    logger.debug('attr,val: %s,%s' % (attr,val))
-    if attr.find('__') is -1:
-      fld = model._meta.get_field(attr) # !!! TODO: try, except FieldDoesNotExist !!!
-      if isinstance(fld, ForeignKey):
-        # So the query was like: '<FK>=<val>'.
-        # Now get id's of the objects (of the referenced model) with value in
-        # one of its fields.
-        to = fld.rel.to
-        ids = ModelExtension.search_object_ids(to, val)
-        # Finally use a filter with the IN field-lookup, like <attr>__in(<ids>)
-        wrapper_cmd = "%s.%s.objects.filter(%s__in=%s)" % (CLUSTER_MODELS, model.__name__, attr, ids)
-        logger.debug("Built command to filter '%s': %s" % (query,wrapper_cmd))
-        qset = eval(wrapper_cmd)
-      else:
-        # In that case the query was like: '<attr>=<val>'.
-        wrapper_cmd = "%s.%s.objects.filter(%s=%s)" % (CLUSTER_MODELS, model.__name__, attr, repr(val))
-        logger.debug("Built command to filter '%s': %s" % (query,wrapper_cmd))
-        qset = eval(wrapper_cmd)
-    else:
-      # Argument appearantly was like: '<FK>__<attr>[+<attr>]*=<val>'
-      partitioned = attr.partition('__')
-      fld = model._meta.get_field(partitioned[0])
-      to = fld.rel.to
-      attrs = partitioned[2].split('+')
-      # Make an empty QuerySet to fill with the union of multiple QuerySets
-      qset = models.query.EmptyQuerySet()
-      for attr in attrs:
-        wrapper_cmd = "%s.%s.objects.filter(%s__%s=%s)" % (CLUSTER_MODELS, model.__name__, fld.name, attr, repr(val))
-        logger.debug("Built command to filter '%s': %s" % (query,wrapper_cmd))
-        result = eval(wrapper_cmd)
-        logger.debug('Result of filter: %s' % result)
-        # Unite the resulting QuerySet with the so far constructed QuerySet
-        qset |= result #eval(wrapper_cmd)
-
-    #logger.debug("Query '%s' gave QuerySet (with ID's):\n%s (%s)"
-    #              % (query,qset,[item.id for item in qset]))
-    return qset
-
-      
-
 
   @staticmethod # !!! TODO: move to QueryManager !!!
   def _values(model, fields=None):
@@ -198,48 +116,6 @@ class ModelExtension(models.Model):
     return matching_indices
 
 
-  @staticmethod # !!! TODO: move to QueryManager !!!
-  def search_objects(model, value, fields=None):
-    """
-      Search for objects of the given model. This method will find objects with
-      the given value in the (list of) given field(s).
-      Returns a list of matching objects.
-    """
-    matching_indices = ModelExtension.search_object_ids(model, value, fields)
-    matches = model.objects.in_bulk(matching_indices)
-    objects = matches.values()
-    return objects
-
-
-  @staticmethod # !!! TODO: move to QueryManager.objects_from_query !!!
-  def objects_from_dict(model, arg_dict):
-    """
-      Search for objects of the given model. This method will find objects with
-      values according to the given dictionary.
-    """
-    # !!! TODO: Handle<FK>__<attr1>+<attr2>=<val>
-    objects_qset = QuerySet()
-
-    for arg in arg_dict:
-      if arg == 'id':
-        # It's the id-field; Just ignore it.
-        logger.debug('Skipping arg with id-field')
-        continue
-      elif arg.find('__') is -1:
-        # Then assume it's a regular field.
-        part_qset = entities[entity_type].objects.complex_filter(arg_dict)
-      else:
-        partitioned = arg.partition('__')
-        fk, attr = partitioned[0], partitioned[2]
-        fld = self._meta.get_field(fk)
-        to = fld.rel.to
-        val = arg_dict[arg]
-
-        #part_qset = 
-
-        # !!! TODO: Complete !!!
-
-
   @staticmethod
   def display(instance):
     """
@@ -261,10 +137,6 @@ class ModelExtension(models.Model):
       if key not in ('__unicode__','__str__'):
         print ' : %s : %s' % (key.ljust(longest_key),instance.__getattribute__(key))
     print " '---\n"
-
-      
-        
-    
 #
 # </STATIC METHODS>
 #
@@ -426,51 +298,175 @@ class ModelExtension(models.Model):
       self.__setattr__(field.name, value)
 
     if self.is_complete():
-    #if ModelExtension._is_complete(self):
       try:
         self.save() # !!! TODO: disable at dry-runs
       except (sqlite3.IntegrityError, ValueError), err:
         logger.error(err)
 
   
-#########
-
-
-  def _filter(self, filter, model_class):
-    _model_class = model_class or self.__class__
-    items = filter.split(',')
-    _dict = {}
-
-    while items:
-      item = items.pop(0).split('=')
-      _dict[item[0]] = item[1]
-
-    result = _model_class.objects.complex_filter(_dict)
-    
-    try:
-      assert len(result) is 1, "Number of %s matching '%s' is %s (has to be 1)" \
-        % (_model_class._meta.verbose_name_plural, filter, len(result))
-    except AssertionError, e:
-      logger.error(e)
-      sys.exit(1)
-
-    return result
-
-
-##############
-
-
 
 class ObjectManager():
   def __init__(self):
     logger.info('Initialized an ObjectManager')
 
+  def get_objects(self, query):
+    """
+      Retrieve objects from the database, corresponding to the entity and terms
+      in the given query.
+    """
+    objects = self._queries_to_qset(query['ent'],query['get'])
+    return objects
+
+  def _queries_to_qset(self, model, subqueries):
+    """
+      Make a QuerySet, based on a given query. Delegate each subquery to
+      _subquery_to_qset and return the intersection of the returned QuerySets.
+
+      * model      : model class
+      * subqueries : dictionary
+    """
+    # Start with an empty QuerySet and intersect the QuerySets of each single Query
+    qset = models.query.EmptyQuerySet()
+    for attr, values in subqueries.items():
+      qset_part = self._subquery_to_qset(model, attr, values)
+      if not qset_part:
+        # Nothing found, so an empty QuerySet could be returned immediately.
+        return models.query.EmptyQuerySet()
+      elif not qset:
+        # First QuerySet has been found.
+        qset = qset_part
+      else:
+        # Another QuerySet has been found, so intersect it with the existing
+        # one and check if this intersection is not empty.
+        qset &= qset_part
+        if not qset:
+          # Intersection of QuerySets is empty, so return it immediately.
+          return models.query.EmptyQuerySet()
+    logger.debug("Subqueries '%s' gave QuerySet: %s"%(subqueries,qset))
+    return qset
+
+  def _subquery_to_qset(self, model, attr, values):
+    """
+      Make a QuerySet, based on a single given term from a query.
+    """
+    if attr.find('__') is -1:
+      fld = model._meta.get_field(attr) # !!! TODO: try, except FieldDoesNotExist !!!
+      if isinstance(fld, ForeignKey):
+        # So the query was like: '<FK>=<val>'.
+        # Now get id's of the objects (of the referenced model) with value in
+        # one of its fields.
+        to = fld.rel.to
+        ids = []
+        for value in values:
+          id = ModelExtension.search_object_ids(to, value)
+          ids.extend(id)
+          logger.debug("Found %s-id's %s for %s=%s"%(model.__name__,ids,attr,values))
+        # Finally use a filter with the IN field-lookup, like <attr>__in(<ids>)
+        wrapper_cmd = "%s.%s.objects.filter(%s__in=%s)" % (CLUSTER_MODELS, model.__name__, attr, ids)
+        logger.debug("Built command to filter '%s=%s': %s" % (attr,values,wrapper_cmd))
+        qset = eval(wrapper_cmd)
+      else:
+        # In that case the query was like: '<attr>=<val>'.
+        wrapper_cmd = "%s.%s.objects.filter(%s__in=%s)" % (CLUSTER_MODELS, model.__name__, attr, values)
+        logger.debug("Built command to filter '%s=%s': %s" % (attr,values,wrapper_cmd))
+        qset = eval(wrapper_cmd)
+    else:
+      # Argument appearantly was like: '<FK>__<attr>[+<attr>]*=<val>'
+      partitioned = attr.partition('__')
+      fld = model._meta.get_field(partitioned[0])
+      to = fld.rel.to
+      attrs = partitioned[2].split('+')
+      # Make an empty QuerySet to fill with the union of multiple QuerySets
+      qset = models.query.EmptyQuerySet()
+      for attr in attrs:
+        wrapper_cmd = "%s.%s.objects.filter(%s__%s__in%s)" % (CLUSTER_MODELS, model.__name__, fld.name, attr, repr(vals))
+        logger.debug("Built command to filter '%s': %s" % (subquery,wrapper_cmd))
+        result = eval(wrapper_cmd)
+        logger.debug('Result of filter: %s' % result)
+        # Unite the resulting QuerySet with the so far constructed QuerySet
+        qset |= result
+    return qset
     
 
 
 class QueryManager():
+
   def __init__(self):
     logger.info('Initialized QueryManager')
+    self.query = self.Query()
+
+  class Query(dict):
+    """
+      Query holds a dictionary of the given args.
+    """
+    def __init__(self):
+      self._new()
+
+    def _new(self):
+      self['ent'] = None
+      self['get'] = {}
+      self['set'] = {}
+      logger.info('Built new Query: %s'%self)
+
+    def as_tuple(self):
+      """
+        Returns a tuple of tuples. Those tuples are based on the the items from
+        the output of queries_to_dict(queries). For example:
+
+        {'hostname':'node1', 'rack':['3', '4']}
+
+        should become
+
+        (('hostname', 'node1'), ('rack', ('3', '4')))
+      """
+      # TODO: implement function which converts a (nested) dict into a (nested) tuple
+      pass
+
+    def as_list(self):
+      """
+        Returns a list of lists. Those lists are based on the the items from the
+        output of queries_to_dict(queries). For example:
+
+        {'hostname':'node1', 'rack':['3', '4']}
+
+        should become
+
+        [['hostname', 'node1'], ['rack', ['3', '4']]]
+      """
+      # TODO: implement function which converts a (nested) dict into a (nested) list
+      pass
 
 
+  def translate(self, given_queries):
+    """
+      Translate the given user input to a Query-object. The user input should
+      be given as a dictionary which looks like:
+        {'ent':<entity_type>, 'get':<arg_list>, 'set':<arg_list>}
+    """
+    # ??? TODO: first cleanup the query? ???
+    
+    # Save the entity type in the query
+    self.query['ent'] = given_queries.pop('ent')
 
+    # Save the get- and set-subqueries in the query
+    for key, given_subqueries in given_queries.items():
+      if given_subqueries is not None:
+        # Convert the list of single arguments to dictionary-items, so:
+        #   ['attr1=val1', 'attr2=val2']
+        # will become
+        #   {'attr1': 'val1', 'attr2': 'val2'}
+        for arg in given_subqueries:
+          (k,val) = arg.split('=',1)
+
+          # ??? split the val in case of ranges ???
+          
+          if self.query[key].has_key(k):
+            self.query[key][k].append(val)
+          else:
+            self.query[key][k] = [val]
+
+    logger.debug("translated args '%s' into dict '%s'"%(given_queries,self.query))
+    return self.query
+
+  def get_query(self):
+    return self.query
