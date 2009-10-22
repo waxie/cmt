@@ -73,7 +73,10 @@ class ModelExtension(models.Model):
     return isinstance(field, ForeignKey)
 
 
-  @staticmethod # !!! TODO: move to QueryManager !!!
+  ####
+  # TODO: <Move to QueryManager>
+  #
+  @staticmethod
   def _values(model, fields=None):
     """
       This function is like the QuerySet.values() in Django. Difference is that
@@ -94,7 +97,7 @@ class ModelExtension(models.Model):
     return vqset
 
 
-  @staticmethod # !!! TODO: move to QueryManager !!!
+  @staticmethod
   def search_object_ids(model, value, fields=None):
     """
       Search for objects of the given model. This method will find objects with
@@ -114,7 +117,9 @@ class ModelExtension(models.Model):
           matching_indices.append(entity['id'])
           break
     return matching_indices
-
+  #
+  # </Move to QueryManager>
+  ####
 
   @staticmethod
   def display(instance):
@@ -222,7 +227,6 @@ class ModelExtension(models.Model):
     missing = self._missing_fields()
 
     while missing:
-      missing = self._missing_fields()
       logger.info('Missing required attributes: %s'
         % ' '.join([field.name for field in missing]))
 
@@ -231,27 +235,18 @@ class ModelExtension(models.Model):
       try:
         assert bool(input), 'Field cannot be left blank'
         # Input for missing attribute is now stored in variable 'input'.
-        i = self._setattr(current_field, input)
+        #i = self._setattr(current_field, input)
         #self.save()
+        self._setattr(current_field, input)
         missing.remove(current_field)
       except AssertionError, err:
         logger.error(err)
       except sqlite3.IntegrityError, err:
-        print IntegrityError, err
+        logger.error('IntegrityError:', err)
 
       logger.debug('Current values: %s' % self.__dict__)
+      missing = self._missing_fields()
 
-      #for field in missing:
-      #  input = raw_input(field.verbose_name+': ')
-      #  try:
-      #    assert bool(input), 'Field cannot be left blank'
-      #    # Input for missing attribute is now stored in variable 'input'.
-      #    self._setattr(field, input)
-      #  except AssertionError, err:
-      #    logger.error(err)
-      #
-      #logger.info('Current values: %s' % self.__dict__)
-      #missing = self._missing_fields()
 
 
   def _setfk(self, field, value, subfields=None):
@@ -289,6 +284,10 @@ class ModelExtension(models.Model):
     if isinstance(field, StringTypes):
       field = self._meta.get_field(field)
 
+    # !!! TODO: Quick {che,ha}ck; have to check this once more !!!
+    if isinstance(value, list):
+      value = value[0]
+
     logger.debug('field=%s (%s), value=%s' % (field.name,field.__class__.__name__,value.__repr__()))
 
     assert isinstance(value, StringTypes), "Given value is a %s, which isn't supported yet (still have to implement this)" % type(value) # !!! TODO: implement support for lists of values !!!
@@ -315,12 +314,13 @@ class ObjectManager():
       in the given query.
     """
     objects = self._queries_to_qset(query['ent'],query['get'])
+    logger.debug('Query %s results in objects: %s'%(query,objects))
     return objects
 
   def _queries_to_qset(self, model, subqueries):
     """
       Make a QuerySet, based on a given query. Delegate each subquery to
-      _subquery_to_qset and return the intersection of the returned QuerySets.
+      _term_to_qset and return the intersection of the returned QuerySets.
 
       * model      : model class
       * subqueries : dictionary
@@ -328,7 +328,7 @@ class ObjectManager():
     # Start with an empty QuerySet and intersect the QuerySets of each single Query
     qset = models.query.EmptyQuerySet()
     for attr, values in subqueries.items():
-      qset_part = self._subquery_to_qset(model, attr, values)
+      qset_part = self._term_to_qset(model, attr, values)
       if not qset_part:
         # Nothing found, so an empty QuerySet could be returned immediately.
         return models.query.EmptyQuerySet()
@@ -345,7 +345,7 @@ class ObjectManager():
     logger.debug("Subqueries '%s' gave QuerySet: %s"%(subqueries,qset))
     return qset
 
-  def _subquery_to_qset(self, model, attr, values):
+  def _term_to_qset(self, model, attr, values):
     """
       Make a QuerySet, based on a single given term from a query.
     """
@@ -360,7 +360,7 @@ class ObjectManager():
         for value in values:
           id = ModelExtension.search_object_ids(to, value)
           ids.extend(id)
-          logger.debug("Found %s-id's %s for %s=%s"%(model.__name__,ids,attr,values))
+          logger.debug("Found %s-id's %s matching %s=%s"%(model.__name__,ids,attr,values))
         # Finally use a filter with the IN field-lookup, like <attr>__in(<ids>)
         wrapper_cmd = "%s.%s.objects.filter(%s__in=%s)" % (CLUSTER_MODELS, model.__name__, attr, ids)
         logger.debug("Built command to filter '%s=%s': %s" % (attr,values,wrapper_cmd))

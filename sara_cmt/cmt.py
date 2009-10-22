@@ -4,7 +4,6 @@
 #
 # <Setup environment for Django's DB API>
 #
-from django.template.loader import render_to_string # to generate templates
 from sara_cmt import settings
 from django.core.management import setup_environ
 setup_environ(settings)
@@ -44,12 +43,11 @@ def crud_validate(func):
   """
   def crudFunc(option, opt_str, value, parser, *args, **kwargs):
     if entities.has_key(value):
-      #logger.debug('Validated entity %s as an %s'%(value.__repr__(),entities[value]))
+      logger.debug('Validated entity %s as a %s'%(value,entities[value]))
       return func(option, opt_str, value, parser, *args, **kwargs)
     else:
-      logger.error('''Entity %s not known. Valid entities are: %s''' % (value.__repr__(),entities.keys()))
+      logger.error('Entity %s not known. Valid entities are: %s' % (value.__repr__(),entities.keys()))
       sys.exit(1)
-  #logger.debug('Decorated function %s'%func.__name__.__repr__())
   return crudFunc
 
 #
@@ -145,7 +143,7 @@ def add(option, opt_str, value, parser, *args, **kwargs):
     except (ValueError, sqlite3.IntegrityError), e:
       logger.error('Failed to save %s: %s' % (new_object._meta.verbose_name, e))
   else:
-    logger.info('Normally the %s should be saved now' % new_object._meta.verbose_name)
+    logger.info('[DRYRUN] Saved %s with id %s' % (new_object._meta.verbose_name, new_object.pk))
     logger.debug('%s: %s' % (entities[value], new_object.__dict__))
 
 
@@ -156,25 +154,28 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
     Remove the objects which match the given values (queries).
   """
   my_args = collect_args(option, parser)
-  queries = queries_to_dict(my_args) # ??? TODO: tuple-list instead of dict ???
-  # First search existing objects which match the given queries.
-  logger.debug(my_args)
-  entities_found = ModelExtension.queries_to_qset(entities[value], my_args)
+  to_query = args_to_dict(my_args, ['get'])
+  to_query['ent'] = entities[value]
 
-  if entities_found:
+  query_mgr.translate(to_query)
+  query = query_mgr.get_query()
+
+  objects = object_mgr.get_objects(query)
+
+  if objects:
     logger.info('Found %s objects matching query: %s'\
-      % (len(entities_found), ', '.join([object.__str__() for object in entities_found])))
+      % (len(objects), ', '.join([object.__str__() for object in entities_found])))
     confirmation = not parser.values.INTERACTIVE or raw_input('Are you sure? [Yn] ')
     print 'confirmation', confirmation
     # Delete and log
     if confirmation in ['', 'y', 'Y', True]:
       logger.info('deleting...')
-      for object in entities_found:
+      for object in objects:
         if not parser.values.DRYRUN:
           object.delete()
           logger.info('Deleted %s' % object)
         else:
-          logger.info('Normally the %s should be deleted now' % object._meta.verbose_name)
+          logger.info('[DRYRUN] Deleted %s' % object)
           
   else:
     logger.info('No existing objects found matching query')
@@ -186,64 +187,75 @@ def change(option, opt_str, value, parser, *args, **kwargs):
   """
     Search for an object which matches the given values, and change it/them.
   """
-  # TODO: Implement for usage like `cmtsara --change <entity> <query> <assignments>
-  #
-  # queries => dict of tuples
-  #
-  # --change <entity> <query> <assignments>
-  #
-  # should become something like:
-  #
-  # {query:<set of queries>, assignments:<set of assignments>}
-  entities_found = _search(value[0], value[1])
+  my_args = collect_args(option, parser)
+  to_query = args_to_dict(my_args, ['get','set'])
+  to_query['ent'] = entities[value]
 
-  if entities_found:
-    print 'Found %s entities matching query: %s'\
-      % (len(entities_found), ', '.join([entity.__str__() for entity in entities_found]))
-    # TODO: !!! Make multiple changes possible in value[2]
-    field, change = value[2].split('=')
+  query_mgr.translate(to_query)
+  query = query_mgr.get_query()
+
+  objects = object_mgr.get_objects(query)
+
+  if objects:
+    logger.debug('Found %s entities matching query: %s' % (len(objects), objects))
     confirmed = not parser.values.INTERACTIVE or raw_input('Are you sure? [Yn] ')
     if confirmed in ['', 'y', 'Y', True]:
-      print 'changing...'
-      for entity in entities_found:
+      for object in objects:
         if not parser.values.DRYRUN:
-          print 'before :', entity.__dict__
-          entity._setattr(field, change)
-          entity.save()
-          print 'after  :', entity.__dict__
-        print 'changed', entity._meta.verbose_name, entity
-  else:
-    print 'No entities found matching query'
+          object.setattrs_from_dict(query['set'])
+          logger.debug('Attributes has been set: %s'%object)
+        else:
+          logger.debug('[DRYRUN] Attributes has been set: %s'%object)
+    else:
+      logger.info('Change has been cancelled')
 
 
 
-
-def args_to_dict(my_args):
+def args_to_dict(my_args, keys=['default']):
   # !!! TODO: implement a function which converts the given args for
   #           {add,remove,change,show}-method into a dict. !!!
-  pass
+  arg_dict = {}
+  key = keys[0]
+  for arg in my_args:
+    if arg in keys: # it's a key
+      key = arg
+    else: # it's a term
+      if arg_dict.has_key(key):
+        arg_dict[key].append(arg)
+      else:
+        arg_dict[key] = [arg]
+  logger.debug("built arg_dict '%s' based on args '%s' and keys '%s'"%(arg_dict,my_args,keys))
+  return arg_dict
 
 
 @crud_validate
 def show(option, opt_str, value, parser, *args, **kwargs):
+  """
+    Show the objects which match the given values (queries).
+  """
+  # Split all given args to dict
   my_args = collect_args(option, parser)
-
-  # !!! TODO: split args to dict; implement a generic function for this !!!
-  to_query = {'ent':entities[value], 'get':my_args, 'set':None}
+  to_query = args_to_dict(my_args, ['get'])
+  to_query['ent'] = entities[value]
 
   # Push args to QueryManager and get corresponding the Query-object
   query_mgr.translate(to_query)
-  #query_mgr.push_args(my_args)
   query = query_mgr.get_query()
 
   # Query for the objects, and send them to std::out
   objects = object_mgr.get_objects(query)
+
   # !!! TODO: either print short, or print long lists !!!
   for object in objects:
     ModelExtension.display(object)
 
 
 def generate(option, opt_str, value, parser, *args, **kwargs):
+  # Needed to generate templates
+  from django.template.loader import render_to_string
+  from django.template import TemplateDoesNotExist
+  import re
+
   # Put data in a dictionary to make accessible in the templates
   template_data = {}
   for entity in entities.values():
@@ -294,73 +306,10 @@ def mac(option, opt_str, value, parser, *args, **kwargs):
 #####
 
 
-######
-##
-## <Methods for processing of arguments>
-##
-#def queries_to_dict(queries):
-#  """
-#    Build a dictionary from the args given to the optionparser. Args can be
-#    given as a string or an array of strings. For example:
-#    
-#    both 'id=2,hostname=node1,rack=3' and ['id=2', 'hostname=node1', 'rack=3']
-#    
-#    should be translated to:
-#    
-#    {'hostname':'node1', 'rack':'3', 'id':'2'}
+#####
 #
-#    When a single option is given multiple times, the value should be a list.
-#    For example:
+# <Methods for processing of arguments>
 #
-#    'hostname=node1,rack=3,rack=4' or ['hostname=node1', 'rack=3', 'rack=4']
-#
-#    should become
-#    
-#    {'hostname':'node1', 'rack':['3', '4']}
-#  """
-#  _q = queries
-#  # First be sure to have a list with queries
-#  if isinstance(queries, StringTypes):
-#    queries = [queries]
-#  
-#  # Now convert the list of single queries to a dictionary, with attributes as
-#  # keys and corresponding values as values. So the result will be something
-#  # like {('<attr>':'<val>')+}.
-#
-#  result = {}
-#  logger.debug('queries: %s'%queries)
-#  for query in queries:
-#    logger.debug('query  : %s'%query)
-#    query = query.split(',')
-#    # Queries with a comma in the assignment are broken now, so first fix them:
-#    index = len(query)-1
-#    while index > 1:
-#      if '=' not in query[index]:
-#        query[index-1] = ','.join([query[index-1],query.pop(index)])
-#      index-=1
-#
-#
-#    # ??? Don't remember why there's a 2nd loop; it looks useless ???
-#    for q in query:
-#      logger.debug('q      : %s'%q)
-#      (opt,val) = q.split('=',1)
-#      if result.has_key(opt):
-#        if isinstance(result[opt], ListType):
-#          # This option has been parsed multiple times
-#          result[opt].append(val)
-#        else:
-#          # This option has been parsed one time
-#          result[opt] = [result[opt],val]
-#      else:
-#        # Parsing this option for the very first time
-#        result[opt] = val
-#
-#  logger.debug('queries_to_dict(%s) => %s' % (_q, result))
-#  return result
-#
-#
-
-
 def collect_args(option, parser):
   """
     Collects the arguments belonging to the given option, and removes them from
@@ -422,7 +371,7 @@ def main():
                     callback=change,
                     type='string',
                     metavar='ENTITY [ATTRIBUTE=VALUE] [ATTRIBUTE=VALUE]',
-                    nargs=3,
+                    nargs=1,
                     help='Change the value of an object.')
   parser.add_option('-g', '--generate',
                     action='callback',

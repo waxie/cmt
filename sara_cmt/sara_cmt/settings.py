@@ -87,7 +87,7 @@ TEMPLATE_DIRS = (
   # Don't forget to use absolute paths, not relative paths.
   #path.normpath(path.join(CMTS_PATH, 'templates')),
   'templates',
-  #os.path.join(os.path.dirname(__file__), 'templates'),
+#  os.path.join(os.path.dirname(__file__), 'templates'),
 )
 
 FIXTURE_DIRS = (
