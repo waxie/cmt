@@ -116,13 +116,27 @@ query_mgr = QueryManager()
 #
 @crud_validate
 def add(option, opt_str, value, parser, *args, **kwargs):
+# !!! TODO: fix this one... it's still old style !!!
+  my_args = collect_args(option, parser)
+  to_query = args_to_dict(my_args, ['set'])
+  to_query['ent'] = entities[value]
+
+  query_mgr.translate(to_query)
+  query = query_mgr.get_query()
+
+  object = entities[value]()
+
+  object.setattrs_from_dict(query['set'])
+  logger.error(object.__dict__) #
+
+  if parser.values.INTERACTIVE:
+    object.interactive_completion()
   """
     Add an object according to the given values.
     
     When the INTERACTIVE-flag has been set and an object is not complete yet,
     the user should be given the opportunity to add data to the missing fields
     on an interactive manner.
-  """
   # Assign values to attributes if assignments are given.
   queries = collect_args(option, parser)
   queries_dict = queries_to_dict(queries)
@@ -145,6 +159,7 @@ def add(option, opt_str, value, parser, *args, **kwargs):
   else:
     logger.info('[DRYRUN] Saved %s with id %s' % (new_object._meta.verbose_name, new_object.pk))
     logger.debug('%s: %s' % (entities[value], new_object.__dict__))
+  """
 
 
 
@@ -224,7 +239,7 @@ def args_to_dict(my_args, keys=['default']):
         arg_dict[key].append(arg)
       else:
         arg_dict[key] = [arg]
-  logger.debug("built arg_dict '%s' based on args '%s' and keys '%s'"%(arg_dict,my_args,keys))
+  logger.debug("returning arg_dict %s based on args %s and keys %s"%(arg_dict,my_args,keys))
   return arg_dict
 
 
@@ -243,11 +258,13 @@ def show(option, opt_str, value, parser, *args, **kwargs):
   query = query_mgr.get_query()
 
   # Query for the objects, and send them to std::out
+  logger.debug('Query to fetch objects: %s'%query)
   objects = object_mgr.get_objects(query)
 
   # !!! TODO: either print short, or print long lists !!!
   for object in objects:
     ModelExtension.display(object)
+
 
 
 def generate(option, opt_str, value, parser, *args, **kwargs):
@@ -290,16 +307,25 @@ def mac(option, opt_str, value, parser, *args, **kwargs):
   """
     Change the MAC-address of an existing interface.
   """
-  old_mac, new_mac = value[0], value[1]
-  try:
-    interface = Interface.objects.get(mac=old_mac)
-    interface.mac = new_mac
-    interface.save()
-    logger.info('MAC-address of interface %s has been changed from %s to %s' %
-      (interface.name, old_mac, new_mac))
-  except Interface.DoesNotExist, e:
-    logger.error('%s %s' % (Interface.DoesNotExist, e))
+  old_mac, new_mac = value
 
+  query = {'ent': entities['interface'], 'get': {'hwaddress': [old_mac]}, 'set': {'hwaddress': [new_mac]}}
+
+  object = object_mgr.get_object(query)
+
+  if object:
+    logger.debug('Found a unique object matching query: %s'%object)
+    confirmed = not parser.values.INTERACTIVE or raw_input('Are you sure? [Yn] ')
+    if confirmed in ['', 'y', 'Y', True]:
+      if not parser.values.DRYRUN:
+        object.setattrs_from_dict(query['set'])
+        logger.debug('Attributes has been set: %s'%object)
+      else:
+        logger.debug('[DRYRUN] Attributes has been set: %s'%object)
+    else:
+      logger.info('Change of MAC-address has been cancelled')
+  else:
+    logger.error('Unable to execute this request')
 #
 # </Database related methods>
 #
@@ -352,7 +378,8 @@ def main():
   parser.add_option('-n', '--dry-run',
                     action='store_true',
                     dest='DRYRUN',
-                    default=config_parser.getboolean('defaults','DRYRUN'))
+                    default=config_parser.getboolean('defaults','DRYRUN'),
+                    help="""This flag has to be given before -[aclmr]""")
   parser.add_option('--script',
                     action='store_false',
                     dest='INTERACTIVE',
@@ -363,16 +390,27 @@ def main():
                     type='string',
                     metavar='ENTITY',
                     nargs=1,
-                    help='Add an object of type ENTITY, with optionally ' + \
-                      'attributes set like assignments given in the form ' + \
-                      'of <attr>=<value> or <FK>__<attr>=<value>.')
+                    help="""Add an object of given ENTITY.
+                      
+                      arguments:   set <ASSIGNMENTS>
+                      
+                      The object will get values according to the given
+                      assignments. Assignments could be formed like
+                      [<FK>__]<attr>=<value>""")
   parser.add_option('-c', '--change',
                     action='callback',
                     callback=change,
                     type='string',
-                    metavar='ENTITY [ATTRIBUTE=VALUE] [ATTRIBUTE=VALUE]',
+                    metavar='ENTITY',
                     nargs=1,
-                    help='Change the value of an object.')
+                    help="""Change value(s) of object(s) of given ENTITY.
+                      
+                      arguments:   get <QUERY> set <ASSIGNMENTS>
+
+                      The query, which consists out of one or more terms, is
+                      used to make a selection of objects to change. These
+                      objects will be changed according to the given
+                      assignments.""")
   parser.add_option('-g', '--generate',
                     action='callback',
                     callback=generate,
@@ -386,8 +424,12 @@ def main():
                     type='string',
                     metavar='ENTITY [ATTRIBUTE=VALUE]',
                     nargs=1,
-                    help='List objects that appear to reflect the given attributes')
-
+                    help="""List object(s) of the given ENTITY.
+                    
+                      arguments:   get <QUERY>
+                    
+                      The query, which consists out of one or more terms, is
+                      used to make a selection of objects to list.""")
   parser.add_option('-m', '--mac',
                     action='callback',
                     callback=mac,

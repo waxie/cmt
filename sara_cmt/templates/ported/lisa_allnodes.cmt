@@ -7,6 +7,8 @@
 
 {% block hw_cluster_name %}
   {% ifequal hw.cluster.name 'Lisa' %}
-    {{ hw.hostname }}
+    {% ifequal hw.rack.label '7' %}
+{{ hw.label }}.irc.sara.nl
+    {% endifequal %}
   {% endifequal %}
 {% endblock hw_cluster_name %}

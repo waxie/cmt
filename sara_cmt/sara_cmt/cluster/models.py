@@ -33,18 +33,11 @@ class Cluster(ModelExtension):
     return self.name or None
 
 
-#try:
-#  tagging.register(Cluster)
-#except tagging.AlreadyRegistered:
-#  logger.debug('Cluster has already been registered')
-#  pass
-
-
 
 class HardwareUnit(ModelExtension):
   cluster      = models.ForeignKey('Cluster', related_name='hardware')
   role         = models.ManyToManyField('Role', related_name='hardware')
-  networks     = models.ManyToManyField('Network', related_name='hardware', through='Interface')
+  network      = models.ManyToManyField('Network', related_name='hardware', through='Interface')
   specifications = models.ForeignKey('HardwareModel', related_name='hardware', null=True, blank=True)
   warranty     = models.ForeignKey('WarrantyContract', related_name='hardware', null=True, blank=True)
   rack         = models.ForeignKey('Rack', related_name='contents')
@@ -165,7 +158,7 @@ class Network(ModelExtension):
     Class with information about a network. Networks are connected with
     Interfaces (and HardwareUnits as equipment through Interface).
   """
-  equipment  = models.ManyToManyField('HardwareUnit', through='Interface')
+  #equipment  = models.ManyToManyField('HardwareUnit', through='Interface')
 
   name       = models.CharField(max_length=30, help_text='example: infiniband')
   netaddress = models.IPAddressField(help_text='example: 192.168.1.0')

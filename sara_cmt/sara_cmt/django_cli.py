@@ -1,4 +1,5 @@
-from django.db.models.fields.related import ForeignKey
+from django.db.models.fields import FieldDoesNotExist 
+from django.db.models.fields.related import ForeignKey, ManyToManyField
 
 from types import StringTypes
 
@@ -24,6 +25,7 @@ class ModelExtension(models.Model):
   created_on = CreationDateTimeField()
   updated_on = ModificationDateTimeField()
   note       = models.TextField(blank=True)
+
 
   class Meta:
     abstract = True
@@ -162,10 +164,14 @@ class ModelExtension(models.Model):
       are delegated to the _setattr-function.
     """
     for arg in arg_dict:
+      logger.debug('checking arg: %s(%s)'%(arg,arg_dict[arg]))
+
+      # In case of an id-field: Just ignore it.
       if arg == 'id':
-        # It's the id-field; Just ignore it.
         logger.debug('Skipping arg with id-field')
         continue
+
+      #fieldtype = 
       elif arg.find('__') is -1:
         # Then assume it's a regular field.
         # !!! TODO: First make sure it's a regular field. !!!
@@ -251,23 +257,54 @@ class ModelExtension(models.Model):
 
   def _setfk(self, field, value, subfields=None):
     """
-      Set the FK of the given field to the id of an entity with the given value
+      Set the FK of the given field to the id of an object with the given value
       in one of its required fields (minus 'id' and FKs).
     """
-    model = field.rel.to
-    objects = ModelExtension.search_objects(model, value, subfields)
+    logger.debug('(field,value): (%s,%s)'%(field,value))
+    to_model = field.rel.to
+    logger.debug('FK to %s'%to_model.__name__)
+
+    # determine which fields should be searched for
+    if not subfields:
+      subfields = to_model._required_fields(to_model)
+      logger.debug('Filter is set to required fields of %s: %s'%(to_model.__name__,[field.name for field in subfields]))
+
+    # make kwargs dict
+    kwargs = {}
+
+    for subfield in subfields:
+      kwargs['%s__icontains'%subfield.name] = value
+
+    logger.debug('kwargs: %s'%kwargs)
+
+    # filter
+    objects = to_model.objects.filter(**kwargs)
     object_count = len(objects)
     if object_count is 0:
       logger.warning('No matching object found; Change your query.')
       pass
     elif object_count is 1:
-      object = objects.pop()
+      logger.debug('Found 1 match: %s'%objects)
+      object = objects[0]
+      #object = objects.latest('id')
+      logger.debug('object: %s'%object)
+      logger.debug('field.attname: %s'%field.attname)
+      logger.debug('field.name: %s'%field.name)
       self.__setattr__(field.attname, object.id)
       logger.info('%s now references to %s'%(field.name,object))
     else:
       # !!! TODO: let the user refine the search !!!
       logger.info('To many matching objects; Refine your query.')
       pass
+
+
+
+  def _setm2m(self, field, value, subfield=None):
+    """
+      Set a ManyToMany-relation.
+    """
+    pass
+      
 
 
   def _setattr(self, field, value):
@@ -292,17 +329,29 @@ class ModelExtension(models.Model):
 
     assert isinstance(value, StringTypes), "Given value is a %s, which isn't supported yet (still have to implement this)" % type(value) # !!! TODO: implement support for lists of values !!!
     if isinstance(field, ForeignKey):
+      logger.debug('I am a %s'%type(self))
+      logger.debug('FK to %s'%field.rel.to)
+      logger.debug('(field,value): (%s,%s)'%(field,value))
       self._setfk(field, value)
+    elif isinstance(field, ManyToManyField):
+      logger.debug('We found a M2M field, but first have to implement a function to handle this')
+      pass
+      # !!! TODO: Implement M2M relations !!!
     else:
+      logger.debug('We have to handle a %s'%type(field))
       self.__setattr__(field.name, value)
 
     if self.is_complete():
       try:
-        self.save() # !!! TODO: disable at dry-runs
+        if parser.values.DRYRUN:
+          self.save() # !!! TODO: disable at dry-runs
+          logger.info('Saved %s'%self)
+        else:
+          logger.info('[DRYRUN] Saved %s'%self)
       except (sqlite3.IntegrityError, ValueError), err:
         logger.error(err)
 
-  
+
 
 class ObjectManager():
   def __init__(self):
@@ -311,84 +360,34 @@ class ObjectManager():
   def get_objects(self, query):
     """
       Retrieve objects from the database, corresponding to the entity and terms
-      in the given query.
+      in the given query. The terms are OR-ed by default.
     """
-    objects = self._queries_to_qset(query['ent'],query['get'])
-    logger.debug('Query %s results in objects: %s'%(query,objects))
+    # !!! TODO: Implement AND !!!
+    kwargs = {}
+    
+    for attr, val in query['get'].items():
+      try:
+        fld = query['ent']._meta.get_field(attr)
+        # Default field to search in
+        if fld.rel.to().__dict__.has_key('label'):
+          label = 'label'
+        else:
+          label = 'name'
+        if type(fld) == ForeignKey:
+          attr = '%s__%s'%(attr,label) # ??? TODO: maybe use %s__str ???
+          # FK-specific code...
+        elif type(fld) == ManyToManyField:
+          attr = '%s__%s'%(attr,label) # ??? TODO: maybe use %s__str ???
+          # M2M-specific code...
+        kwargs['%s__in'%attr] = val
+      except FieldDoesNotExist, err:
+        logger.error(err)
+
+    objects = query['ent'].objects.filter(**kwargs)
     return objects
 
-  def _queries_to_qset(self, model, subqueries):
-    """
-      Make a QuerySet, based on a given query. Delegate each subquery to
-      _term_to_qset and return the intersection of the returned QuerySets.
 
-      * model      : model class
-      * subqueries : dictionary
-    """
-    # Start with an empty QuerySet and intersect the QuerySets of each single Query
-    qset = models.query.EmptyQuerySet()
-    for attr, values in subqueries.items():
-      qset_part = self._term_to_qset(model, attr, values)
-      if not qset_part:
-        # Nothing found, so an empty QuerySet could be returned immediately.
-        return models.query.EmptyQuerySet()
-      elif not qset:
-        # First QuerySet has been found.
-        qset = qset_part
-      else:
-        # Another QuerySet has been found, so intersect it with the existing
-        # one and check if this intersection is not empty.
-        qset &= qset_part
-        if not qset:
-          # Intersection of QuerySets is empty, so return it immediately.
-          return models.query.EmptyQuerySet()
-    logger.debug("Subqueries '%s' gave QuerySet: %s"%(subqueries,qset))
-    return qset
-
-  def _term_to_qset(self, model, attr, values):
-    """
-      Make a QuerySet, based on a single given term from a query.
-    """
-    if attr.find('__') is -1:
-      fld = model._meta.get_field(attr) # !!! TODO: try, except FieldDoesNotExist !!!
-      if isinstance(fld, ForeignKey):
-        # So the query was like: '<FK>=<val>'.
-        # Now get id's of the objects (of the referenced model) with value in
-        # one of its fields.
-        to = fld.rel.to
-        ids = []
-        for value in values:
-          id = ModelExtension.search_object_ids(to, value)
-          ids.extend(id)
-          logger.debug("Found %s-id's %s matching %s=%s"%(model.__name__,ids,attr,values))
-        # Finally use a filter with the IN field-lookup, like <attr>__in(<ids>)
-        wrapper_cmd = "%s.%s.objects.filter(%s__in=%s)" % (CLUSTER_MODELS, model.__name__, attr, ids)
-        logger.debug("Built command to filter '%s=%s': %s" % (attr,values,wrapper_cmd))
-        qset = eval(wrapper_cmd)
-      else:
-        # In that case the query was like: '<attr>=<val>'.
-        wrapper_cmd = "%s.%s.objects.filter(%s__in=%s)" % (CLUSTER_MODELS, model.__name__, attr, values)
-        logger.debug("Built command to filter '%s=%s': %s" % (attr,values,wrapper_cmd))
-        qset = eval(wrapper_cmd)
-    else:
-      # Argument appearantly was like: '<FK>__<attr>[+<attr>]*=<val>'
-      partitioned = attr.partition('__')
-      fld = model._meta.get_field(partitioned[0])
-      to = fld.rel.to
-      attrs = partitioned[2].split('+')
-      # Make an empty QuerySet to fill with the union of multiple QuerySets
-      qset = models.query.EmptyQuerySet()
-      for attr in attrs:
-        wrapper_cmd = "%s.%s.objects.filter(%s__%s__in%s)" % (CLUSTER_MODELS, model.__name__, fld.name, attr, repr(vals))
-        logger.debug("Built command to filter '%s': %s" % (subquery,wrapper_cmd))
-        result = eval(wrapper_cmd)
-        logger.debug('Result of filter: %s' % result)
-        # Unite the resulting QuerySet with the so far constructed QuerySet
-        qset |= result
-    return qset
     
-
-
 class QueryManager():
 
   def __init__(self):
@@ -465,7 +464,7 @@ class QueryManager():
           else:
             self.query[key][k] = [val]
 
-    logger.debug("translated args '%s' into dict '%s'"%(given_queries,self.query))
+    logger.debug("translated args %s into dict %s"%(given_queries,self.query))
     return self.query
 
   def get_query(self):
