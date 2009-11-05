@@ -216,11 +216,11 @@ class HardwareModelAdmin(admin.ModelAdmin):
 class NetworkAdmin(admin.ModelAdmin):
   fieldsets = (
     (None, {
-      'fields': (('name', 'prefix', 'domain'), ('netaddress', 'netmask', 'vlan')),
+      'fields': (('name', 'hostnames', 'domain'), ('netaddress', 'netmask', 'vlan')),
     }),
     GlobalAdmin.extra_fieldset
   )
-  list_display = ('name', 'vlan', 'cidr', 'domain', 'prefix', '_max_hosts', 'count_ips_assigned', 'count_ips_free')
+  list_display = ('name', 'vlan', 'cidr', 'domain', 'hostnames', '_max_hosts', 'count_ips_assigned', 'count_ips_free')
   list_filter  = GlobalAdmin.list_filter
 
 

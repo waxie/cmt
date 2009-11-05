@@ -113,7 +113,7 @@ class Interface(ModelExtension):
   network   = models.ForeignKey('Network', related_name='interfaces')
   hardware  = models.ForeignKey('HardwareUnit', related_name='interfaces', verbose_name='machine') # ??? host ???
   type      = models.ForeignKey('InterfaceType', related_name='interfaces', verbose_name='type')
-  label     = models.CharField(max_length=30, blank=True, help_text='Automagically generated if kept empty') # TODO: Default name has to be based on the prefix of the network
+  label     = models.CharField(max_length=30, blank=True, help_text='Automagically generated if kept empty')
   aliasses  = models.ManyToManyField(Alias, blank=True, null=True, related_name='_interfaces')
   hwaddress = models.CharField(max_length=17, blank=True, verbose_name='hardware address', help_text="6 Octets, optionally delimited by a space ' ', a hyphen '-', or a colon ':'.", unique=True)
   ip        = models.IPAddressField(editable=False, null=True, blank=True)
@@ -134,19 +134,20 @@ class Interface(ModelExtension):
       when the network has been changed.
     """
     try:
+      # To be sure that the interface has a valid network
       assert isinstance(self.network, Network), "network doesn't exist"
 
-      ip = IP(self.ip or 0)
       try:
         network = IP('%s/%s' % (self.network.netaddress, self.network.netmask))
       except ValueError, e:
         print ValueError, e
 
       # Pick a new IP when it's not defined yet or when the network has been changed
+      ip = IP(self.ip or 0)
       if ip not in network:
         self.ip = self.network.pick_ip()
 
-      self.label = self.label or '%s%s' % (self.network.prefix, self.hardware.label)
+      self.label = self.label or self.network.construct_interface_label(self.hardware)
 
       super(Interface, self).save(force_insert, force_update)
     except AssertionError, e:
@@ -158,14 +159,12 @@ class Network(ModelExtension):
     Class with information about a network. Networks are connected with
     Interfaces (and HardwareUnits as equipment through Interface).
   """
-  #equipment  = models.ManyToManyField('HardwareUnit', through='Interface')
-
   name       = models.CharField(max_length=30, help_text='example: infiniband')
   netaddress = models.IPAddressField(help_text='example: 192.168.1.0')
   netmask    = models.IPAddressField(help_text='example: 255.255.255.0')
   domain     = models.CharField(max_length=30, help_text='example: irc.sara.nl')
   vlan       = models.PositiveIntegerField(max_length=3, null=True, blank=True)
-  prefix     = models.CharField(max_length=10, blank=True, help_text='example: ib-')
+  hostnames  = models.CharField(max_length=255, help_text='''stringformat of hostnames in the network, example: 'ib-{machine}''')
 
   class Meta:
     ordering = ('name', 'domain',)
@@ -238,9 +237,19 @@ class Network(ModelExtension):
 
     return ip
 
+  def construct_interface_label(self, machine):
+    """
+      Construct a label for an interface that's asking for it. The default
+      label of an interface is based on info of its machine and network.
+    """
+    interface_label = self.hostnames.format(machine=machine)
+    return interface_label
+
+
   def cidr(self):
     network = IP("%s/%s" % (self.netaddress, self.netmask))
     return network.strNormal()
+
 
 
 class Rack(ModelExtension):
@@ -391,17 +400,11 @@ class Connection(ModelExtension):
 
   def __unicode__(self):
     return self.name
-    #return self.fullname()
-
-  #def _lastname(self):
-  #  return name.split()[-1]
-  #lastname = property(_lastname)
 
   def _address(self):
     return address.address
 
   class Meta:
-    #ordering = ('lastname',)
     verbose_name = 'contact'
     unique_together = ('company', 'name')
 
