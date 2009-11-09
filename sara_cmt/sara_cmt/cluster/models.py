@@ -66,7 +66,15 @@ class HardwareUnit(ModelExtension):
   roles = property(_roles)
 
   def _in_support(self):
-    return not self.warranty.expired
+    retval = False
+    try:
+      assert bool(self.warranty), 'No warranty contract for %s %s'%(self.__class__.__name__,self.label)
+      retval = not self.warranty.expired
+    except:
+      retval = False
+      logger.error("Hardware with label '%s' hasn't got a warranty contract"%self.label)
+    return retval
+
   in_support = property(_in_support)
 
   def __unicode__(self):
@@ -532,10 +540,6 @@ class WarrantyContract(ModelExtension):
   label       = models.CharField(max_length=30, unique=True)
   date_from   = models.DateField(verbose_name='valid from')
   date_to     = models.DateField(verbose_name='expires at')
-
-
-  class Meta:
-    verbose_name_plural = 'warranties'
 
   def is_expired(self):
     return self.date_to < datetime.date.today()

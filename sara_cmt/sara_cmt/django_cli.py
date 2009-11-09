@@ -75,54 +75,6 @@ class ModelExtension(models.Model):
     return isinstance(field, ForeignKey)
 
 
-  ####
-  # TODO: <Move to QueryManager>
-  #
-  @staticmethod
-  def _values(model, fields=None):
-    """
-      This function is like the QuerySet.values() in Django. Difference is that
-      the query of _values will be restricted to the required fields in the
-      given model, minus 'id' and FKs. When a fields-argument is given, only
-      the values of that field(s) will be returned.
-      Returns a ValuesQuerySet (like Django's QuerySet.values() does).
-    """
-    if fields:
-      wanted_fields = ','.join([field.__repr__() for field in fields])
-    else:
-      # If no fields are given, just filter on all required fields (except FKs)
-      wanted_fields = ','.join([field.name.__repr__()
-        for field in ModelExtension._required_fields_no_fks(model)])
-    wrapper_cmd = "%s.%s.objects.values('id',%s)" % (CLUSTER_MODELS, model.__name__, wanted_fields)
-    logger.debug('Built command: %s' % wrapper_cmd)
-    vqset = eval(wrapper_cmd)
-    return vqset
-
-
-  @staticmethod
-  def search_object_ids(model, value, fields=None):
-    """
-      Search for objects of the given model. This method will find objects with
-      the given value in the (list of) given field(s).
-      Returns a list of matching object-ids.
-    """
-    matching_indices = []
-    # Only search in the required fields of the model
-    search_space = ModelExtension._values(model, fields)
-    #logger.debug('Search space: %s' % search_space)
-    
-    # Search for objects containing the given value...
-    for entity in search_space:
-      for (key,val) in entity.items():
-        # ... but only search for matches in the non-id-fields
-        if val.__str__() == value and key is not 'id':
-          matching_indices.append(entity['id'])
-          break
-    return matching_indices
-  #
-  # </Move to QueryManager>
-  ####
-
   @staticmethod
   def display(instance):
     """
@@ -366,19 +318,17 @@ class ObjectManager():
     kwargs = {}
     
     for attr, val in query['get'].items():
+      logger.debug('CHECK query: %s'%query)
       try:
         fld = query['ent']._meta.get_field(attr)
-        # Default field to search in
-        if fld.rel.to().__dict__.has_key('label'):
-          label = 'label'
-        else:
-          label = 'name'
-        if type(fld) == ForeignKey:
+        logger.debug('CHECK %s: %s'%(fld.__class__.__name__,fld.name))
+        if type(fld) in (ForeignKey,ManyToManyField):
+          # Default field to search in
+          if fld.rel.to().__dict__.has_key('label'):
+            label = 'label'
+          else:
+            label = 'name'
           attr = '%s__%s'%(attr,label) # ??? TODO: maybe use %s__str ???
-          # FK-specific code...
-        elif type(fld) == ManyToManyField:
-          attr = '%s__%s'%(attr,label) # ??? TODO: maybe use %s__str ???
-          # M2M-specific code...
         kwargs['%s__in'%attr] = val
       except FieldDoesNotExist, err:
         logger.error(err)
