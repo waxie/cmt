@@ -537,9 +537,9 @@ class WarrantyContract(ModelExtension):
   """
   type = models.ForeignKey(WarrantyType, blank=True, null=True, related_name='contracts')
 
-  label       = models.CharField(max_length=30, unique=True)
-  date_from   = models.DateField(verbose_name='valid from')
-  date_to     = models.DateField(verbose_name='expires at')
+  label     = models.CharField(max_length=30, unique=True)
+  date_from = models.DateField(verbose_name='valid from')
+  date_to   = models.DateField(verbose_name='expires at')
 
   def is_expired(self):
     return self.date_to < datetime.date.today()

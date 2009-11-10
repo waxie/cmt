@@ -9,7 +9,9 @@ from sqlite3 import IntegrityError
 from sara_cmt.logger import Logger
 logger = Logger().getLogger()
 
-import sara_cmt
+from sara_cmt.parser import Parser
+parser = Parser().getParser()
+
 from django.db import models
 CLUSTER_MODELS = 'sara_cmt.cluster.models'
 

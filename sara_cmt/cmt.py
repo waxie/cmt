@@ -14,20 +14,26 @@ os.environ['DJANGO_SETTINGS_MODULE'] = settings.__name__
 #
 #####
 
+#####
+#
+# <Some imports for our Django-template related action>
+#
+from django.template.loader import render_to_string
+from django.template import TemplateDoesNotExist
+import re
+#
+# </Some imports for our Django-template related action>
+#
+#####
+
 from types import ListType, StringTypes
 
 import datetime
 
-import optparse
 import ConfigParser
 import sys
 
-
-
-import sara_cmt.cluster.admin
-from sara_cmt.django_cli import ModelExtension, ObjectManager, QueryManager
-from sara_cmt.logger import Logger
-
+from sara_cmt.django_cli import ModelExtension, ObjectManager, QueryManager, logger, parser
 
 import sara_cmt.cluster.models
 
@@ -70,8 +76,7 @@ config_parser.optionxform = lambda x: x
 #    http://www.finalcog.com/python-config-parser-lower-case-names
 config_parser.read(configfile)
 
-# Get instance of global logger
-logger = Logger().getLogger()
+# Setup the logger for logging
 loglevel_str = config_parser.get('defaults','LOGLEVEL')
 logger.setLevel(config_parser.getint('loglevels',loglevel_str))
 
@@ -268,11 +273,6 @@ def show(option, opt_str, value, parser, *args, **kwargs):
 
 
 def generate(option, opt_str, value, parser, *args, **kwargs):
-  # Needed to generate templates
-  from django.template.loader import render_to_string
-  from django.template import TemplateDoesNotExist
-  import re
-
   # Put data in a dictionary to make accessible in the templates
   template_data = {}
   for entity in entities.values():
@@ -369,11 +369,8 @@ def collect_args(option, parser):
 
 
 def main():
-  # ??? TODO: parser options for '--query' and '--assign'
-  #           or maybe '--get' and '--set'
-  # ???
-  parser = optparse.OptionParser(version=CMTSARA_VERSION,
-                                 description=CMTSARA_DESCRIPTION)
+  parser.version = CMTSARA_VERSION
+  parser.description = CMTSARA_DESCRIPTION
 
   parser.add_option('-n', '--dry-run',
                     action='store_true',
