@@ -118,7 +118,7 @@ class ModelExtension(models.Model):
       are delegated to the _setattr-function.
     """
     for arg in arg_dict:
-      logger.debug('checking arg: %s(%s)'%(arg,arg_dict[arg]))
+      logger.debug('checking arg: %s:%s'%(arg,arg_dict[arg]))
 
       # In case of an id-field: Just ignore it.
       if arg == 'id':

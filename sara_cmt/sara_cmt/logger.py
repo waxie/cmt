@@ -2,6 +2,7 @@ import logging
 import logging.config
 import os
 from sara_cmt import settings
+
 class Logger:
   """
     A logging facility, implemented with the borg design pattern. Makes use of
@@ -13,6 +14,7 @@ class Logger:
   if 'logger' not in __shared_state.keys():
     logging.config.fileConfig(os.path.join(os.path.dirname(__file__),'logging.conf'))
     __shared_state['logger'] = logging.getLogger('cli')
+    __shared_state['logger'].info('Initializing Logger')
 
   def __init__(self):
     """

@@ -34,6 +34,7 @@ import ConfigParser
 import sys
 
 from sara_cmt.django_cli import ModelExtension, ObjectManager, QueryManager, logger, parser
+from sara_cmt.parser import Parser
 
 import sara_cmt.cluster.models
 
@@ -85,6 +86,9 @@ logger.setLevel(config_parser.getint('loglevels',loglevel_str))
 CMTSARA_VERSION = config_parser.get('info','version').strip("'")
 CMTSARA_DESCRIPTION = config_parser.get('info','description').strip("'")
 
+parse_object = Parser()
+parser = parse_object.getParser()
+
 # Make a dict with aliasses for the models
 entities = {}
 for option in config_parser.options('entities'):
@@ -104,12 +108,12 @@ INTERACTIVE = config_parser.getboolean('defaults','DRYRUN')
 
 #####
 #
-# <Managers for database related stuff>
+# <Managers for database related interactions>
 #
 object_mgr = ObjectManager()
 query_mgr = QueryManager()
 #
-# </Managers for database related stuff>
+# </Managers for database related interactions>
 #
 #####
 
@@ -117,17 +121,19 @@ query_mgr = QueryManager()
 
 #####
 #
-# <Database related methods>
+# <CRUD methods>
 #
 @crud_validate
 def add(option, opt_str, value, parser, *args, **kwargs):
 # !!! TODO: fix this one... it's still old style !!!
-  my_args = collect_args(option, parser)
-  to_query = args_to_dict(my_args, ['set'])
-  to_query['ent'] = entities[value]
+  my_args = collect_args(option, parser)    # get method-specific args-list
+  to_query = args_to_dict(my_args, ['set']) # transform args-list into args-dict (dynamic line)
+  to_query['ent'] = entities[value]         # add model-name to args-dict (dynamic line)
 
-  query_mgr.translate(to_query)
-  query = query_mgr.get_query()
+  query_mgr.translate(to_query)             # translate args-dict to query (which is a dict)
+  query = query_mgr.get_query()             # retrieve query
+
+  ### </>
 
   object = entities[value]()
 
@@ -169,36 +175,26 @@ def add(option, opt_str, value, parser, *args, **kwargs):
 
 
 @crud_validate
-def remove(option, opt_str, value, parser, *args, **kwargs):
+def show(option, opt_str, value, parser, *args, **kwargs):
   """
-    Remove the objects which match the given values (queries).
+    Show the objects which match the given values (queries).
   """
+  # Split all given args to dict
   my_args = collect_args(option, parser)
   to_query = args_to_dict(my_args, ['get'])
   to_query['ent'] = entities[value]
 
+  # Push args to QueryManager and get corresponding the Query-object
   query_mgr.translate(to_query)
   query = query_mgr.get_query()
 
+  # Query for the objects, and send them to std::out
+  logger.debug('Query to fetch objects: %s'%query)
   objects = object_mgr.get_objects(query)
 
-  if objects:
-    logger.info('Found %s objects matching query: %s'\
-      % (len(objects), ', '.join([object.__str__() for object in entities_found])))
-    confirmation = not parser.values.INTERACTIVE or raw_input('Are you sure? [Yn] ')
-    print 'confirmation', confirmation
-    # Delete and log
-    if confirmation in ['', 'y', 'Y', True]:
-      logger.info('deleting...')
-      for object in objects:
-        if not parser.values.DRYRUN:
-          object.delete()
-          logger.info('Deleted %s' % object)
-        else:
-          logger.info('[DRYRUN] Deleted %s' % object)
-          
-  else:
-    logger.info('No existing objects found matching query')
+  # !!! TODO: either print short, or print long lists !!!
+  for object in objects:
+    ModelExtension.display(object)
 
 
 
@@ -231,6 +227,63 @@ def change(option, opt_str, value, parser, *args, **kwargs):
 
 
 
+@crud_validate
+def remove(option, opt_str, value, parser, *args, **kwargs):
+  """
+    Remove the objects which match the given values (queries).
+  """
+  my_args = collect_args(option, parser)
+  to_query = args_to_dict(my_args, ['get'])
+  to_query['ent'] = entities[value]
+
+  query_mgr.translate(to_query)
+  query = query_mgr.get_query()
+
+  objects = object_mgr.get_objects(query)
+
+  if objects:
+    logger.info('Found %s objects matching query: %s'\
+      % (len(objects), ', '.join([object.__str__() for object in entities_found])))
+    confirmation = not parser.values.INTERACTIVE or raw_input('Are you sure? [Yn] ')
+    print 'confirmation', confirmation
+    # Delete and log
+    if confirmation in ['', 'y', 'Y', True]:
+      logger.info('deleting...')
+      for object in objects:
+        if not parser.values.DRYRUN:
+          object.delete()
+          logger.info('Deleted %s' % object)
+        else:
+          logger.info('[DRYRUN] Deleted %s' % object)
+          
+  else:
+    logger.info('No existing objects found matching query')
+#
+# </CRUD methods>
+#
+#####
+
+
+
+#def args_to_dict(option, my_args, keys=['default']):
+#  # !!! TODO: implement a function which converts the given args for
+#  #           {add,remove,change,show}-method into a dict. !!!
+#
+#  arg_dict = {}
+#  key = keys[0]
+#  for arg in collect_args(option, parser):
+#  #for arg in my_args:
+#    if arg in keys: # it's a key
+#      key = arg
+#    else: # it's a term
+#      if arg_dict.has_key(key):
+#        arg_dict[key].append(arg)
+#      else:
+#        arg_dict[key] = [arg]
+#  logger.debug("returning arg_dict %s based on args %s and keys %s"%(arg_dict,my_args,keys))
+#  return arg_dict
+
+
 def args_to_dict(my_args, keys=['default']):
   # !!! TODO: implement a function which converts the given args for
   #           {add,remove,change,show}-method into a dict. !!!
@@ -246,29 +299,6 @@ def args_to_dict(my_args, keys=['default']):
         arg_dict[key] = [arg]
   logger.debug("returning arg_dict %s based on args %s and keys %s"%(arg_dict,my_args,keys))
   return arg_dict
-
-
-@crud_validate
-def show(option, opt_str, value, parser, *args, **kwargs):
-  """
-    Show the objects which match the given values (queries).
-  """
-  # Split all given args to dict
-  my_args = collect_args(option, parser)
-  to_query = args_to_dict(my_args, ['get'])
-  to_query['ent'] = entities[value]
-
-  # Push args to QueryManager and get corresponding the Query-object
-  query_mgr.translate(to_query)
-  query = query_mgr.get_query()
-
-  # Query for the objects, and send them to std::out
-  logger.debug('Query to fetch objects: %s'%query)
-  objects = object_mgr.get_objects(query)
-
-  # !!! TODO: either print short, or print long lists !!!
-  for object in objects:
-    ModelExtension.display(object)
 
 
 
@@ -336,10 +366,11 @@ def mac(option, opt_str, value, parser, *args, **kwargs):
 #
 # <Methods for processing of arguments>
 #
+#def collect_args(option):
 def collect_args(option, parser):
   """
     Collects the arguments belonging to the given option, and removes them from
-    the arguments-datastructue.
+    the arguments-datastructue. Returns the collected arguments as a list.
   """
   collected = []
 
