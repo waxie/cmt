@@ -127,11 +127,8 @@ query_mgr = QueryManager()
 def add(option, opt_str, value, parser, *args, **kwargs):
 # !!! TODO: fix this one... it's still old style !!!
   my_args = collect_args(option, parser)    # get method-specific args-list
-  to_query = args_to_dict(my_args, ['set']) # transform args-list into args-dict (dynamic line)
-  to_query['ent'] = entities[value]         # add model-name to args-dict (dynamic line)
-
-  query_mgr.translate(to_query)             # translate args-dict to query (which is a dict)
-  query = query_mgr.get_query()             # retrieve query
+  query_mgr.push_args(my_args, entities[value], ['set'])
+  query = query_mgr.get_query()
 
   ### </>
 
@@ -181,15 +178,9 @@ def show(option, opt_str, value, parser, *args, **kwargs):
   """
   # Split all given args to dict
   my_args = collect_args(option, parser)
-  to_query = args_to_dict(my_args, ['get'])
-  to_query['ent'] = entities[value]
-
-  # Push args to QueryManager and get corresponding the Query-object
-  query_mgr.translate(to_query)
+  query_mgr.push_args(my_args, entities[value], ['get'])
   query = query_mgr.get_query()
-
-  # Query for the objects, and send them to std::out
-  logger.debug('Query to fetch objects: %s'%query)
+  
   objects = object_mgr.get_objects(query)
 
   # !!! TODO: either print short, or print long lists !!!
@@ -204,10 +195,7 @@ def change(option, opt_str, value, parser, *args, **kwargs):
     Search for an object which matches the given values, and change it/them.
   """
   my_args = collect_args(option, parser)
-  to_query = args_to_dict(my_args, ['get','set'])
-  to_query['ent'] = entities[value]
-
-  query_mgr.translate(to_query)
+  query_mgr.push_args(my_args, entities[value], ['get', 'set'])
   query = query_mgr.get_query()
 
   objects = object_mgr.get_objects(query)
@@ -233,17 +221,14 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
     Remove the objects which match the given values (queries).
   """
   my_args = collect_args(option, parser)
-  to_query = args_to_dict(my_args, ['get'])
-  to_query['ent'] = entities[value]
-
-  query_mgr.translate(to_query)
+  query_mgr.push_args(my_args, entities[value], ['get'])
   query = query_mgr.get_query()
 
   objects = object_mgr.get_objects(query)
 
   if objects:
     logger.info('Found %s objects matching query: %s'\
-      % (len(objects), ', '.join([object.__str__() for object in entities_found])))
+      % (len(objects), ', '.join([object.__str__() for object in objects])))
     confirmation = not parser.values.INTERACTIVE or raw_input('Are you sure? [Yn] ')
     print 'confirmation', confirmation
     # Delete and log
@@ -262,43 +247,6 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
 # </CRUD methods>
 #
 #####
-
-
-
-#def args_to_dict(option, my_args, keys=['default']):
-#  # !!! TODO: implement a function which converts the given args for
-#  #           {add,remove,change,show}-method into a dict. !!!
-#
-#  arg_dict = {}
-#  key = keys[0]
-#  for arg in collect_args(option, parser):
-#  #for arg in my_args:
-#    if arg in keys: # it's a key
-#      key = arg
-#    else: # it's a term
-#      if arg_dict.has_key(key):
-#        arg_dict[key].append(arg)
-#      else:
-#        arg_dict[key] = [arg]
-#  logger.debug("returning arg_dict %s based on args %s and keys %s"%(arg_dict,my_args,keys))
-#  return arg_dict
-
-
-def args_to_dict(my_args, keys=['default']):
-  # !!! TODO: implement a function which converts the given args for
-  #           {add,remove,change,show}-method into a dict. !!!
-  arg_dict = {}
-  key = keys[0]
-  for arg in my_args:
-    if arg in keys: # it's a key
-      key = arg
-    else: # it's a term
-      if arg_dict.has_key(key):
-        arg_dict[key].append(arg)
-      else:
-        arg_dict[key] = [arg]
-  logger.debug("returning arg_dict %s based on args %s and keys %s"%(arg_dict,my_args,keys))
-  return arg_dict
 
 
 

@@ -84,6 +84,7 @@ class ModelExtension(models.Model):
     """
     # First get access to the admin
     admin_class_name = instance._meta.object_name+'Admin'
+    import sara_cmt.cluster.admin
     admin_list_display = eval('sara_cmt.cluster.admin.'+admin_class_name+'.list_display')
 
     # Determine longest value-string to display
@@ -350,11 +351,11 @@ class QueryManager():
     """
       Query holds a dictionary of the given args.
     """
-    def __init__(self):
-      self._new()
+    def __init__(self, ent=None):
+      self._new(ent)
 
-    def _new(self):
-      self['ent'] = None
+    def _new(self, ent=None):
+      self['ent'] = ent
       self['get'] = {}
       self['set'] = {}
       logger.info('Built new Query: %s'%self)
@@ -388,36 +389,32 @@ class QueryManager():
       pass
 
 
-  def translate(self, given_queries):
+  def push_args(self, args, entity, keys=['default']):
     """
-      Translate the given user input to a Query-object. The user input should
-      be given as a dictionary which looks like:
-        {'ent':<entity_type>, 'get':<arg_list>, 'set':<arg_list>}
+      # args = list of args, like ['get', 'label=fs7', 'label=fs6']
+      # entity = class of entity, like <class 'sara_cmt.cluster.models.HardwareUnit'>
+      # keys = keys in query, like ['get']
     """
-    # ??? TODO: first cleanup the query? ???
-    
-    # Save the entity type in the query
-    self.query['ent'] = given_queries.pop('ent')
+    self.query = self.Query(entity)
 
-    # Save the get- and set-subqueries in the query
-    for key, given_subqueries in given_queries.items():
-      if given_subqueries is not None:
-        # Convert the list of single arguments to dictionary-items, so:
-        #   ['attr1=val1', 'attr2=val2']
-        # will become
-        #   {'attr1': 'val1', 'attr2': 'val2'}
-        for arg in given_subqueries:
-          (k,val) = arg.split('=',1)
+    key = keys[0]
+     
+    for arg in args:
+      logger.debug("checking arg '%s' of args '%s'"%(arg,args))
+      if arg in keys: # it's a key like 'get', 'set'
+        key = arg
+      else: # it's a attr/val combo like 'label=fs6'
+        attr,val = arg.split('=',1)
+        logger.debug("translated arg '%s' to (%s,%s)"%(arg,attr,val))
 
-          # ??? split the val in case of ranges ???
-          
-          if self.query[key].has_key(k):
-            self.query[key][k].append(val)
-          else:
-            self.query[key][k] = [val]
-
-    logger.debug("translated args %s into dict %s"%(given_queries,self.query))
-    return self.query
+        if self.query[key].has_key(attr):
+          # this isn't the first time we see this attribute, so assign an extra value to it
+          self.query[key][attr].append(val)
+        else:
+          # this is the first time we see this attribute
+          self.query[key][attr] = [val]
+        
+    logger.debug("push_args built query '%s' from args '%s'"%(self.query, args))
 
   def get_query(self):
     return self.query
