@@ -1,5 +1,5 @@
 from django.db.models.fields import FieldDoesNotExist 
-from django.db.models.fields.related import ForeignKey, ManyToManyField
+from django.db.models.fields.related import ForeignKey, ManyToManyField, OneToOneField
 
 from types import StringTypes
 
@@ -37,44 +37,6 @@ class ModelExtension(models.Model):
 #
 # <STATIC METHODS>
 #
-  @staticmethod
-  def _required_fields(model):
-    """
-      Checks which fields of the given model are required.
-      Returns the set of required fields.
-    """
-    required = [field for field in model._meta.fields if not field.blank]
-    return required
-
-
-  @staticmethod
-  def _required_fields_no_fks(model):
-    """
-      Returns the result of _required_fields without FKs.
-    """
-    required = [field for field in ModelExtension._required_fields(model)
-      if not isinstance(field, ForeignKey)]
-    return required
-
-
-  @staticmethod
-  def _required_fields_fks_only(model):
-    """
-      Returns FKs from the result of _required_fields.
-    """
-    required = [field for field in ModelExtension._required_fields(model)
-      if isinstance(field, ForeignKey)]
-    return required
-
-
-  @staticmethod
-  def _is_fk(model, field):
-    """
-      Look if a field is defined as a ForeignKey. Returns a boolean.
-    """
-    if isinstance(field, StringTypes):
-      field = model._meta.get_field(field)
-    return isinstance(field, ForeignKey)
 
 
   @staticmethod
@@ -103,6 +65,48 @@ class ModelExtension(models.Model):
 # </STATIC METHODS>
 #
 #####
+
+  def _required_fields(self):
+    """
+      Checks which fields are required, and returns these fields in a set.
+    """
+    fields = [fld for fld in self._meta.fields if not fld.blank]
+    return fields
+
+  def _required_local_fields(self):
+    """
+      Checks which local fields are required, and returns these fields in a set.
+      A local field can be of any type except ForeignKey and ManyToManyField.
+    """
+    fields = [fld for fld in self._required_fields()
+      if not (isinstance(fld, ForeignKey) or isinstance(fld, ManyToManyField) or isinstance(fld, OneToOneField))]
+    return fields
+
+  def _required_refering_fields(self):
+    """
+      Checks which refering fields are required, and returns these fields in a
+      set. A refering field is of the type ForeignKey or ManyToManyField.
+    """
+    fields = [fld for fld in self._required_fields()
+      if (isinstance(fld, ForeignKey) or isinstance(fld, ManyToManyField) or isinstance(fld, OneToOneField))]
+    return fields
+
+
+  def _is_fk(self, field):
+    """
+      Checks if a given field is a ForeignKey, and returns a boolean value.
+    """
+    retval = isinstance(field, ForeignKey)
+    return retval
+
+  def _is_m2m(self, field):
+    """
+      Checks if a given field is a ManyToManyField, and returns a boolean value.
+    """
+    retval = isinstance(field, ManyToManyField)
+    return retval
+
+
 
 
   def is_complete(self):
@@ -162,7 +166,7 @@ class ModelExtension(models.Model):
       it can be saved to the database.
       Returns the set of missing editable fields.
     """
-    required, missing = ModelExtension._required_fields(self.__class__), []
+    required, missing = self._required_fields(), []
 
     # Isolate all missing fields from required fields.
     for field in required:
@@ -221,7 +225,7 @@ class ModelExtension(models.Model):
 
     # determine which fields should be searched for
     if not subfields:
-      subfields = to_model._required_fields(to_model)
+      subfields = self._required_fields()
       logger.debug('Filter is set to required fields of %s: %s'%(to_model.__name__,[field.name for field in subfields]))
 
     # make kwargs dict
@@ -309,6 +313,11 @@ class ModelExtension(models.Model):
 
 
 class ObjectManager():
+  """
+    The ObjectManager is responsible for operations on objects in the database.
+    Operations are based on a given Query-object.
+  """
+
   def __init__(self):
     logger.info('Initialized an ObjectManager')
 
@@ -340,8 +349,33 @@ class ObjectManager():
     return objects
 
 
+  def save_objects(self, qset):
+    """
+      Save all objects of the given QuerySet.
+    """
+    # TODO: implement
+    for object in qset:
+      try:
+        self._save_object(object)
+      except:
+        logger.error('Error saving %s %s'%(object.__class__.__name__, object))
+
+
+  def display(self, instance):
+    """
+      Print all values 
+    """
+    pass
+
+
     
 class QueryManager():
+  """
+    The QueryManager has knowledge about building Queries based on arguments
+    that are given on the commandline. Those arguments can be pushed to the
+    QueryManager with push_args(), which on its turn will build a new Query,
+    which can be retrieved with get_query().
+  """
 
   def __init__(self):
     logger.info('Initialized QueryManager')
@@ -352,12 +386,14 @@ class QueryManager():
       Query holds a dictionary of the given args.
     """
     def __init__(self, ent=None):
-      self._new(ent)
+      if ent:
+        self._new(ent)
 
     def _new(self, ent=None):
       self['ent'] = ent
       self['get'] = {}
       self['set'] = {}
+      # ??? TODO: maybe implement something like `self['fields'] = {}` to narrow the searchspace ???
       logger.info('Built new Query: %s'%self)
 
     def as_tuple(self):
@@ -391,9 +427,9 @@ class QueryManager():
 
   def push_args(self, args, entity, keys=['default']):
     """
-      # args = list of args, like ['get', 'label=fs7', 'label=fs6']
-      # entity = class of entity, like <class 'sara_cmt.cluster.models.HardwareUnit'>
-      # keys = keys in query, like ['get']
+      # args = list of args from cli, like ['get', 'label=fs7', 'label=fs6']
+      # entity = class of given entity, like <class 'sara_cmt.cluster.models.HardwareUnit'>
+      # keys = the key(s) to use (which depends on the given option), like ['get']
     """
     self.query = self.Query(entity)
 
@@ -403,7 +439,7 @@ class QueryManager():
       logger.debug("checking arg '%s' of args '%s'"%(arg,args))
       if arg in keys: # it's a key like 'get', 'set'
         key = arg
-      else: # it's a attr/val combo like 'label=fs6'
+      else: # it's an assignment like 'label=fs6'
         attr,val = arg.split('=',1)
         logger.debug("translated arg '%s' to (%s,%s)"%(arg,attr,val))
 

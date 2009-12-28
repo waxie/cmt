@@ -299,13 +299,14 @@ class Rack(ModelExtension):
 #
 
 class Country(ModelExtension):
+  """
+    Model for country - country-code pairs. Country-codes can be found on:
+      http://www.itu.int/dms_pub/itu-t/opb/sp/T-SP-E.164D-2009-PDF-E.pdf
+  """
   name         = models.CharField(max_length=30, unique=True)
-  country_code = models.PositiveIntegerField(help_text='''Example: In case of The Netherlands it's 31''')
-  # Country codes can be found on:
-  #   http://www.itu.int/dms_pub/itu-t/opb/sp/T-SP-E.164D-2009-PDF-E.pdf
+  country_code = models.PositiveIntegerField(unique=True, help_text='''Example: In case of The Netherlands it's 31''')
 
   class Meta:
-    unique_together = ('name', 'country_code')
     verbose_name_plural = 'countries'
 
 
@@ -464,7 +465,6 @@ class HardwareModel(ModelExtension):
   
   class Meta:
     verbose_name = 'model'
-    #verbose_name_plural = 'specifications'
     ordering = ('vendor', 'name')
 
 
