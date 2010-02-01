@@ -23,13 +23,84 @@ MANAGERS = ADMINS
 # excluded from the SVN repository. An example of the needed info for database
 # configuration is commented out.
 from settings_db import *
-#DATABASE_ENGINE    = '' # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-#DATABASE_NAME      = '' # Or path to database file if using sqlite3.
-#DATABASE_USER      = '' # Not used with sqlite3.
-#DATABASE_PASSWORD  = '' # Not used with sqlite3.
-#DATABASE_HOST      = '' # Set to empty string for localhost. Not used with sqlite3.
-#DATABASE_PORT      = '' # Set to empty string for default. Not used with sqlite3.
 #TEST_DATABASE_NAME = ''
+
+
+
+#####
+#
+# <AUTH AGAINST LDAP>
+#
+import ldap
+from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
+
+# (based on docs on http://packages.python.org/django-auth-ldap/)
+
+# Baseline configuration.
+AUTH_LDAP_SERVER_URI = "ldaps://master.cua.sara.nl"
+
+# If you can't search anonymously, you can set AUTH_LDAP_BIND_DN to the
+# distinguished name of an authorized user and AUTH_LDAP_BIND_PASSWORD to the
+# password.
+AUTH_LDAP_BIND_DN = ''
+AUTH_LDAP_BIND_PASSWORD = ''
+
+# This will perform an anonymous bind, search under
+# "ou=users,dc=example,dc=com" for an object with a uid matching the user's
+# name, and try to bind using that DN and the user's password. The search must
+# return exactly one result or authentication will fail.
+#AUTH_LDAP_USER_SEARCH = LDAPSearch('ou=Users,dc=hpcv,dc=sara,dc=nl',
+#  ldap.SCOPE_SUBTREE, '(uid=%(user)s)'
+#)
+# To skip the search phase, set AUTH_LDAP_USER_DN_TEMPLATE to a template that
+# will produce the authenticating user's DN directly. This template should have
+# one placeholder, %(user)s. If the previous example had used
+# ldap.SCOPE_ONELEVEL, the following would be a more straightforward (and
+# efficient) equivalent:
+AUTH_LDAP_USER_DN_TEMPLATE = 'uid=%(user)s,ou=Users,dc=hpcv,dc=sara,dc=nl'
+
+# Set up the basic group parameters.
+AUTH_LDAP_GROUP_SEARCH = LDAPSearch('ou=Groups,dc=hpcv,dc=sara,dc=nl',
+  ldap.SCOPE_SUBTREE, '(objectClass=groupOfNames)'
+)
+AUTH_LDAP_GROUP_TYPE = GroupOfNamesType(name_attr='cn')
+
+# Only users in this group can log in.
+AUTH_LDAP_REQUIRE_GROUP = 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl'
+
+# Populate the Django user from the LDAP directory.
+AUTH_LDAP_USER_ATTR_MAP = {
+  'first_name': 'givenName',
+  'last_name': 'sn',
+  'email': 'mail'
+}
+
+AUTH_LDAP_USER_FLAGS_BY_GROUP = {
+  'is_active': 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl',
+  'is_staff': 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl',
+  'is_superuser': 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl'
+}
+
+# This is the default, but I like to be explicit.
+AUTH_LDAP_ALWAYS_UPDATE_USER = True
+
+# Cache group memberships for an hour to minimize LDAP traffic
+AUTH_LDAP_CACHE_GROUPS = False # True
+AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
+
+# Keep ModelBackend around for per-user permissions and maybe a local
+# superuser.
+AUTHENTICATION_BACKENDS = (
+  'django_auth_ldap.backend.LDAPBackend',
+  'django.contrib.auth.backends.ModelBackend',
+)
+#
+# </AUTH AGAINST LDAP>
+#
+#####
+
+
+
 
 
 # Local time zone for this installation. Choices can be found here:
@@ -85,9 +156,7 @@ TEMPLATE_DIRS = (
   # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
   # Always use forward slashes, even on Windows.
   # Don't forget to use absolute paths, not relative paths.
-  #path.normpath(path.join(CMTS_PATH, 'templates')),
   'templates',
-#  os.path.join(os.path.dirname(__file__), 'templates'),
 )
 
 FIXTURE_DIRS = (
@@ -97,7 +166,7 @@ FIXTURE_DIRS = (
 
 
 INSTALLED_APPS = (
-    'django.contrib.auth',
+#    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.admin',
