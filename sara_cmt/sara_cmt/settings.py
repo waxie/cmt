@@ -29,43 +29,27 @@ from settings_db import *
 
 #####
 #
-# <AUTH AGAINST LDAP>
+# <AUTH AGAINST LDAP> (based on http://packages.python.org/django-auth-ldap/)
 #
 import ldap
-from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
+from django_auth_ldap.config import LDAPSearch, PosixGroupType
 
-# (based on docs on http://packages.python.org/django-auth-ldap/)
 
 # Baseline configuration.
-AUTH_LDAP_SERVER_URI = "ldaps://master.cua.sara.nl"
+AUTH_LDAP_SERVER_URI = "ldaps://ldap.cua.sara.nl"
 
-# If you can't search anonymously, you can set AUTH_LDAP_BIND_DN to the
-# distinguished name of an authorized user and AUTH_LDAP_BIND_PASSWORD to the
-# password.
-AUTH_LDAP_BIND_DN = ''
-AUTH_LDAP_BIND_PASSWORD = ''
-
-# This will perform an anonymous bind, search under
-# "ou=users,dc=example,dc=com" for an object with a uid matching the user's
-# name, and try to bind using that DN and the user's password. The search must
-# return exactly one result or authentication will fail.
-#AUTH_LDAP_USER_SEARCH = LDAPSearch('ou=Users,dc=hpcv,dc=sara,dc=nl',
-#  ldap.SCOPE_SUBTREE, '(uid=%(user)s)'
-#)
-# To skip the search phase, set AUTH_LDAP_USER_DN_TEMPLATE to a template that
-# will produce the authenticating user's DN directly. This template should have
-# one placeholder, %(user)s. If the previous example had used
-# ldap.SCOPE_ONELEVEL, the following would be a more straightforward (and
-# efficient) equivalent:
+# Set AUTH_LDAP_USER_DN_TEMPLATE to a template that will produce the
+# authenticating user's DN directly. This template should have one
+# placeholder, %(user)s.
 AUTH_LDAP_USER_DN_TEMPLATE = 'uid=%(user)s,ou=Users,dc=hpcv,dc=sara,dc=nl'
 
 # Set up the basic group parameters.
 AUTH_LDAP_GROUP_SEARCH = LDAPSearch('ou=Groups,dc=hpcv,dc=sara,dc=nl',
-  ldap.SCOPE_SUBTREE, '(objectClass=groupOfNames)'
+  ldap.SCOPE_SUBTREE, '(objectClass=posixGroup)'
 )
-AUTH_LDAP_GROUP_TYPE = GroupOfNamesType(name_attr='cn')
+AUTH_LDAP_GROUP_TYPE = PosixGroupType()
 
-# Only users in this group can log in.
+## Only users in this group can log in.
 AUTH_LDAP_REQUIRE_GROUP = 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl'
 
 # Populate the Django user from the LDAP directory.
@@ -85,7 +69,7 @@ AUTH_LDAP_USER_FLAGS_BY_GROUP = {
 AUTH_LDAP_ALWAYS_UPDATE_USER = True
 
 # Cache group memberships for an hour to minimize LDAP traffic
-AUTH_LDAP_CACHE_GROUPS = False # True
+AUTH_LDAP_CACHE_GROUPS = True
 AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
 
 # Keep ModelBackend around for per-user permissions and maybe a local
@@ -166,7 +150,7 @@ FIXTURE_DIRS = (
 
 
 INSTALLED_APPS = (
-#    'django.contrib.auth',
+    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.admin',
