@@ -1,5 +1,6 @@
 import os
 
+
 # Documentation of settings can be found on:
 #
 #   http://docs.djangoproject.com/en/dev/ref/settings/
@@ -132,8 +133,9 @@ MIDDLEWARE_CLASSES = (
   'django.middleware.common.CommonMiddleware',
   'django.contrib.sessions.middleware.SessionMiddleware',
   'django.contrib.auth.middleware.AuthenticationMiddleware',
+  'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
-
+ 
 ROOT_URLCONF = 'sara_cmt.urls'
 
 TEMPLATE_DIRS = (
@@ -150,15 +152,21 @@ FIXTURE_DIRS = (
 
 
 INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.admin',
-    'django.contrib.databrowse',
-    'django.contrib.webdesign',
-    'sara_cmt.cluster',
-    'sara_cmt.django_cli',
-    'django_extensions',
-    'tagging',
-    'south',
+  'django.contrib.auth',
+  'django.contrib.contenttypes',
+  'django.contrib.sessions',
+  'django.contrib.admin',
+  'django.contrib.databrowse',
+  'django.contrib.webdesign',
+  'sara_cmt.cluster',
+  'sara_cmt.django_cli',
+  'django_extensions',
+  'tagging',
+  'south',
+  'debug_toolbar',
+)
+
+# Append your IP to use the debug_toolbar
+INTERNAL_IPS = (
+  '145.100.6.163',
 )
