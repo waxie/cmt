@@ -8,8 +8,8 @@ import os
 SARACMT_BASE = os.path.normpath(os.path.dirname(__file__))
 PROJECT_BASE = os.path.normpath(os.path.join(SARACMT_BASE, os.path.pardir))
 
-#DEBUG = False
-DEBUG = True
+DEBUG = False
+#DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -142,7 +142,7 @@ TEMPLATE_DIRS = (
   # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
   # Always use forward slashes, even on Windows.
   # Don't forget to use absolute paths, not relative paths.
-  'templates',
+  os.path.normpath(os.path.join(os.path.dirname(__file__), '../templates')),
 )
 
 FIXTURE_DIRS = (
@@ -160,6 +160,7 @@ INSTALLED_APPS = (
   'django.contrib.webdesign',
   'sara_cmt.cluster',
   'sara_cmt.django_cli',
+  'sara_cmt.template',
   'django_extensions',
   'tagging',
   'south',
@@ -169,4 +170,5 @@ INSTALLED_APPS = (
 # Append your IP to use the debug_toolbar
 INTERNAL_IPS = (
   '145.100.6.163',
+  '127.0.0.1',
 )

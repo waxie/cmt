@@ -39,24 +39,29 @@ from sara_cmt.parser import Parser
 import sara_cmt.cluster.models
 
 
+from django.db.models import get_model
+def search_model(value):
+    return get_model('cluster',value)
+  
+
+
 #####
 #
 # <Decorators>
 #
-
 def crud_validate(func):
   """
     Validate the entity given as an argument to CRUD-functions
   """
   def crudFunc(option, opt_str, value, parser, *args, **kwargs):
-    if entities.has_key(value):
-      logger.debug('Validated entity %s as a %s'%(value,entities[value]))
+    model = search_model(value)
+    if model != None:
+      logger.debug('Validated entity %s as a %s'%(value,model))
       return func(option, opt_str, value, parser, *args, **kwargs)
     else:
-      logger.error('Entity %s not known. Valid entities are: %s' % (value.__repr__(),entities.keys()))
+      logger.error('Entity %s not known.' % (value.__repr__()))
       sys.exit(1)
   return crudFunc
-
 #
 # </Decorators>
 #
@@ -127,12 +132,12 @@ query_mgr = QueryManager()
 def add(option, opt_str, value, parser, *args, **kwargs):
 # !!! TODO: fix this one... it's still old style !!!
   my_args = collect_args(option, parser)    # get method-specific args-list
-  query_mgr.push_args(my_args, entities[value], ['set'])
+  query_mgr.push_args(my_args, search_model(value), ['set'])
   query = query_mgr.get_query()
 
   ### </>
 
-  object = entities[value]()
+  object = search_model(value)()
 
   object.setattrs_from_dict(query['set'])
   logger.error(object.__dict__) #
@@ -178,12 +183,13 @@ def show(option, opt_str, value, parser, *args, **kwargs):
   """
   # Split all given args to dict
   my_args = collect_args(option, parser)
-  query_mgr.push_args(my_args, entities[value], ['get'])
+  query_mgr.push_args(my_args, search_model(value), ['get'])
   query = query_mgr.get_query()
   
   objects = object_mgr.get_objects(query)
 
   # !!! TODO: either print short, or print long lists !!!
+  # !!! TODO: use config files for fields (not) to print (maybe 
   for object in objects:
     ModelExtension.display(object)
 
@@ -195,7 +201,7 @@ def change(option, opt_str, value, parser, *args, **kwargs):
     Search for an object which matches the given values, and change it/them.
   """
   my_args = collect_args(option, parser)
-  query_mgr.push_args(my_args, entities[value], ['get', 'set'])
+  query_mgr.push_args(my_args, search_model(value), ['get', 'set'])
   query = query_mgr.get_query()
 
   objects = object_mgr.get_objects(query)
@@ -221,7 +227,7 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
     Remove the objects which match the given values (queries).
   """
   my_args = collect_args(option, parser)
-  query_mgr.push_args(my_args, entities[value], ['get'])
+  query_mgr.push_args(my_args, search_model(value), ['get'])
   query = query_mgr.get_query()
 
   objects = object_mgr.get_objects(query)
@@ -251,17 +257,28 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
 
 
 def generate(option, opt_str, value, parser, *args, **kwargs):
+  ###
+  # <TEST>
+  from sara_cmt.template import SmartTemplate
+  from django.template import Context
+  templstr = 'my name is {{ my_name }}.'
+  t = SmartTemplate(templstr)
+  c = Context({'my_name': '<ingevulde naam>'})
+  t.render(c)
+  # </TEST>
+  ###
+
   # Put data in a dictionary to make accessible in the templates
   template_data = {}
-  for entity in entities.values():
-    template_data[entity._meta.object_name] = entity
+#  for entity in entities.values():
+#    template_data[entity._meta.object_name] = entity
   template_data['version'] = CMTSARA_VERSION
   template_data['svn_id'] = '$Id:$'
   template_data['svn_url'] = '$URL:$'
 
   try:
     # Render a string of the template from the argument
-    template_string = render_to_string('ported/'+value+'.cmt', template_data)
+    template_string = render_to_string(value+'.cmt', template_data)
 
     # Remove blanks from the output of Django Template Engine
     whitespace = r'\n(\s*\n)*'
@@ -280,14 +297,13 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
   return
 
 
-
 def mac(option, opt_str, value, parser, *args, **kwargs):
   """
     Change the MAC-address of an existing interface.
   """
   old_mac, new_mac = value
 
-  query = {'ent': entities['interface'], 'get': {'hwaddress': [old_mac]}, 'set': {'hwaddress': [new_mac]}}
+  query = {'ent': search_model('interface'), 'get': {'hwaddress': [old_mac]}, 'set': {'hwaddress': [new_mac]}}
 
   object = object_mgr.get_object(query)
 

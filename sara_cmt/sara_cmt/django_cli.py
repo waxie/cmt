@@ -13,7 +13,6 @@ from sara_cmt.parser import Parser
 parser = Parser().getParser()
 
 from django.db import models
-CLUSTER_MODELS = 'sara_cmt.cluster.models'
 
 import tagging
 from tagging.fields import TagField
@@ -302,7 +301,7 @@ class ModelExtension(models.Model):
 
     if self.is_complete():
       try:
-        if parser.values.DRYRUN:
+        if not parser.values.DRYRUN:
           self.save() # !!! TODO: disable at dry-runs
           logger.info('Saved %s'%self)
         else:
