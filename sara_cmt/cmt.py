@@ -257,43 +257,34 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
 
 
 def generate(option, opt_str, value, parser, *args, **kwargs):
-  ###
-  # <TEST>
-  from sara_cmt.template import SmartTemplate
+  from sara_cmt.template import CMTTemplate
   from django.template import Context
-  templstr = 'my name is {{ my_name }}.'
-  t = SmartTemplate(templstr)
-  c = Context({'my_name': '<ingevulde naam>'})
-  t.render(c)
-  # </TEST>
-  ###
 
-  # Put data in a dictionary to make accessible in the templates
+  # Save full path of templatefile to generate
+  filename = '%s.cmt'%value
+  fullpath = os.path.join(settings.CMT_TEMPLATES_DIR, 'example.cmt')
+
+  # Load the contents of the templatefile as a CMTTemplate
+  f = open(fullpath, 'r')
+  templatestr = f.read()
+  f.close()
+  logger.debug('<TEMPSTR>\n%s\n</TEMPSTR>'%templatestr)
+  template = CMTTemplate(templatestr)
+
+  # Render the CMTTemplate with a Context
   template_data = {}
-#  for entity in entities.values():
-#    template_data[entity._meta.object_name] = entity
   template_data['version'] = CMTSARA_VERSION
   template_data['svn_id'] = '$Id:$'
   template_data['svn_url'] = '$URL:$'
+  template_data['input'] = fullpath
+  c = Context(template_data)
+  res = template.render(c)
 
-  try:
-    # Render a string of the template from the argument
-    template_string = render_to_string(value+'.cmt', template_data)
+  # While rendering the CMTTemplate there are variables added to the context,
+  # so these can be used for post-processing.
 
-    # Remove blanks from the output of Django Template Engine
-    whitespace = r'\n(\s*\n)*'
-    lines = re.sub(whitespace, '\n', template_string).splitlines()
-    parsed_str = '\n'.join([line for line in lines if line])
-
-    # Insert blank lines where they are needed
-    cleaned_data = parsed_str.replace('{ BLANKLINE }\n', '\n')
-
-    # !!! TODO: save the generated file !!!
-    # !!! TODO: execute command to reload the generated file !!!
-    print cleaned_data
-  except TemplateDoesNotExist, e:
-    print TemplateDoesNotExist, e
-
+  logger.debug('<CONTEXT>\n%s\n</CONTEXT>'%c)
+  logger.debug('<RESULT>\n%s\n</RESULT>'%res)
   return
 
 

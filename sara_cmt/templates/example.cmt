@@ -1,0 +1,14 @@
+{% load cmts_extras %}
+{% comment %}
+Dit is slechts een test van een template voor sara_cmt. Als het goed is wordt dit stuk tekst niet geparsed, dus zal ook niet in de gegenereerde instantie terechtkomen.
+{% endcomment %}
+Dit zou de eerste regel output moeten zijn.
+{% store /home/sil/ as path %}
+Het pad is: {{ path }}
+
+{% epilogue %}
+/bin/ls -l
+date
+{% endepilogue %}
+
+This file is based on the template at: {{ input }}

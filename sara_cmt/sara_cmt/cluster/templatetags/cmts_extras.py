@@ -1,6 +1,12 @@
+import os
+
 # Inspired by Django tips on:
 #   http://www.b-list.org/weblog/2006/jun/07/django-tips-write-better-template-tags/
 from django import template
+from django.template.defaultfilters import stringfilter
+
+from sara_cmt.logger import Logger
+logger = Logger().getLogger()
 
 #from django.db.models import get_model
 
@@ -16,13 +22,12 @@ class MetaNode(template.Node):
 
   def render(self, context):
     # This is where the work actually happens
-    print 'tag is:', self.tag
-    print 'vars r:', self.vars
     context[self.tag] = self.vars
-    return "The path should be saved in the Context"
+    return ''
 
 
-@register.tag(name='save_meta')
+@register.tag(name='store')
+#@stringfilter
 def do_save_meta(parser, token):
   """
     Compilation function to use for meta-info.
@@ -40,3 +45,24 @@ def do_save_meta(parser, token):
   return MetaNode(meta_info[-1], meta_info[1])
 
 
+class ScriptNode(template.Node):
+  """
+    Renderer, which executes the lines included in the script-tags.
+  """
+  def __init__(self, nodelist):
+    self.nodelist = nodelist
+
+  def render(self, context):
+    script = self.nodelist.render(context)
+    context['epilogue'] = script
+    # All content between {% epilogue %} and {% endepilogue %} is parsed now
+    return ''
+
+@register.tag(name='epilogue')
+def do_epilogue(parser, token):
+  """
+    Saving the contents between the epilogue-tags
+  """
+  nodelist = parser.parse(('endepilogue',))
+  parser.delete_first_token()
+  return ScriptNode(nodelist)

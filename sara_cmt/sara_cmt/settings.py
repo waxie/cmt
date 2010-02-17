@@ -145,6 +145,9 @@ TEMPLATE_DIRS = (
   os.path.normpath(os.path.join(os.path.dirname(__file__), '../templates')),
 )
 
+CMT_TEMPLATES_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../templates'))
+CMT_TEMPLATE_DIRS = (os.path.normpath(os.path.join(os.path.dirname(__file__), '../templates')),)
+
 FIXTURE_DIRS = (
   # A fixture is a collection of files that contain serialized contents of the database.
   os.path.normpath(os.path.join(os.path.dirname(__file__), 'fixtures')),

@@ -21,7 +21,6 @@ Commandline Interface:
 
 
 Web Interface:
-  * Authentication with LDAP
   * Filters:
     - Racks on Address
     - Hardware on Room and Address
