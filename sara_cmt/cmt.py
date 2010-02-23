@@ -262,29 +262,57 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
 
   # Save full path of templatefile to generate
   filename = '%s.cmt'%value
-  fullpath = os.path.join(settings.CMT_TEMPLATES_DIR, 'example.cmt')
+  fullpath = os.path.join(settings.CMT_TEMPLATES_DIR, '%s.cmt'%value)
 
   # Load the contents of the templatefile as a CMTTemplate
-  f = open(fullpath, 'r')
-  templatestr = f.read()
-  f.close()
-  logger.debug('<TEMPSTR>\n%s\n</TEMPSTR>'%templatestr)
-  template = CMTTemplate(templatestr)
+  try:
+    f = open(fullpath, 'r')
+    templatestr = f.read()
+    f.close()
 
-  # Render the CMTTemplate with a Context
-  template_data = {}
-  template_data['version'] = CMTSARA_VERSION
-  template_data['svn_id'] = '$Id:$'
-  template_data['svn_url'] = '$URL:$'
-  template_data['input'] = fullpath
-  c = Context(template_data)
-  res = template.render(c)
+    ### <DEBUG>
+    logger.debug('<TEMPSTR>\n%s'%templatestr)
+    logger.debug('</TEMPSTR>')
+    template = CMTTemplate(templatestr)
+    ### </DEBUG>
 
-  # While rendering the CMTTemplate there are variables added to the context,
-  # so these can be used for post-processing.
+    # Render the CMTTemplate with a Context
+    template_data = {}
+    template_data['version'] = CMTSARA_VERSION
+    template_data['svn_id'] = '$Id:$'
+    template_data['svn_url'] = '$URL:$'
+    template_data['input'] = fullpath
+    c = Context(template_data)
+    res = template.render(c)
 
-  logger.debug('<CONTEXT>\n%s\n</CONTEXT>'%c)
-  logger.debug('<RESULT>\n%s\n</RESULT>'%res)
+    # While rendering the CMTTemplate there are variables added to the context,
+    # so these can be used for post-processing.
+
+    ### <DEBUG>
+    logger.debug('<CONTEXT>\n%s'%c)
+    logger.debug('</CONTEXT>')
+    logger.debug('<RESULT>\n%s'%res)
+    logger.debug('</RESULT>')
+    ### </DEBUG>
+  except IOError, e:
+    logger.error('Template does not exist: %s'%e)
+
+  ### <DEBUG>
+  logger.info('Now executing epilogue script')
+  logger.debug('<EPILOGUE>')
+  os.system(c['epilogue'])
+  logger.debug('</EPILOGUE>')
+  logger.info('Finished epilogue script')
+  ### </DEBUG>
+
+  try:
+    logger.info('Writing outputfile')
+    f = open(c['output'],'w')
+    f.writelines(res)
+    f.close()
+    logger.info('Outputfile is created')
+  except IOError, e:
+    logger.error('Failed creating outputfile: %s'%e)
   return
 
 
