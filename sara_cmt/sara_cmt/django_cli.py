@@ -122,7 +122,7 @@ class ModelExtension(models.Model):
       are delegated to the _setattr-function.
     """
     for arg in arg_dict:
-      logger.debug('checking arg: %s:%s'%(arg,arg_dict[arg]))
+      logger.debug("Have to do something with arg '%s' and value %s"%(arg,arg_dict[arg]))
 
       # In case of an id-field: Just ignore it.
       if arg == 'id':
@@ -220,34 +220,28 @@ class ModelExtension(models.Model):
     """
     logger.debug('(field,value): (%s,%s)'%(field,value))
     to_model = field.rel.to
-    logger.debug('FK to %s'%to_model.__name__)
+    logger.debug("Trying to save '%s' in FK to %s"%(value,to_model.__name__))
 
     # determine which fields should be searched for
     if not subfields:
-      subfields = self._required_fields()
-      logger.debug('Filter is set to required fields of %s: %s'%(to_model.__name__,[field.name for field in subfields]))
+      subfields = to_model()._required_fields()
 
-    # make kwargs dict
-    kwargs = {}
-
+    qset = models.query.EmptyQuerySet(model=to_model)
+    # OR-filtering QuerySets
     for subfield in subfields:
-      kwargs['%s__icontains'%subfield.name] = value
-
-    logger.debug('kwargs: %s'%kwargs)
+      qset = qset | to_model.objects.filter(**{'%s__icontains'%subfield.name:str(value)})
+    logger.debug('Found the following matching objects: %s'%qset)
 
     # filter
-    objects = to_model.objects.filter(**kwargs)
+    #objects = to_model.objects.filter(**kwargs)
+    objects = [object for object in qset]
     object_count = len(objects)
     if object_count is 0:
       logger.warning('No matching object found; Change your query.')
       pass
     elif object_count is 1:
-      logger.debug('Found 1 match: %s'%objects)
       object = objects[0]
-      #object = objects.latest('id')
-      logger.debug('object: %s'%object)
-      logger.debug('field.attname: %s'%field.attname)
-      logger.debug('field.name: %s'%field.name)
+      logger.debug('Found 1 match: %s'%object)
       self.__setattr__(field.attname, object.id)
       logger.info('%s now references to %s'%(field.name,object))
     else:
@@ -279,17 +273,15 @@ class ModelExtension(models.Model):
     if isinstance(field, StringTypes):
       field = self._meta.get_field(field)
 
+
     # !!! TODO: Quick {che,ha}ck; have to check this once more !!!
     if isinstance(value, list):
       value = value[0]
 
-    logger.debug('field=%s (%s), value=%s' % (field.name,field.__class__.__name__,value.__repr__()))
+    logger.debug("Trying to set attribute '%s' (%s) to %s" % (field.name,field.__class__.__name__,value.__repr__()))
 
     assert isinstance(value, StringTypes), "Given value is a %s, which isn't supported yet (still have to implement this)" % type(value) # !!! TODO: implement support for lists of values !!!
     if isinstance(field, ForeignKey):
-      logger.debug('I am a %s'%type(self))
-      logger.debug('FK to %s'%field.rel.to)
-      logger.debug('(field,value): (%s,%s)'%(field,value))
       self._setfk(field, value)
     elif isinstance(field, ManyToManyField):
       logger.debug('We found a M2M field, but first have to implement a function to handle this')
@@ -435,12 +427,11 @@ class QueryManager():
     key = keys[0]
      
     for arg in args:
-      logger.debug("checking arg '%s' of args '%s'"%(arg,args))
+      #logger.debug("checking arg '%s' of args '%s'"%(arg,args))
       if arg in keys: # it's a key like 'get', 'set'
         key = arg
       else: # it's an assignment like 'label=fs6'
         attr,val = arg.split('=',1)
-        logger.debug("translated arg '%s' to (%s,%s)"%(arg,attr,val))
 
         if self.query[key].has_key(attr):
           # this isn't the first time we see this attribute, so assign an extra value to it

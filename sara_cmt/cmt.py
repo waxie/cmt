@@ -41,7 +41,7 @@ import sara_cmt.cluster.models
 
 from django.db.models import get_model
 def search_model(value):
-    return get_model('cluster',value)
+  return get_model('cluster',value)
   
 
 
@@ -56,7 +56,7 @@ def crud_validate(func):
   def crudFunc(option, opt_str, value, parser, *args, **kwargs):
     model = search_model(value)
     if model != None:
-      logger.debug('Validated entity %s as a %s'%(value,model))
+      logger.debug("Assuming '%s' is a %s"%(value,model._meta.object_name))
       return func(option, opt_str, value, parser, *args, **kwargs)
     else:
       logger.error('Entity %s not known.' % (value.__repr__()))
@@ -131,19 +131,23 @@ query_mgr = QueryManager()
 @crud_validate
 def add(option, opt_str, value, parser, *args, **kwargs):
 # !!! TODO: fix this one... it's still old style !!!
+# The following steps need to be done:
+#  - collect args
+#  - args -> queries
+#  - execute action
   my_args = collect_args(option, parser)    # get method-specific args-list
   query_mgr.push_args(my_args, search_model(value), ['set'])
   query = query_mgr.get_query()
 
   ### </>
 
-  object = search_model(value)()
+  new_obj = search_model(value)()
+  logger.debug('Initiated a new %s'%new_obj._meta.verbose_name)
 
-  object.setattrs_from_dict(query['set'])
-  logger.error(object.__dict__) #
+  new_obj.setattrs_from_dict(query['set'])
 
   if parser.values.INTERACTIVE:
-    object.interactive_completion()
+    new_obj.interactive_completion()
   """
     Add an object according to the given values.
     
