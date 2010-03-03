@@ -95,6 +95,10 @@ class ModelExtension(models.Model):
     """
       Checks if a given field is a ForeignKey, and returns a boolean value.
     """
+    # First be sure that we check a field
+    if isinstance(field, StringTypes):
+      field = self._meta.get_field(field)
+      logger.warning('Checking for a ForeignKey with the string-representation of a field')
     retval = isinstance(field, ForeignKey)
     return retval
 
@@ -102,6 +106,10 @@ class ModelExtension(models.Model):
     """
       Checks if a given field is a ManyToManyField, and returns a boolean value.
     """
+    # First be sure that we check a field
+    if isinstance(field, StringTypes):
+      field = self._meta.get_field(field)
+      logger.warning('Checking for a ManyToMany with the string-representation of a field')
     retval = isinstance(field, ManyToManyField)
     return retval
 
@@ -118,43 +126,46 @@ class ModelExtension(models.Model):
   def setattrs_from_dict(self, arg_dict):
     """
       Set attributes according to the arguments, given in a dictionary. Each
-      key in the dictionary should match an attribute name in the model. Checks
-      are delegated to the _setattr-function.
+      key in the dictionary should match an attribute name in the model.
     """
+    m2ms = []
     for arg in arg_dict:
-      logger.debug("Have to do something with arg '%s' and value %s"%(arg,arg_dict[arg]))
+      field = self._meta.get_field(arg)
+      logger.debug("Have to assign %s to attribute '%s' (%s)"%(arg_dict[arg],arg,field.__class__.__name__))
 
       # In case of an id-field: Just ignore it.
       if arg == 'id':
-        logger.debug('Skipping arg with id-field')
+        logger.error("Better to not set an id-field, so I'll skip this one")
         continue
 
-      #fieldtype = 
-      elif arg.find('__') is -1:
-        # Then assume it's a regular field.
-        # !!! TODO: First make sure it's a regular field. !!!
-        logger.debug('Trying to set a regular field')
-        self._setattr(field=arg, value=arg_dict[arg])
-        continue
+      if type(field) == ForeignKey:
+        self._setfk(field,arg_dict[arg])
+
+      elif type(field) == ManyToManyField:
+        # Leave M2Ms for later, because they need an object's id
+        m2ms.append([field,arg_dict[arg]])
+
       else:
-        # Probably it's a FK field; This one needs a special treatment. Args
-        # like 'rack__label' should be split up to ['rack', '__', 'label']. Or
-        # more generic: '<FK>__<attr>' should become ['<FK>', '__', '<attr>'].
-        # !!! TODO: First make sure it's a regular field. !!!
-        partitioned = arg.partition('__')
-        fk, attr = partitioned[0], partitioned[2]
-        fld = self._meta.get_field(fk)
-        val = arg_dict[arg]
-        # Multiple subfields can be concatenated with '+'-chars when given via
-        # args. If an argument like '<FK>__<attr1>+<attr2>' is given, CMTSARA
-        # should filter on the fields <attr1> and <attr2> in the model which
-        # belongs to the FK.
-        subs = attr.split('+')
-        logger.debug("Trying to set FK '%s' to id of match for '%s in field(s) %s'" % (fld.name,val,subs))
-        logger.debug('partitioned: %s' % ', '.join([part.__repr__() for part in partitioned]))
+        logger.debug("Assuming '%s' is a regular field"%arg)
+        self._setattr(field=arg, value=arg_dict[arg])
 
-        self._setfk(field=fld, subfields=subs, value=val)
-        continue
+    # Save object to give it an id, and make the M2M relations
+    if not parser.values.DRYRUN:
+      self.save()
+
+    for m2m in m2ms:
+      self._setm2m(m2m[0],m2m[1])
+
+    if self.is_complete():
+      save_msg = 'Saved %s %s'%(self.__class__.__name__,self)
+      if not parser.values.DRYRUN:
+        try:
+          self.save()
+          logger.info(save_msg)
+        except (sqlite3.IntegrityError, ValueError), err:
+          logger.error(err)
+      else:
+        logger.info('[DRYRUN] %s'%save_msg)
 
     logger.debug('attrs_from_dict(%s) => %s' % (arg_dict,self.__dict__))
     
@@ -218,22 +229,23 @@ class ModelExtension(models.Model):
       Set the FK of the given field to the id of an object with the given value
       in one of its required fields (minus 'id' and FKs).
     """
-    logger.debug('(field,value): (%s,%s)'%(field,value))
     to_model = field.rel.to
     logger.debug("Trying to save '%s' in FK to %s"%(value,to_model.__name__))
 
     # determine which fields should be searched for
     if not subfields:
-      subfields = to_model()._required_fields()
+      subfields = to_model()._required_local_fields() # exclude FKs
+
+    logger.debug('Searching a %s matching on fields %s'%(to_model.__name__,[f.name for f in subfields]))
 
     qset = models.query.EmptyQuerySet(model=to_model)
     # OR-filtering QuerySets
     for subfield in subfields:
-      qset = qset | to_model.objects.filter(**{'%s__icontains'%subfield.name:str(value)})
+      logger.critical('searching in field: %s'%subfield.name)
+      # !!! TODO: support multiple values[] !!!
+      qset |= to_model.objects.filter(**{'%s__icontains'%(subfield.name):value[0]})
     logger.debug('Found the following matching objects: %s'%qset)
 
-    # filter
-    #objects = to_model.objects.filter(**kwargs)
     objects = [object for object in qset]
     object_count = len(objects)
     if object_count is 0:
@@ -243,18 +255,47 @@ class ModelExtension(models.Model):
       object = objects[0]
       logger.debug('Found 1 match: %s'%object)
       self.__setattr__(field.attname, object.id)
-      logger.info('%s now references to %s'%(field.name,object))
+      logger.debug('%s now references to %s'%(field.name,object))
     else:
       # !!! TODO: let the user refine the search !!!
-      logger.info('To many matching objects; Refine your query.')
+      logger.warning('To many matching objects; Refine your query.')
       pass
 
 
 
-  def _setm2m(self, field, value, subfield=None):
+  def _setm2m(self, field, value, subfields=None):
     """
       Set a ManyToMany-relation.
     """
+    to_model = field.rel.to
+    values = value[0].split(',')
+    logger.debug("Trying to make M2M-relations to %s based on '%s'"%(to_model.__name__, value))
+
+    # determine which fields should be searched for
+    if not subfields:
+      subfields = to_model()._required_fields()
+
+    logger.debug('Searching a %s matching on fields %s'%(to_model.__name__,subfields))
+
+    qset = models.query.EmptyQuerySet(model=to_model)
+    # OR-filtering QuerySets
+    for subfield in subfields:
+      logger.critical('searching in field: %s'%subfield.name)
+      qset |= to_model.objects.filter(**{'%s__in'%subfield.name:values})
+    logger.debug('Found the following matching objects: %s'%qset)
+
+    objects = [object for object in qset]
+    object_count = len(objects)
+    if object_count is 0:
+      logger.warning('No matching object found; Change your query.')
+      pass
+    else:
+      for object in objects:
+        self.__getattribute__(field.name).add(object)
+
+    logger.critical('value to save: %s'%value)
+
+
     pass
       
 
@@ -291,16 +332,6 @@ class ModelExtension(models.Model):
       logger.debug('We have to handle a %s'%type(field))
       self.__setattr__(field.name, value)
 
-    if self.is_complete():
-      try:
-        if not parser.values.DRYRUN:
-          self.save() # !!! TODO: disable at dry-runs
-          logger.info('Saved %s'%self)
-        else:
-          logger.info('[DRYRUN] Saved %s'%self)
-      except (sqlite3.IntegrityError, ValueError), err:
-        logger.error(err)
-
 
 
 class ObjectManager():
@@ -310,7 +341,7 @@ class ObjectManager():
   """
 
   def __init__(self):
-    logger.info('Initialized an ObjectManager')
+    logger.info('Initializing ObjectManager')
 
   def get_objects(self, query):
     """
@@ -369,7 +400,7 @@ class QueryManager():
   """
 
   def __init__(self):
-    logger.info('Initialized QueryManager')
+    logger.info('Initializing QueryManager')
     self.query = self.Query()
 
   class Query(dict):
@@ -377,6 +408,7 @@ class QueryManager():
       Query holds a dictionary of the given args.
     """
     def __init__(self, ent=None):
+      logger.info('Initializing new Query')
       if ent:
         self._new(ent)
 
@@ -385,7 +417,6 @@ class QueryManager():
       self['get'] = {}
       self['set'] = {}
       # ??? TODO: maybe implement something like `self['fields'] = {}` to narrow the searchspace ???
-      logger.info('Built new Query: %s'%self)
 
     def as_tuple(self):
       """

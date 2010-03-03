@@ -321,7 +321,7 @@ class Address(ModelExtension):
   """
   
   country    = models.ForeignKey(Country, null=True, blank=True, related_name='addresses')
-  address    = models.CharField(max_length=60)
+  street     = models.CharField(max_length=60)
   postalcode = models.CharField(max_length=9, blank=True)
   city       = models.CharField(max_length=30)
 
@@ -330,12 +330,12 @@ class Address(ModelExtension):
   companies = property(_companies)
 
   class Meta:
-    unique_together = ('address', 'city')
+    unique_together = ('street', 'city')
     verbose_name_plural = 'addresses'
 
 
   def __unicode__(self):
-    return '%s - %s' % (self.city, self.address)
+    return '%s - %s' % (self.city, self.street)
 
 
 class Room(ModelExtension):
@@ -385,7 +385,7 @@ class Company(ModelExtension):
   website = models.URLField()
 
   def get_addresses(self):
-    return ' | '.join([address.address for address in self.addresses.all()]) or '-'
+    return ' | '.join([address.street for address in self.addresses.all()]) or '-'
 
   def __unicode__(self):
     return self.name
@@ -411,7 +411,7 @@ class Connection(ModelExtension):
     return self.name
 
   def _address(self):
-    return address.address
+    return address.street
 
   class Meta:
     verbose_name = 'contact'

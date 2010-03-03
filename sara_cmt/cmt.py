@@ -56,7 +56,7 @@ def crud_validate(func):
   def crudFunc(option, opt_str, value, parser, *args, **kwargs):
     model = search_model(value)
     if model != None:
-      logger.debug("Assuming '%s' is a %s"%(value,model._meta.object_name))
+      logger.debug("Assuming '%s' should be of type %s"%(value,model._meta.object_name))
       return func(option, opt_str, value, parser, *args, **kwargs)
     else:
       logger.error('Entity %s not known.' % (value.__repr__()))
@@ -135,6 +135,7 @@ def add(option, opt_str, value, parser, *args, **kwargs):
 #  - collect args
 #  - args -> queries
 #  - execute action
+#  - save new entry
   my_args = collect_args(option, parser)    # get method-specific args-list
   query_mgr.push_args(my_args, search_model(value), ['set'])
   query = query_mgr.get_query()
@@ -142,7 +143,7 @@ def add(option, opt_str, value, parser, *args, **kwargs):
   ### </>
 
   new_obj = search_model(value)()
-  logger.debug('Initiated a new %s'%new_obj._meta.verbose_name)
+  logger.debug('Initiated a new %s'%new_obj.__class__.__name__)
 
   new_obj.setattrs_from_dict(query['set'])
 

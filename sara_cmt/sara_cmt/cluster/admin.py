@@ -112,12 +112,12 @@ class CountryAdmin(admin.ModelAdmin):
 class AddressAdmin(admin.ModelAdmin):
   #date_hierarchy = 'created_on'
   fieldsets = (
-    ('Location', {'fields': ('address', 'postalcode', 'city', 'country'), 'classes': ('wide',)}),
+    ('Location', {'fields': ('street', 'postalcode', 'city', 'country'), 'classes': ('wide',)}),
     GlobalAdmin.extra_fieldset
   )
-  list_display  = ('address', 'postalcode', 'city', 'country', 'companies')
+  list_display  = ('street', 'postalcode', 'city', 'country', 'companies')
   list_filter   = ('city', 'country') + GlobalAdmin.list_filter
-  search_fields = ('address',)
+  search_fields = ('street',)
   
   inlines = [RoomInline]
 
