@@ -1,4 +1,5 @@
 from django.db import models
+from psycopg2 import IntegrityError
 
 from IPy import IP
 
@@ -24,7 +25,7 @@ import datetime
 # Classes of sara_cmt.core
 #
 class Cluster(ModelExtension):
-  name = models.CharField(max_length=30, unique=True)
+  name = models.CharField(max_length=255, unique=True)
 
   class Meta:
     ordering = ['name']
@@ -42,10 +43,10 @@ class HardwareUnit(ModelExtension):
   warranty     = models.ForeignKey('WarrantyContract', related_name='hardware', null=True, blank=True)
   rack         = models.ForeignKey('Rack', related_name='contents')
 
-  serialnumber = models.CharField(max_length=30, blank=True, null=True, unique=True) # should be a field of Specifications
-  service_tag  = models.CharField(max_length=30, blank=True, null=True, unique=True)
+  serialnumber = models.CharField(max_length=255, blank=True, null=True, unique=True) # should be a field of Specifications
+  service_tag  = models.CharField(max_length=255, blank=True, null=True, unique=True)
   first_slot   = models.PositiveIntegerField()
-  label        = models.CharField(max_length=30, blank=True)
+  label        = models.CharField(max_length=255)
 
   class Meta:
     #verbose_name = "piece of hardware"
@@ -104,7 +105,7 @@ class HardwareUnit(ModelExtension):
 
 
 class Alias(ModelExtension):
-  label     = models.CharField(max_length=30, unique=True)
+  label     = models.CharField(max_length=255, unique=True)
 
   class Meta:
     verbose_name_plural = 'aliasses'
@@ -121,7 +122,7 @@ class Interface(ModelExtension):
   network   = models.ForeignKey('Network', related_name='interfaces')
   hardware  = models.ForeignKey('HardwareUnit', related_name='interfaces', verbose_name='machine') # ??? host ???
   type      = models.ForeignKey('InterfaceType', related_name='interfaces', verbose_name='type')
-  label     = models.CharField(max_length=30, blank=True, help_text='Automagically generated if kept empty')
+  label     = models.CharField(max_length=255, blank=True, help_text='Automagically generated if kept empty')
   aliasses  = models.ManyToManyField(Alias, blank=True, null=True, related_name='_interfaces')
   hwaddress = models.CharField(max_length=17, blank=True, verbose_name='hardware address', help_text="6 Octets, optionally delimited by a space ' ', a hyphen '-', or a colon ':'.", unique=True)
   ip        = models.IPAddressField(editable=False, null=True, blank=True)
@@ -132,7 +133,8 @@ class Interface(ModelExtension):
   fqdn = property(_fqdn)
 
   def __unicode__(self):
-    return self.fqdn
+    #return self.fqdn
+    return 'INTERAFCE'
     #return self.label or 'anonymous'
 
   def save(self, force_insert=False, force_update=False):
@@ -157,7 +159,10 @@ class Interface(ModelExtension):
 
       self.label = self.label or self.network.construct_interface_label(self.hardware)
 
-      super(Interface, self).save(force_insert, force_update)
+      try:
+        super(Interface, self).save(force_insert, force_update)
+      except IntegrityError, e:
+        logger.warning(e)
     except AssertionError, e:
       print AssertionError, e
     
@@ -167,10 +172,10 @@ class Network(ModelExtension):
     Class with information about a network. Networks are connected with
     Interfaces (and HardwareUnits as equipment through Interface).
   """
-  name       = models.CharField(max_length=30, help_text='example: infiniband')
+  name       = models.CharField(max_length=255, help_text='example: infiniband')
   netaddress = models.IPAddressField(help_text='example: 192.168.1.0')
   netmask    = models.IPAddressField(help_text='example: 255.255.255.0')
-  domain     = models.CharField(max_length=30, help_text='example: irc.sara.nl')
+  domain     = models.CharField(max_length=255, help_text='example: irc.sara.nl')
   vlan       = models.PositiveIntegerField(max_length=3, null=True, blank=True)
   hostnames  = models.CharField(max_length=255, help_text='''stringformat of hostnames in the network, example: 'ib-{machine}''')
 
@@ -268,7 +273,7 @@ class Rack(ModelExtension):
 
   room = models.ForeignKey('Room', related_name='racks')
 
-  label    = models.SlugField(max_length=30)
+  label    = models.SlugField(max_length=255)
   capacity = models.PositiveIntegerField(verbose_name='number of slots')
 
 
@@ -303,7 +308,7 @@ class Country(ModelExtension):
     Model for country - country-code pairs. Country-codes can be found on:
       http://www.itu.int/dms_pub/itu-t/opb/sp/T-SP-E.164D-2009-PDF-E.pdf
   """
-  name         = models.CharField(max_length=30, unique=True)
+  name         = models.CharField(max_length=255, unique=True)
   country_code = models.PositiveIntegerField(unique=True, help_text='''Example: In case of The Netherlands it's 31''')
 
   class Meta:
@@ -321,9 +326,9 @@ class Address(ModelExtension):
   """
   
   country    = models.ForeignKey(Country, null=True, blank=True, related_name='addresses')
-  address    = models.CharField(max_length=60)
+  address    = models.CharField(max_length=255)
   postalcode = models.CharField(max_length=9, blank=True)
-  city       = models.CharField(max_length=30)
+  city       = models.CharField(max_length=255)
 
   def _companies(self):
     return ' | '.join([comp.name for comp in self._companies.all()]) or '-'
@@ -342,7 +347,7 @@ class Room(ModelExtension):
   address = models.ForeignKey(Address, related_name='rooms')
 
   floor   = models.IntegerField(max_length=2)
-  label   = models.CharField(max_length=30, blank=False)
+  label   = models.CharField(max_length=255, blank=False)
 
   class Meta:
     unique_together = ('address', 'floor', 'label')
@@ -356,7 +361,7 @@ class Room(ModelExtension):
 class Site(ModelExtension):
   """
   """
-  name = models.CharField(max_length=30, unique=True)
+  name = models.CharField(max_length=255, unique=True)
 
   def __unicode__(self):
     return self.name
@@ -381,7 +386,7 @@ class Company(ModelExtension):
   addresses = models.ManyToManyField(Address, related_name='_companies')
 
   #type    = models.ChoiceField() # !!! TODO: add choices like vendor / support / partner / etc... !!!
-  name    = models.CharField(max_length=64)
+  name    = models.CharField(max_length=255)
   website = models.URLField()
 
   def get_addresses(self):
@@ -404,7 +409,7 @@ class Connection(ModelExtension):
   company = models.ForeignKey(Company, related_name='companies')
 
   active = models.BooleanField(editable=True, default=True)
-  name   = models.CharField(verbose_name='full name', max_length=60)
+  name   = models.CharField(verbose_name='full name', max_length=255)
   email  = models.EmailField(blank=True, null=True)
 
   def __unicode__(self):
@@ -458,7 +463,7 @@ class HardwareModel(ModelExtension):
   """
   vendor = models.ForeignKey(Company, related_name='model specifications')
 
-  name       = models.CharField(max_length=30, unique=True)
+  name       = models.CharField(max_length=255, unique=True)
   #model_id   = models.CharField(max_length=30, blank=True)
   rackspace  = models.PositiveIntegerField(help_text='size in U for example')
   expansions = models.PositiveIntegerField(default=0, help_text='number of expansion slots')
@@ -480,7 +485,7 @@ class Role(ModelExtension):
     Those roles can be used for all kinds of rules on HardwareUnits which exist
     in the cluster.
   """
-  label = models.CharField(max_length=30, unique=True)
+  label = models.CharField(max_length=255, unique=True)
 
 
   class Meta:
@@ -494,7 +499,7 @@ class Role(ModelExtension):
 
 
 class InterfaceType(ModelExtension):
-  label = models.CharField(max_length=60, help_text="'DRAC 4' for example")
+  label = models.CharField(max_length=255, help_text="'DRAC 4' for example")
   # ??? TODO: add a CharField for version ???
   vendor = models.ForeignKey('Company', null=True, blank=True, related_name='interfaces')
 
@@ -525,7 +530,7 @@ A type of warranty offered by a company.
   """
   contact = models.ForeignKey(Connection, related_name='warranty types')
 
-  label = models.CharField(max_length=30, unique=True)
+  label = models.CharField(max_length=255, unique=True)
 
   def __unicode__(self):
     return self.label
@@ -537,7 +542,7 @@ class WarrantyContract(ModelExtension):
   """
   type = models.ForeignKey(WarrantyType, blank=True, null=True, related_name='contracts')
 
-  label     = models.CharField(max_length=30, unique=True)
+  label     = models.CharField(max_length=255, unique=True)
   date_from = models.DateField(verbose_name='valid from')
   date_to   = models.DateField(verbose_name='expires at')
 

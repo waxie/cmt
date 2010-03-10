@@ -240,6 +240,7 @@ class ModelExtension(models.Model):
 
     qset = models.query.EmptyQuerySet(model=to_model)
     # OR-filtering QuerySets
+    # !!! TODO: have to write a Custom Manager for this !!!
     for subfield in subfields:
       logger.critical('searching in field: %s'%subfield.name)
       # !!! TODO: support multiple values[] !!!
@@ -273,12 +274,14 @@ class ModelExtension(models.Model):
 
     # determine which fields should be searched for
     if not subfields:
-      subfields = to_model()._required_fields()
+      #subfields = to_model()._required_fields()
+      subfields = to_model()._required_local_fields() # exclude FKs
 
-    logger.debug('Searching a %s matching on fields %s'%(to_model.__name__,subfields))
+    logger.debug('Searching a %s matching on fields %s'%(to_model.__name__,[f.name for f in subfields]))
 
     qset = models.query.EmptyQuerySet(model=to_model)
     # OR-filtering QuerySets
+    # !!! TODO: have to write a Custom Manager for this !!!
     for subfield in subfields:
       logger.critical('searching in field: %s'%subfield.name)
       qset |= to_model.objects.filter(**{'%s__in'%subfield.name:values})
