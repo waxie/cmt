@@ -122,7 +122,8 @@ class Interface(ModelExtension):
   network   = models.ForeignKey('Network', related_name='interfaces')
   hardware  = models.ForeignKey('HardwareUnit', related_name='interfaces', verbose_name='machine') # ??? host ???
   type      = models.ForeignKey('InterfaceType', related_name='interfaces', verbose_name='type')
-  label     = models.CharField(max_length=255, blank=True, help_text='Automagically generated if kept empty')
+  #label     = models.CharField(max_length=255, blank=True, help_text='Automagically generated if kept empty')
+  label     = models.CharField(max_length=255, help_text='Automagically generated if kept empty')
   aliasses  = models.ManyToManyField(Alias, blank=True, null=True, related_name='_interfaces')
   hwaddress = models.CharField(max_length=17, blank=True, verbose_name='hardware address', help_text="6 Octets, optionally delimited by a space ' ', a hyphen '-', or a colon ':'.", unique=True)
   ip        = models.IPAddressField(editable=False, null=True, blank=True)
@@ -134,8 +135,7 @@ class Interface(ModelExtension):
 
   def __unicode__(self):
     #return self.fqdn
-    return 'INTERAFCE'
-    #return self.label or 'anonymous'
+    return self.label or 'anonymous'
 
   def save(self, force_insert=False, force_update=False):
     """

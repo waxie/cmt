@@ -1,5 +1,5 @@
 from django.db.models.fields import FieldDoesNotExist 
-from django.db.models.fields.related import ForeignKey, ManyToManyField, OneToOneField
+from django.db.models.fields.related import ForeignKey, ManyToManyField, OneToOneField, RelatedField
 
 from types import StringTypes
 
@@ -78,7 +78,8 @@ class ModelExtension(models.Model):
       A local field can be of any type except ForeignKey and ManyToManyField.
     """
     fields = [fld for fld in self._required_fields()
-      if not (isinstance(fld, ForeignKey) or isinstance(fld, ManyToManyField) or isinstance(fld, OneToOneField))]
+      #if not (isinstance(fld, ForeignKey) or isinstance(fld, ManyToManyField) or isinstance(fld, OneToOneField))]
+      if not isinstance(fld, RelatedField)]
     return fields
 
   def _required_refering_fields(self):
@@ -87,7 +88,8 @@ class ModelExtension(models.Model):
       set. A refering field is of the type ForeignKey or ManyToManyField.
     """
     fields = [fld for fld in self._required_fields()
-      if (isinstance(fld, ForeignKey) or isinstance(fld, ManyToManyField) or isinstance(fld, OneToOneField))]
+      #if (isinstance(fld, ForeignKey) or isinstance(fld, ManyToManyField) or isinstance(fld, OneToOneField))]
+      if isinstance(fld, RelatedField)]
     return fields
 
 
@@ -146,7 +148,7 @@ class ModelExtension(models.Model):
         m2ms.append([field,arg_dict[arg]])
 
       else:
-        logger.debug("Assuming '%s' is a regular field"%arg)
+        #logger.debug("Assuming '%s' is a regular field"%arg)
         self._setattr(field=arg, value=arg_dict[arg])
 
     # Save object to give it an id, and make the M2M relations
@@ -230,6 +232,7 @@ class ModelExtension(models.Model):
       in one of its required fields (minus 'id' and FKs).
     """
     to_model = field.rel.to
+    #values = value[0].split(',') #
     logger.debug("Trying to save '%s' in FK to %s"%(value,to_model.__name__))
 
     # determine which fields should be searched for
@@ -242,9 +245,17 @@ class ModelExtension(models.Model):
     # OR-filtering QuerySets
     # !!! TODO: have to write a Custom Manager for this !!!
     for subfield in subfields:
-      logger.critical('searching in field: %s'%subfield.name)
+      #logger.critical('searching in field: %s'%subfield.name)
       # !!! TODO: support multiple values[] !!!
-      qset |= to_model.objects.filter(**{'%s__icontains'%(subfield.name):value[0]})
+      #qset |= to_model.objects.filter(**{'%s__icontains'%(subfield.name):value[0]})
+      try:
+        found = to_model.objects.filter(**{'%s__in'%subfield.name:value}) #
+        if len(found) == 1 and subfield.name == 'label': # higher priority on the label-field
+          qset = found
+          break
+        qset |= found
+      except ValueError, e:
+        logger.warning(e)
     logger.debug('Found the following matching objects: %s'%qset)
 
     objects = [object for object in qset]
@@ -260,6 +271,7 @@ class ModelExtension(models.Model):
     else:
       # !!! TODO: let the user refine the search !!!
       logger.warning('To many matching objects; Refine your query.')
+      # Try the match with the highest number of matches, ...
       pass
 
 
@@ -332,7 +344,7 @@ class ModelExtension(models.Model):
       pass
       # !!! TODO: Implement M2M relations !!!
     else:
-      logger.debug('We have to handle a %s'%type(field))
+      #logger.debug('We have to handle a %s'%type(field))
       self.__setattr__(field.name, value)
 
 
