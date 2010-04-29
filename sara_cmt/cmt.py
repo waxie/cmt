@@ -94,13 +94,6 @@ CMTSARA_DESCRIPTION = config_parser.get('info','description').strip("'")
 parse_object = Parser()
 parser = parse_object.getParser()
 
-# Make a dict with aliasses for the models
-entities = {}
-for option in config_parser.options('entities'):
-  labels = config_parser.get('entities',option).split(',')
-  for label in labels:
-    entities[label] = sara_cmt.cluster.models.__getattribute__(option)
-
 # Get and set the defaults
 DRYRUN = config_parser.getboolean('defaults','DRYRUN')
 INTERACTIVE = config_parser.getboolean('defaults','DRYRUN')
@@ -130,17 +123,16 @@ query_mgr = QueryManager()
 #
 @crud_validate
 def add(option, opt_str, value, parser, *args, **kwargs):
-# !!! TODO: fix this one... it's still old style !!!
-# The following steps need to be done:
-#  - collect args
-#  - args -> queries
-#  - execute action
-#  - save new entry
+  """
+    Add an object according to the given values.
+    
+    When the INTERACTIVE-flag has been set and an object is not complete yet,
+    the user should be given the opportunity to add data to the missing fields
+    on an interactive manner.
+  """
   my_args = collect_args(option, parser)    # get method-specific args-list
   query_mgr.push_args(my_args, search_model(value), ['set'])
   query = query_mgr.get_query()
-
-  ### </>
 
   new_obj = search_model(value)()
   logger.debug('Initiated a new %s'%new_obj.__class__.__name__)
@@ -149,35 +141,6 @@ def add(option, opt_str, value, parser, *args, **kwargs):
 
   if parser.values.INTERACTIVE:
     new_obj.interactive_completion()
-  """
-    Add an object according to the given values.
-    
-    When the INTERACTIVE-flag has been set and an object is not complete yet,
-    the user should be given the opportunity to add data to the missing fields
-    on an interactive manner.
-  # Assign values to attributes if assignments are given.
-  queries = collect_args(option, parser)
-  queries_dict = queries_to_dict(queries)
-  new_object = entities[value]()
-  new_object.setattrs_from_dict(queries_dict)
-    
-  # Let the user complete interactively if INTERACTIVE-flag has been set.
-  if parser.values.INTERACTIVE:
-    new_object.interactive_completion()
-
-  # ??? TODO: Validate object ???
-
-  # Save and log
-  if not parser.values.DRYRUN:
-    try:
-      new_object.save()
-      logger.info('Saved %s with id %s' % (new_object._meta.verbose_name, new_object.pk))
-    except (ValueError, sqlite3.IntegrityError), e:
-      logger.error('Failed to save %s: %s' % (new_object._meta.verbose_name, e))
-  else:
-    logger.info('[DRYRUN] Saved %s with id %s' % (new_object._meta.verbose_name, new_object.pk))
-    logger.debug('%s: %s' % (entities[value], new_object.__dict__))
-  """
 
 
 
@@ -276,9 +239,9 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
     f.close()
 
     ### <DEBUG>
-    logger.debug('<TEMPSTR>\n%s'%templatestr)
-    logger.debug('</TEMPSTR>')
-    template = CMTTemplate(templatestr)
+    #logger.debug('<TEMPSTR>\n%s'%templatestr)
+    #logger.debug('</TEMPSTR>')
+    #template = CMTTemplate(templatestr)
     ### </DEBUG>
 
     # Render the CMTTemplate with a Context
@@ -294,20 +257,20 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
     # so these can be used for post-processing.
 
     ### <DEBUG>
-    logger.debug('<CONTEXT>\n%s'%c)
-    logger.debug('</CONTEXT>')
-    logger.debug('<RESULT>\n%s'%res)
-    logger.debug('</RESULT>')
+    #logger.debug('<CONTEXT>\n%s'%c)
+    #logger.debug('</CONTEXT>')
+    #logger.debug('<RESULT>\n%s'%res)
+    #logger.debug('</RESULT>')
     ### </DEBUG>
   except IOError, e:
     logger.error('Template does not exist: %s'%e)
 
   ### <DEBUG>
-  logger.info('Now executing epilogue script')
-  logger.debug('<EPILOGUE>')
-  os.system(c['epilogue'])
-  logger.debug('</EPILOGUE>')
-  logger.info('Finished epilogue script')
+  #logger.info('Now executing epilogue script')
+  #logger.debug('<EPILOGUE>')
+  #os.system(c['epilogue'])
+  #logger.debug('</EPILOGUE>')
+  #logger.info('Finished epilogue script')
   ### </DEBUG>
 
   try:

@@ -77,9 +77,7 @@ class ModelExtension(models.Model):
       Checks which local fields are required, and returns these fields in a set.
       A local field can be of any type except ForeignKey and ManyToManyField.
     """
-    fields = [fld for fld in self._required_fields()
-      #if not (isinstance(fld, ForeignKey) or isinstance(fld, ManyToManyField) or isinstance(fld, OneToOneField))]
-      if not isinstance(fld, RelatedField)]
+    fields = [fld for fld in self._required_fields() if not isinstance(fld, RelatedField)]
     return fields
 
   def _required_refering_fields(self):
@@ -87,9 +85,7 @@ class ModelExtension(models.Model):
       Checks which refering fields are required, and returns these fields in a
       set. A refering field is of the type ForeignKey or ManyToManyField.
     """
-    fields = [fld for fld in self._required_fields()
-      #if (isinstance(fld, ForeignKey) or isinstance(fld, ManyToManyField) or isinstance(fld, OneToOneField))]
-      if isinstance(fld, RelatedField)]
+    fields = [fld for fld in self._required_fields() if isinstance(fld, RelatedField)]
     return fields
 
 
@@ -128,9 +124,9 @@ class ModelExtension(models.Model):
   def setattrs_from_dict(self, arg_dict):
     """
       Set attributes according to the arguments, given in a dictionary. Each
-      key in the dictionary should match an attribute name in the model.
+      key in the dictionary should match a fieldname in the model.
     """
-    m2ms = []
+    m2ms = [] # to collect M2Ms (which should be done at last)
     for arg in arg_dict:
       field = self._meta.get_field(arg)
       logger.debug("Have to assign %s to attribute '%s' (%s)"%(arg_dict[arg],arg,field.__class__.__name__))
@@ -148,7 +144,7 @@ class ModelExtension(models.Model):
         m2ms.append([field,arg_dict[arg]])
 
       else:
-        #logger.debug("Assuming '%s' is a regular field"%arg)
+        logger.debug("Assuming '%s' is a regular field"%arg)
         self._setattr(field=arg, value=arg_dict[arg])
 
     # Save object to give it an id, and make the M2M relations
@@ -245,9 +241,7 @@ class ModelExtension(models.Model):
     # OR-filtering QuerySets
     # !!! TODO: have to write a Custom Manager for this !!!
     for subfield in subfields:
-      #logger.critical('searching in field: %s'%subfield.name)
       # !!! TODO: support multiple values[] !!!
-      #qset |= to_model.objects.filter(**{'%s__icontains'%(subfield.name):value[0]})
       try:
         found = to_model.objects.filter(**{'%s__in'%subfield.name:value}) #
         if len(found) == 1 and subfield.name == 'label': # higher priority on the label-field
