@@ -241,8 +241,9 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
     ### <DEBUG>
     #logger.debug('<TEMPSTR>\n%s'%templatestr)
     #logger.debug('</TEMPSTR>')
-    #template = CMTTemplate(templatestr)
     ### </DEBUG>
+
+    template = CMTTemplate(templatestr)
 
     # Render the CMTTemplate with a Context
     template_data = {}
