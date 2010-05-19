@@ -43,8 +43,8 @@ class HardwareUnit(ModelExtension):
   warranty     = models.ForeignKey('WarrantyContract', related_name='hardware', null=True, blank=True)
   rack         = models.ForeignKey('Rack', related_name='contents')
 
-  serialnumber = models.CharField(max_length=255, blank=True, null=True, unique=True) # should be a field of Specifications
-  service_tag  = models.CharField(max_length=255, blank=True, null=True, unique=True)
+  serialnumber = models.CharField(max_length=255, blank=True, null=True) # should be a field of Specifications
+  service_tag  = models.CharField(max_length=255, blank=True, null=True)
   first_slot   = models.PositiveIntegerField()
   label        = models.CharField(max_length=255)
 
@@ -52,7 +52,7 @@ class HardwareUnit(ModelExtension):
     #verbose_name = "piece of hardware"
     verbose_name_plural = "hardware"
     ordering = ['cluster__name', 'rack__label', 'first_slot']
-    unique_together = [('rack', 'first_slot')]
+    unique_together = (('rack', 'first_slot'), ('serialnumber', 'service_tag'))
 
   def _address(self):
     return self.rack.address
@@ -126,7 +126,7 @@ class Interface(ModelExtension):
   label     = models.CharField(max_length=255, help_text='Automagically generated if kept empty')
   aliasses  = models.ManyToManyField(Alias, blank=True, null=True, related_name='_interfaces')
   hwaddress = models.CharField(max_length=17, blank=True, verbose_name='hardware address', help_text="6 Octets, optionally delimited by a space ' ', a hyphen '-', or a colon ':'.", unique=True)
-  ip        = models.IPAddressField(editable=False, null=True, blank=True)
+  ip        = models.IPAddressField(editable=False)#, null=True, blank=True)
 
 
   def _fqdn(self):

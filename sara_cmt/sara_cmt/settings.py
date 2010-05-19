@@ -172,7 +172,7 @@ INSTALLED_APPS = (
 )
 
 # Append your IP to use the debug_toolbar
+#  '145.100.6.163',
 INTERNAL_IPS = (
-  '145.100.6.163',
   '127.0.0.1',
 )

@@ -173,7 +173,7 @@ class InterfaceAdmin(admin.ModelAdmin):
     }),
     GlobalAdmin.extra_fieldset
   )
-  list_display = ('__unicode__', 'hwaddress', 'type')
+  list_display = ('__unicode__', 'hwaddress', 'ip', 'type')
   list_filter  = ('network','type',) + GlobalAdmin.list_filter
 
 
