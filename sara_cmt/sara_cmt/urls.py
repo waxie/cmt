@@ -9,7 +9,7 @@ urlpatterns = patterns('',
     # Example:
     # (r'^core/', include('core.foo.urls')),
 
-    # Uncomment the admin/doc line below and add 'django.contrib.admindocs' 
+    # Uncomment the admin/doc line below and add 'django.contrib.admindocs'
     # to INSTALLED_APPS to enable admin documentation:
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
@@ -22,7 +22,8 @@ urlpatterns = patterns('',
 )
 
 # core
-from sara_cmt.cluster.models import Cluster, HardwareUnit, Interface, Network, Rack
+from sara_cmt.cluster.models import Cluster, HardwareUnit, Interface, \
+                                    Network, Rack
 databrowse.site.register(Cluster)
 databrowse.site.register(HardwareUnit)
 databrowse.site.register(Interface)

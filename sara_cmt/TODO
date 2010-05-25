@@ -4,6 +4,7 @@ We want views for:
 
 Objectmodel:
   * HardwareUnit kan onder meerdere clusters vallen (bv boot <> install.cua)
+     (dit komt door interfaces in verschillende netwerken)
 
 Fields in models:
   * HardwareModel.formfactor

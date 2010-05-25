@@ -14,8 +14,8 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-  ('Sil Westerveld', 'sil.westerveld@sara.nl'),
-  #('Your Name', 'your_email@domain.com'),
+    ('Sil Westerveld', 'sil.westerveld@sara.nl'),
+    #('Your Name', 'your_email@domain.com'),
 )
 
 MANAGERS = ADMINS
@@ -47,7 +47,7 @@ AUTH_LDAP_USER_DN_TEMPLATE = 'uid=%(user)s,ou=Users,dc=hpcv,dc=sara,dc=nl'
 
 # Set up the basic group parameters.
 AUTH_LDAP_GROUP_SEARCH = LDAPSearch('ou=Groups,dc=hpcv,dc=sara,dc=nl',
-  ldap.SCOPE_SUBTREE, '(objectClass=posixGroup)'
+    ldap.SCOPE_SUBTREE, '(objectClass=posixGroup)',
 )
 AUTH_LDAP_GROUP_TYPE = PosixGroupType()
 
@@ -56,15 +56,15 @@ AUTH_LDAP_REQUIRE_GROUP = 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl'
 
 # Populate the Django user from the LDAP directory.
 AUTH_LDAP_USER_ATTR_MAP = {
-  'first_name': 'givenName',
-  'last_name': 'sn',
-  'email': 'mail'
+    'first_name': 'givenName',
+    'last_name': 'sn',
+    'email': 'mail',
 }
 
 AUTH_LDAP_USER_FLAGS_BY_GROUP = {
-  'is_active': 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl',
-  'is_staff': 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl',
-  'is_superuser': 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl'
+    'is_active': 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl',
+    'is_staff': 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl',
+    'is_superuser': 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl',
 }
 
 # This is the default, but I like to be explicit.
@@ -77,8 +77,8 @@ AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
 # Keep ModelBackend around for per-user permissions and maybe a local
 # superuser.
 AUTHENTICATION_BACKENDS = (
-  'django_auth_ldap.backend.LDAPBackend',
-  'django.contrib.auth.backends.ModelBackend',
+    'django_auth_ldap.backend.LDAPBackend',
+    'django.contrib.auth.backends.ModelBackend',
 )
 #
 # </AUTH AGAINST LDAP>
@@ -125,54 +125,58 @@ SECRET_KEY = 'uygv6wrel4o2%x8s4dk2%i6=dp!2bt32$0ne-%_7&j=ez*u$1b'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-  'django.template.loaders.filesystem.load_template_source',
-  'django.template.loaders.app_directories.load_template_source',
-  #'django.template.loaders.eggs.load_template_source',
+    'django.template.loaders.filesystem.load_template_source',
+    'django.template.loaders.app_directories.load_template_source',
+    #'django.template.loaders.eggs.load_template_source',
 )
 
 MIDDLEWARE_CLASSES = (
-  'django.middleware.common.CommonMiddleware',
-  'django.contrib.sessions.middleware.SessionMiddleware',
-  'django.contrib.auth.middleware.AuthenticationMiddleware',
-  'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
- 
+
 ROOT_URLCONF = 'sara_cmt.urls'
 
 TEMPLATE_DIRS = (
-  # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-  # Always use forward slashes, even on Windows.
-  # Don't forget to use absolute paths, not relative paths.
-  os.path.normpath(os.path.join(os.path.dirname(__file__), '../templates')),
+    # Put strings here, like "/home/html/django_templates"
+    # or "C:/www/django/templates".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    os.path.normpath(os.path.join(os.path.dirname(__file__), '../templates')),
 )
 
-CMT_TEMPLATES_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '../templates'))
-CMT_TEMPLATE_DIRS = (os.path.normpath(os.path.join(os.path.dirname(__file__), '../templates')),)
+CMT_TEMPLATES_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), \
+    '../templates'))
+#CMT_TEMPLATE_DIRS = (os.path.normpath(os.path.join(os.path.dirname(__file__),
+#'../templates')),)
 
 FIXTURE_DIRS = (
-  # A fixture is a collection of files that contain serialized contents of the database.
-  os.path.normpath(os.path.join(os.path.dirname(__file__), 'fixtures')),
+    # A fixture is a collection of files that contain serialized contents of
+    # the database.
+    os.path.normpath(os.path.join(os.path.dirname(__file__), 'fixtures')),
 )
 
 
 INSTALLED_APPS = (
-  'django.contrib.auth',
-  'django.contrib.contenttypes',
-  'django.contrib.sessions',
-  'django.contrib.admin',
-  'django.contrib.databrowse',
-  'django.contrib.webdesign',
-  'sara_cmt.cluster',
-  'sara_cmt.django_cli',
-  'sara_cmt.template',
-  'django_extensions',
-  'tagging',
-  'south',
-  'debug_toolbar',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.admin',
+    'django.contrib.databrowse',
+    'django.contrib.webdesign',
+    'sara_cmt.cluster',
+    'sara_cmt.django_cli',
+    'sara_cmt.template',
+    'django_extensions',
+    'tagging',
+    'south',
+    'debug_toolbar',
 )
 
 # Append your IP to use the debug_toolbar
 #  '145.100.6.163',
 INTERNAL_IPS = (
-  '127.0.0.1',
+    '127.0.0.1',
 )
