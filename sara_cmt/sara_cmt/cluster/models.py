@@ -52,7 +52,7 @@ class HardwareUnit(ModelExtension):
     # should be a field of Specifications:
     serialnumber = models.CharField(max_length=255, blank=True, null=True)
     service_tag  = models.CharField(max_length=255, blank=True, null=True)
-    first_slot   = models.PositiveIntegerField()
+    first_slot   = models.PositiveIntegerField(blank=True, null=True)
     label        = models.CharField(max_length=255)
 
     class Meta:
