@@ -149,7 +149,7 @@ class Interface(ModelExtension):
                                  help_text="6 Octets, optionally delimited by \
                                  a space ' ', a hyphen '-', or a colon ':'.",
                                  unique=True)
-    ip        = models.IPAddressField(editable=False)#, null=True, blank=True)
+    ip        = models.IPAddressField()#editable=False)#, null=True, blank=True)
 
     def _fqdn(self):
         return '%s.%s' % (self.label, self.network.domain)

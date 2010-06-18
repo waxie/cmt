@@ -167,7 +167,7 @@ class AliasAdmin(admin.ModelAdmin):
 class InterfaceAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Physical', {
-            'fields': (('type', 'hardware'), 'hwaddress'),
+            'fields': (('type', 'hardware'), 'hwaddress', 'ip'),
         }),
         ('Network', {
             'fields': ('network', ('label', 'aliasses')),
