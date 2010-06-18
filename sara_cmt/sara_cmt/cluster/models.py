@@ -167,13 +167,16 @@ class Interface(ModelExtension):
         """
         try:
             # To be sure that the interface has a valid network
-            assert isinstance(self.network, Network), "network doesn't exist"
+            #assert isinstance(self.network, Network), "network doesn't exist"
 
             try:
-                network = IP('%s/%s' % (self.network.netaddress,
-                             self.network.netmask))
+                if self.network:
+                    network = IP('%s/%s' % (self.network.netaddress,
+                                            self.network.netmask))
             except ValueError, e:
                 print ValueError, e
+            except Exception, e:
+                print 'An error occured:', e
 
             # Pick a new IP when it's not defined yet or when the network has
             # been changed

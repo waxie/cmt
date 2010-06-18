@@ -237,6 +237,8 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
 def generate(option, opt_str, value, parser, *args, **kwargs):
     from sara_cmt.template import CMTTemplate
     from django.template import Context
+    # !!! TODO: Do this in the templates
+    from sara_cmt.cluster.models import Cluster, HardwareUnit, Interface, Network # for template_data
 
     # Save full path of templatefile to generate
     filename = '%s.cmt' % value
@@ -261,6 +263,12 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
         template_data['svn_id'] = '$Id:$'
         template_data['svn_url'] = '$URL:$'
         template_data['input'] = fullpath
+        # !!! TODO: Change from hardcoded to dynamic:
+        template_data['Cluster'] = Cluster
+        template_data['HardwareUnit'] = HardwareUnit
+        template_data['Interface'] = Interface
+        template_data['Network'] = Network
+
         c = Context(template_data)
         res = template.render(c)
 
@@ -270,8 +278,8 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
         ### <DEBUG>
         #logger.debug('<CONTEXT>\n%s'%c)
         #logger.debug('</CONTEXT>')
-        #logger.debug('<RESULT>\n%s'%res)
-        #logger.debug('</RESULT>')
+        logger.debug('<RESULT>\n%s'%res)
+        logger.debug('</RESULT>')
         ### </DEBUG>
     except IOError, e:
         logger.error('Template does not exist: %s' % e)
@@ -292,6 +300,8 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
         logger.info('Outputfile is created')
     except IOError, e:
         logger.error('Failed creating outputfile: %s' % e)
+    except KeyError, e:
+        logger.error('No output defined in template')
     return
 
 

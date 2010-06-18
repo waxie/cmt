@@ -167,8 +167,6 @@ INSTALLED_APPS = (
     'django.contrib.databrowse',
     'django.contrib.webdesign',
     'sara_cmt.cluster',
-    'sara_cmt.django_cli',
-    'sara_cmt.template',
     'django_extensions',
     'tagging',
     'south',
