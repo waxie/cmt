@@ -81,7 +81,7 @@ def crud_validate(func):
 #
 
 # Instantiate ConfigParser
-configfile = os.path.join(os.path.dirname(__file__), 'cmt.cfg')
+configfile = os.path.join(os.path.dirname(__file__), 'config/cmt.cfg')
 config_parser = ConfigParser.ConfigParser()
 config_parser.optionxform = lambda x: x
 # ^^ Hack for case-insensitivity, reference:
