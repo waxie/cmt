@@ -120,7 +120,7 @@ class Alias(ModelExtension):
     label     = models.CharField(max_length=255, unique=True)
 
     class Meta:
-        verbose_name_plural = 'aliasses'
+        verbose_name_plural = 'aliases'
 
     def _interfaces(self):
         return ' | '.join([interface.label for interface in

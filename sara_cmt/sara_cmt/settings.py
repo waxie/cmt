@@ -144,6 +144,7 @@ TEMPLATE_DIRS = (
     # or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    os.path.normpath(os.path.join(os.path.dirname(__file__), 'cluster/templates')),
     os.path.normpath(os.path.join(os.path.dirname(__file__), '../templates')),
 )
 
