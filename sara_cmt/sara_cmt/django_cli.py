@@ -131,10 +131,6 @@ class ModelExtension(models.Model):
         """
             Check if all the required fields has been assigned.
         """
-        #if not self._missing_fields():
-        #    logger.error('not self._missing_fields()')
-        #else:
-        #    logger.error('missing fields()')
         return not self._missing_fields()
 
     def setattrs_from_dict(self, arg_dict):
@@ -166,11 +162,11 @@ class ModelExtension(models.Model):
                 self._setattr(field=arg, value=arg_dict[arg])
 
         # Save object to give it an id, and make the M2M relations
-        #if not parser.values.DRYRUN:
-        if self.is_complete():
-            self.save()
-        else:
-            logger.info('Not enough data provided')
+        if not parser.values.DRYRUN:
+            if self.is_complete():
+                self.save()
+            else:
+                logger.info('Not enough data provided')
 
         for m2m in m2ms:
             self._setm2m(m2m[0], m2m[1])
@@ -205,7 +201,6 @@ class ModelExtension(models.Model):
             except:
                 # FK hasn't been set
                 missing.append(field)
-        logger.debug('Still need following data: %s'%missing)
         return missing
 
     def interactive_completion(self):
@@ -223,8 +218,6 @@ class ModelExtension(models.Model):
         missing = self._missing_fields()
 
         while missing:
-        #while not self.is_complete():
-            missing = self._missing_fields()
             logger.info('Missing required attributes: %s'
                 % ' '.join([field.name for field in missing]))
 
@@ -263,8 +256,6 @@ class ModelExtension(models.Model):
             % (to_model.__name__, [f.name for f in subfields]))
 
         qset = models.query.EmptyQuerySet(model=to_model)
-        logger.debug('Initialized new queryset of %s: %s'
-            % (to_model.__name__, qset))
         # OR-filtering QuerySets
         # !!! TODO: have to write a Custom Manager for this !!!
         for subfield in subfields:

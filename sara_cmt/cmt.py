@@ -60,7 +60,7 @@ def crud_validate(func):
 
     def crudFunc(option, opt_str, value, parser, *args, **kwargs):
         model = search_model(value)
-        if model != None:
+        if model:
             logger.debug("Assuming '%s' should be of type %s"
                 % (value, model._meta.object_name))
             return func(option, opt_str, value, parser, *args, **kwargs)
@@ -92,6 +92,7 @@ config_parser.read(configfile)
 # Setup the logger for logging
 loglevel_str = config_parser.get('defaults', 'LOGLEVEL')
 logger.setLevel(config_parser.getint('loglevels', loglevel_str))
+logger.debug('Initialized logger')
 
 
 # Collect package information
@@ -148,8 +149,20 @@ def add(option, opt_str, value, parser, *args, **kwargs):
 
     new_obj.setattrs_from_dict(query['set'])
 
+    # Complete if needed (only in interactive mode)
     if parser.values.INTERACTIVE:
         new_obj.interactive_completion()
+
+    # Save object
+    save_msg = 'Added a new %s'%value
+    if not parser.values.DRYRUN:
+        try:
+            new_obj.save()
+            logger.info(save_msg)
+        except Exception, e:
+            logger.error('Could not add new %s: '%(value,e))
+    else:
+        logger.info('[DRYRUN] %s'%save_msg)
 
 
 @crud_validate
@@ -189,12 +202,12 @@ def change(option, opt_str, value, parser, *args, **kwargs):
             raw_input('Are you sure? [Yn] ')
         if confirmed in ['', 'y', 'Y', True]:
             for object in objects:
+                attr_set_msg = 'Attributes has been set: %s' % object
                 if not parser.values.DRYRUN:
                     object.setattrs_from_dict(query['set'])
-                    logger.debug('Attributes has been set: %s' % object)
+                    logger.debug(attr_set_msg)
                 else:
-                    logger.debug('[DRYRUN] Attributes has been set: %s'
-                        % object)
+                    logger.debug('[DRYRUN] %s' % attr_set_msg)
         else:
             logger.info('Change has been cancelled')
 
@@ -221,11 +234,12 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
         if confirmation in ['', 'y', 'Y', True]:
             logger.info('deleting...')
             for object in objects:
+                del_msg = 'Deleted %s' % object
                 if not parser.values.DRYRUN:
                     object.delete()
-                    logger.info('Deleted %s' % object)
+                    logger.info(del_msg)
                 else:
-                    logger.info('[DRYRUN] Deleted %s' % object)
+                    logger.info('[DRYRUN] %s' % del_msg)
 
     else:
         logger.info('No existing objects found matching query')
@@ -293,16 +307,22 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
     #logger.info('Finished epilogue script')
     ### </DEBUG>
 
-    try:
-        logger.info('Writing outputfile')
-        f = open(c['output'], 'w')
-        f.writelines(res)
-        f.close()
-        logger.info('Outputfile is created')
-    except IOError, e:
-        logger.error('Failed creating outputfile: %s' % e)
-    except KeyError, e:
-        logger.error('No output defined in template')
+    if not parser.values.DRYRUN:
+        write_msg = 'Writing outputfile'
+        created_msg = 'Outputfile is created'
+        try:
+            logger.info(write_msg)
+            f = open(c['output'], 'w')
+            f.writelines(res)
+            f.close()
+            logger.info(created_msg)
+        except IOError, e:
+            logger.error('Failed creating outputfile: %s' % e)
+        except KeyError, e:
+            logger.error('No output defined in template')
+    else:
+        logger.info('[DRYRUN] %s' % write_msg)
+        logger.info('[DRYRUN] %s' % created_msg)
     return
 
 
@@ -322,11 +342,12 @@ def mac(option, opt_str, value, parser, *args, **kwargs):
         confirmed = not parser.values.INTERACTIVE or \
             raw_input('Are you sure? [Yn] ')
         if confirmed in ['', 'y', 'Y', True]:
+            attr_set_msg = 'Attributes has been set: %s' % object
             if not parser.values.DRYRUN:
                 object.setattrs_from_dict(query['set'])
-                logger.debug('Attributes has been set: %s' % object)
+                logger.debug(attr_set_msg)
             else:
-                logger.debug('[DRYRUN] Attributes has been set: %s' % object)
+                logger.debug('[DRYRUN] %s' % attr_set_msg)
         else:
             logger.info('Change of MAC-address has been cancelled')
     else:
@@ -456,8 +477,9 @@ def main():
     # TODO: implement the following option(s)
     parser.add_option('-v', '--verbose',
                     action='store_true',
-                    dest='verbose',
-                    default=False)
+                    dest='VERBOSE',
+                    default=config_parser.getboolean('defaults',
+                                                     'VERBOSE'))
 
     (options, args) = parser.parse_args()
     logger.debug('(options, args) = (%s, %s)' % (options, args))
