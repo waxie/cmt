@@ -104,6 +104,13 @@ class HardwareUnit(ModelExtension):
         if not self.label:
             self.label = self.default_label()
 
+        # Solution for empty unique fields described on:
+        # http://stackoverflow.com/questions/454436/unique-fields-that-allow-nulls-in-django
+        if not self.serialnumber:
+            self.serialnumber = None
+        if not self.service_tag:
+            self.service_tag = None
+
         super(HardwareUnit, self).save(force_insert, force_update)
 
     def default_label(self):
