@@ -59,8 +59,7 @@ class HardwareUnit(ModelExtension):
         #verbose_name = "piece of hardware"
         verbose_name_plural = "hardware"
         ordering = ['cluster__name', 'rack__label', 'first_slot']
-        unique_together = (('rack', 'first_slot'),
-                           ('serialnumber', 'service_tag'))
+        unique_together = ('rack', 'first_slot')
 
     def _address(self):
         return self.rack.address

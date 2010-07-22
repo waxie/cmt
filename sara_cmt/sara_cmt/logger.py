@@ -16,7 +16,6 @@ class Logger:
         logging.config.fileConfig(
                 os.path.join(os.path.dirname(__file__), 'logging.conf'))
         __shared_state['logger'] = logging.getLogger('cli')
-        __shared_state['logger'].debug('Initializing Logger')
 
     def __init__(self):
         """

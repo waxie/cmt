@@ -61,8 +61,6 @@ def crud_validate(func):
     def crudFunc(option, opt_str, value, parser, *args, **kwargs):
         model = search_model(value)
         if model:
-            logger.debug("Assuming '%s' should be of type %s"
-                % (value, model._meta.object_name))
             return func(option, opt_str, value, parser, *args, **kwargs)
         else:
             logger.error('Entity %s not known.' % (value.__repr__()))
@@ -92,7 +90,6 @@ config_parser.read(configfile)
 # Setup the logger for logging
 loglevel_str = config_parser.get('defaults', 'LOGLEVEL')
 logger.setLevel(config_parser.getint('loglevels', loglevel_str))
-logger.debug('Initialized logger')
 
 
 # Collect package information

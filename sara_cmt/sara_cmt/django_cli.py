@@ -262,8 +262,7 @@ class ModelExtension(models.Model):
             # !!! TODO: support multiple values[] !!!
             try:
                 found = to_model.objects.filter(
-                    #**{'%s__in' % subfield.name: value})
-                    **{'%s'%subfield.name: value})
+                    **{'%s__in' % subfield.name: value})
                 # higher priority on the label-field:
                 if len(found) == 1 and subfield.name == 'label':
                     qset = found
