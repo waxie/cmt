@@ -150,16 +150,17 @@ class ModelExtension(models.Model):
                     this one")
                 continue
 
-            if type(field) == ForeignKey:
-                self._setfk(field, arg_dict[arg])
+            #if type(field) == ForeignKey:
+            #    self._setfk(field, arg_dict[arg])
 
-            elif type(field) == ManyToManyField:
-                # Leave M2Ms for later, because they need an object's id
-                m2ms.append([field, arg_dict[arg]])
+            #elif type(field) == ManyToManyField:
+            #    # Leave M2Ms for later, because they need an object's id
+            #    m2ms.append([field, arg_dict[arg]])
 
-            else:
-                logger.debug("Assuming '%s' is a regular field" % arg)
-                self._setattr(field=arg, value=arg_dict[arg])
+            #else:
+            #    logger.debug("Assuming '%s' is a regular field" % arg)
+            #    self._setattr(field=arg, value=arg_dict[arg])
+            self._setattr(field=arg, value=arg_dict[arg])
 
         # Save object to give it an id, and make the M2M relations
         if not parser.values.DRYRUN:
@@ -222,13 +223,14 @@ class ModelExtension(models.Model):
                 % ' '.join([field.name for field in missing]))
 
             current_field = missing[0]
-            input = raw_input(current_field.verbose_name + ': ')
+            interactive_input = [raw_input(current_field.verbose_name + ': ')]
+            logger.debug('INTERACTIVE INPUT: %s'%interactive_input)
             try:
-                assert bool(input), 'Field cannot be left blank'
+                assert bool(interactive_input), 'Field cannot be left blank'
                 # Input for missing attribute is now stored in var 'input'.
                 #i = self._setattr(current_field, input)
                 #self.save()
-                self._setattr(current_field, input)
+                self._setattr(current_field, interactive_input)
                 missing.remove(current_field)
             except AssertionError, err:
                 logger.error(err)
@@ -244,9 +246,12 @@ class ModelExtension(models.Model):
             given value in one of its required fields (minus 'id' and FKs).
         """
         to_model = field.rel.to
-        #values = value[0].split(',') #
-        logger.debug("Trying to save '%s' in FK to %s"
-            % (value, to_model.__name__))
+        logger.debug("Trying to save '%s' (type:%s) in FK to %s"
+            % (value, type(value), to_model.__name__))
+
+        if isinstance(value, StringTypes):
+            value = [value]
+            logger.debug("Transformed value '%s' in list '%s'"%(value[0],value))
 
         # determine which fields should be searched for
         if not subfields:
@@ -263,6 +268,7 @@ class ModelExtension(models.Model):
             try:
                 found = to_model.objects.filter(
                     **{'%s__in' % subfield.name: value})
+                logger.debug('Iteration done, found: %s (%s)'%(found, type(found)))
                 # higher priority on the label-field:
                 if len(found) == 1 and subfield.name == 'label':
                     qset = found
@@ -343,17 +349,9 @@ class ModelExtension(models.Model):
         if isinstance(field, StringTypes):
             field = self._meta.get_field(field)
 
-
-        # !!! TODO: Quick {che,ha}ck; have to check this once more !!!
-        if isinstance(value, list):
-            value = value[0]
-
         logger.debug("Trying to set attribute '%s' (%s) to %s" \
             % (field.name, field.__class__.__name__, value.__repr__()))
 
-        # !!! TODO: implement support for lists of values !!!
-        assert isinstance(value, StringTypes), "Given value is a %s, which \
-            isn't supported yet (still have to implement this)" % type(value)
         if isinstance(field, ForeignKey):
             self._setfk(field, value)
         elif isinstance(field, ManyToManyField):
@@ -362,8 +360,13 @@ class ModelExtension(models.Model):
             pass
             # !!! TODO: Implement M2M relations !!!
         else:
-            #logger.debug('We have to handle a %s'%type(field))
-            self.__setattr__(field.name, value)
+            logger.debug('Trying to set attribute of %s'%type(field))
+            self.__setattr__(field.name, value.pop())
+            if value:
+                # !!! TODO: append remaining value(s) !!!
+                # like: for v in value: self.<append>(v)
+                logger.debug('Functionality to append values is still missing')
+                pass
 
 
 class ObjectManager():

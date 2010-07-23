@@ -150,12 +150,12 @@ class Interface(ModelExtension):
                                  generated if kept empty')
     aliasses  = models.ManyToManyField(Alias, blank=True, null=True,
                                        related_name='_interfaces')
-    hwaddress = models.CharField(max_length=17, blank=True,
+    hwaddress = models.CharField(max_length=17, blank=True, null=True,
                                  verbose_name='hardware address',
                                  help_text="6 Octets, optionally delimited by \
                                  a space ' ', a hyphen '-', or a colon ':'.",
                                  unique=True)
-    ip        = models.IPAddressField()#editable=False)#, null=True, blank=True)
+    ip        = models.IPAddressField(blank=True)
 
     def _fqdn(self):
         return '%s.%s' % (self.label, self.network.domain)
