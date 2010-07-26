@@ -95,15 +95,6 @@ class HardwareUnitAdmin(admin.ModelAdmin):
     #filter_horizontal = ('role',)
 
 
-class SiteAdmin(admin.ModelAdmin):
-    fieldsets = (
-        (None, {'fields': ('name',)}),
-        GlobalAdmin.extra_fieldset)
-    list_display = ('name',) + GlobalAdmin.list_filter
-    list_filter  = GlobalAdmin.list_filter
-    ordering     = ('name',)
-
-
 class CountryAdmin(admin.ModelAdmin):
     fieldsets = (
         ('None', {'fields': (('name', 'country_code'),)}),

@@ -354,8 +354,7 @@ class Country(ModelExtension):
 
 class Address(ModelExtension):
     """
-        A class to hold information about the physical location of a model. In the
-        case of CMTSARA it is a superclass of Site, ContactPerson and Company.
+        A class to hold information about the physical location of a model.
     """
     country    = models.ForeignKey(Country, null=True, blank=True, related_name='addresses')
     address    = models.CharField(max_length=255)
@@ -386,16 +385,6 @@ class Room(ModelExtension):
     def __unicode__(self):
         #return unicode('%s - %s'%(self.address,self.label))
         return self.label
-
-
-# ??? What todo with this model ???
-class Site(ModelExtension):
-    """
-    """
-    name = models.CharField(max_length=255, unique=True)
-
-    def __unicode__(self):
-        return self.name
 
 #
 #
