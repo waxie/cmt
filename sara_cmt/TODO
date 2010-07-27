@@ -5,12 +5,11 @@ We want views for:
 Fields in models:
   * HardwareModel.formfactor
   * Connection.type (leverancier, support, ...)
-  * HardwareUnit.delivered_on
 
 
 Commandline Interface:
-  * Interactive completion per required field
   * Logging
+  * --script option
 
 
 Web Interface:

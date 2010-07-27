@@ -30,11 +30,10 @@ databrowse.site.register(Interface)
 databrowse.site.register(Network)
 databrowse.site.register(Rack)
 # locations
-from sara_cmt.cluster.models import Country, Address, Room, Site
+from sara_cmt.cluster.models import Country, Address, Room
 databrowse.site.register(Country)
 databrowse.site.register(Address)
 databrowse.site.register(Room)
-databrowse.site.register(Site)
 # contacts
 from sara_cmt.cluster.models import Company, Telephonenumber, Connection
 databrowse.site.register(Company)

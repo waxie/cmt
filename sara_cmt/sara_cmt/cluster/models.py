@@ -139,13 +139,10 @@ class Alias(ModelExtension):
 
 class Interface(ModelExtension):
     network   = models.ForeignKey('Network', related_name='interfaces')
-    hardware  = models.ForeignKey('HardwareUnit', related_name='interfaces',
-                                  verbose_name='machine') # ??? host ???
-    type      = models.ForeignKey('InterfaceType', related_name='interfaces',
+    host      = models.ForeignKey('HardwareUnit', related_name='interfaces',
+                                  verbose_name='machine')
+    iftype      = models.ForeignKey('InterfaceType', related_name='interfaces',
                                   verbose_name='type')
-    #label     = models.CharField(max_length=255, blank=True,
-    #                             help_text='Automagically generated if kept \
-    #                             empty')
     label     = models.CharField(max_length=255, help_text='Automagically \
                                  generated if kept empty')
     aliasses  = models.ManyToManyField(Alias, blank=True, null=True,
@@ -191,7 +188,7 @@ class Interface(ModelExtension):
                 self.ip = self.network.pick_ip()
 
             self.label = self.label or \
-                         self.network.construct_interface_label(self.hardware)
+                         self.network.construct_interface_label(self.host)
 
             try:
                 super(Interface, self).save(force_insert, force_update)
@@ -484,7 +481,6 @@ class HardwareModel(ModelExtension):
     vendor = models.ForeignKey(Company, related_name='model specifications')
 
     name       = models.CharField(max_length=255, unique=True)
-    #model_id   = models.CharField(max_length=30, blank=True)
     rackspace  = models.PositiveIntegerField(help_text='size in U for example')
     expansions = models.PositiveIntegerField(default=0, help_text='number of expansion slots')
 
