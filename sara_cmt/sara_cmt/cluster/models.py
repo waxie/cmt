@@ -1,4 +1,8 @@
 from django.db import models
+from django.core.validators import RegexValidator
+
+import re
+
 from psycopg2 import IntegrityError
 
 from IPy import IP
@@ -137,13 +141,10 @@ class Alias(ModelExtension):
         return self.label
 
 
-from django.core.validators import RegexValidator
-
-import re
-re_mac = re.compile('([a-fA-F\d]{2}[:|\-]?){5}[a-fA-F\d]{2}')
-hwaddress_validator = RegexValidator(re_mac,'Enter a valid hardware address.', 'invalid')
-
 class Interface(ModelExtension):
+    re_mac = re.compile('([a-fA-F\d]{2}[:|\-]?){5}[a-fA-F\d]{2}')
+    hwaddress_validator = RegexValidator(re_mac,'Enter a valid hardware address.', 'invalid')
+
     network   = models.ForeignKey('Network', related_name='interfaces')
     host      = models.ForeignKey('HardwareUnit', related_name='interfaces',
                                   verbose_name='machine')
@@ -176,6 +177,8 @@ class Interface(ModelExtension):
             yet, or when the network has been changed.
         """
         try:
+            if self.hwaddress and len(self.hwaddress) >= 12:
+                self.hwaddress = ':'.join(re.findall(r'[A-Za-z\d]{2}', self.hwaddress))
             # To be sure that the interface has a valid network
             #assert isinstance(self.network, Network), "network doesn't exist"
 
@@ -201,7 +204,7 @@ class Interface(ModelExtension):
                 super(Interface, self).save(force_insert, force_update)
             except IntegrityError, e:
                 logger.warning(e)
-        except AssertionError, e:
+        except AssertionError, e: # !!! TODO: exception on other errors !!!
             print AssertionError, e
 
 
