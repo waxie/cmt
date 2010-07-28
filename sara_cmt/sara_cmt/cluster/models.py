@@ -137,6 +137,12 @@ class Alias(ModelExtension):
         return self.label
 
 
+from django.core.validators import RegexValidator
+
+import re
+re_mac = re.compile('([a-fA-F\d]{2}[:|\-]?){5}[a-fA-F\d]{2}')
+hwaddress_validator = RegexValidator(re_mac,'Enter a valid hardware address.', 'invalid')
+
 class Interface(ModelExtension):
     network   = models.ForeignKey('Network', related_name='interfaces')
     host      = models.ForeignKey('HardwareUnit', related_name='interfaces',
@@ -151,7 +157,7 @@ class Interface(ModelExtension):
                                  verbose_name='hardware address',
                                  help_text="6 Octets, optionally delimited by \
                                  a space ' ', a hyphen '-', or a colon ':'.",
-                                 unique=True)
+                                 unique=True, validators=[hwaddress_validator])
     ip        = models.IPAddressField(blank=True)
 
     def _fqdn(self):
@@ -161,6 +167,7 @@ class Interface(ModelExtension):
     def __unicode__(self):
         #return self.fqdn
         return self.label or 'anonymous'
+
 
     def save(self, force_insert=False, force_update=False):
         """
