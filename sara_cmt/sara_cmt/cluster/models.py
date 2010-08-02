@@ -460,6 +460,7 @@ class Telephonenumber(ModelExtension):
     connection = models.ForeignKey(Connection, blank=False, null=False, related_name='telephone_numbers')
     areacode          = models.CharField(max_length=4) # because it can start with a zero
     subscriber_number = models.IntegerField(verbose_name='number', max_length=15)
+    # !!! TODO: type is a reserved name, so rename to numtype in a migration !!!
     type = models.CharField(max_length=1, choices=NUMBER_CHOICES)
 
     # !!! TODO: link to company / contact / etc... !!!
@@ -562,6 +563,7 @@ class WarrantyContract(ModelExtension):
     """
         A class which contains warranty information of (a collection of) hardware.
     """
+    # !!! TODO: type is a reserved name, so rename to wartype in a migratino !!!
     type = models.ForeignKey(WarrantyType, blank=True, null=True, related_name='contracts')
 
     label     = models.CharField(max_length=255, unique=True)
