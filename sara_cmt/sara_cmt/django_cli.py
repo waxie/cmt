@@ -361,9 +361,10 @@ class ModelExtension(models.Model):
             # !!! TODO: Implement M2M relations !!!
         else:
             logger.debug('Trying to set attribute of %s'%type(field))
-            self.__setattr__(field.name, value.pop())
-            if value:
-                # !!! TODO: append remaining value(s) !!!
+            for e in value: # iterate through all elements
+                self.__setattr__(field.name, e)
+            if len(value) > 1:
+                # !!! TODO: append values, instead of overwrite !!!
                 # like: for v in value: self.<append>(v)
                 logger.debug('Functionality to append values is still missing')
                 pass
@@ -387,8 +388,8 @@ class ObjectManager():
         # !!! TODO: Implement AND !!!
         kwargs = {}
 
+        logger.debug('CHECK query: %s' % query)
         for attr, val in query['get'].items():
-            logger.debug('CHECK query: %s' % query)
             try:
                 fld = query['ent']._meta.get_field(attr)
                 logger.debug('CHECK %s: %s' \

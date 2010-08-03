@@ -113,6 +113,8 @@ class HardwareUnit(ModelExtension):
             self.serialnumber = None
         if not self.service_tag:
             self.service_tag = None
+        if not self.first_slot:
+            self.first_slot = None
 
         super(HardwareUnit, self).save(force_insert, force_update)
 
