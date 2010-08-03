@@ -407,7 +407,7 @@ class ObjectManager():
                 logger.error(err)
 
         objects = query['ent'].objects.filter(**kwargs)
-        return objects
+        return objects.distinct()
 
     def save_objects(self, qset):
         """
