@@ -75,13 +75,13 @@ class ClusterAdmin(admin.ModelAdmin):
 class HardwareUnitAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Host info', {'fields': (('cluster', 'label', 'role'), )}),
-        ('Machine specifications', {'fields': (('specifications', 'warranty', 'warranty_tag'),
-                                               ('service_tag', 'serialnumber'))}
+        ('Machine specifications', {'fields': ('specifications', 'warranty',
+                                               'warranty_tag')}
         ),
         ('Physical location', {'fields': (('rack', 'first_slot'),)}),
         GlobalAdmin.extra_fieldset)
 
-    list_display = ('__unicode__', 'service_tag', 'serialnumber', 'warranty_tag', 'cluster', 'address', 'room', 'rack',
+    list_display = ('__unicode__', 'warranty_tag', 'cluster', 'address', 'room', 'rack',
         'first_slot', 'specifications', 'roles', 'in_support')
     list_filter  = ('cluster', 'rack', 'role', 'specifications') + \
         GlobalAdmin.list_filter

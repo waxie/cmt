@@ -54,8 +54,6 @@ class HardwareUnit(ModelExtension):
                                      blank=True)
     rack         = models.ForeignKey('Rack', related_name='contents')
     # should be a field of Specifications:
-    serialnumber = models.CharField(max_length=255, blank=True, null=True)
-    service_tag  = models.CharField(max_length=255, blank=True, null=True)
     warranty_tag = models.CharField(max_length=255, blank=True, null=True,
                                     help_text='Service tag or serialnumber',
                                     unique=True)
@@ -112,10 +110,8 @@ class HardwareUnit(ModelExtension):
 
         # Solution for empty unique fields described on:
         # http://stackoverflow.com/questions/454436/unique-fields-that-allow-nulls-in-django
-        if not self.serialnumber:
-            self.serialnumber = None
-        if not self.service_tag:
-            self.service_tag = None
+        if not self.warranty_tag:
+            self.warranty_tag = None
         if not self.first_slot:
             self.first_slot = None
 
