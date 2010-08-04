@@ -13,7 +13,7 @@ class Migration(DataMigration):
                 hw.warranty_tag = hw.service_tag
             else:
                 hw.warranty_tag = hw.serialnumber
-        hw.save()
+            hw.save()
 
 
 
