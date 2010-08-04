@@ -1,0 +1,13 @@
+{% load cmts_extras %}
+{% store /usr/sara/etc/support.nodes.jaap as output %}
+{% noblanklines %}
+    {% for hw in HardwareUnit.objects.all %}
+        {% if hw.cluster.name == 'Lisa' %}
+            {% for i in hw.interfaces.all %}
+                {% if i.network.name == 'lisa consoles' %}
+{{ i.fqdn }}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+{% endnoblanklines %}
