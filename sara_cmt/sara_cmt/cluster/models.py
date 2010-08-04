@@ -56,6 +56,9 @@ class HardwareUnit(ModelExtension):
     # should be a field of Specifications:
     serialnumber = models.CharField(max_length=255, blank=True, null=True)
     service_tag  = models.CharField(max_length=255, blank=True, null=True)
+    warranty_tag = models.CharField(max_length=255, blank=True, null=True,
+                                    help_text='Service tag or serialnumber',
+                                    unique=True)
     first_slot   = models.PositiveIntegerField(blank=True, null=True)
     label        = models.CharField(max_length=255)
 
