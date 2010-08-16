@@ -131,7 +131,7 @@ class QuerySetNode(template.Node):
 
     def __init__(self, entity, query, key):
         self.entity = entity
-        self.query = query.strip("'").strip('"')
+        self.query = query.strip("'").strip('"').__str__()
         self.key = key
 
     def render(self, context):
