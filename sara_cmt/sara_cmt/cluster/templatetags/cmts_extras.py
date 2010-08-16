@@ -40,13 +40,13 @@ class MetaNode(template.Node):
         Renderer, which stores the save path to the context.
     """
 
-    def __init__(self, tag, vars):
+    def __init__(self, tag, values):
         self.tag = tag
-        self.vars = vars
+        self.values = values
 
     def render(self, context):
         # This is where the work actually happens
-        context[self.tag] = self.vars
+        context[self.tag] = self.values
         return ''
 
 
@@ -59,7 +59,7 @@ def do_save_meta(parser, token):
     tag = token.contents.split()[0]
     try:
         meta_info = token.split_contents()
-        # meta_info should look like ['<tag>', '<path>', 'as', '
+        # meta_info should look like ['<tag>', '<path>', 'as', '<key>']
     except ValueError:
         raise template.TemplateSyntaxError, '%r tag requires at least 3 arguments' % tag
     if len(meta_info) != 4:
@@ -92,3 +92,63 @@ def do_epilogue(parser, token):
     nodelist = parser.parse(('endepilogue',))
     parser.delete_first_token()
     return ScriptNode(nodelist)
+
+
+from django.db.models import get_model
+
+@register.tag(name='use')
+def do_use(parser, token):
+    """
+        Compilation function to definine Querysets for later use.
+        
+        Usage: {% use <entity> with <attribute>=<value> as <key> %}
+    """
+    tag = token.contents.split()[0]
+    try:
+        definition = token.split_contents()
+        # definition should look like ['use', <entity>, 'with' <query>, 'as', '<key>']
+    except ValueError:
+        raise template.TemplateSyntaxError, '%r tag requires at least 5 arguments' % tag
+    if len(definition) != 6:
+        raise template.TemplateSyntaxError, '%r tag requires at least 5 arguments' % tag
+    if definition[2] != 'with':
+        raise template.TemplateSyntaxError, "second argument of %r tag has to be 'with'" % tag
+    if definition[-2] != 'as':
+        raise template.TemplateSyntaxError, "second last argument of %r tag has to be 'as'" % tag
+    entity = definition[1]
+    query = definition[-3]
+    #attr,val = query.split('=')
+    key = definition[-1]
+    #queryset = get_model('cluster', entity).objects.filter(**{attr:val})
+    #return ObjectNode(definition[-1], definition[1])
+    return QuerySetNode(entity, query, key)
+
+
+class QuerySetNode(template.Node):
+    """
+        Renderer, which fetches objects from the database.
+    """
+
+    def __init__(self, entity, query, key):
+        self.entity = entity
+        self.query = query.strip("'").strip('"')
+        self.key = key
+
+    def render(self, context):
+        attr, val = self.query.split('=')
+        queryset = get_model('cluster', self.entity).objects.filter(**{attr:val})
+        if len(queryset) is 1:
+            context[self.key] = queryset[0]
+        else:
+            context[self.key] = queryset
+        logger.debug('context = %s'%context)
+        return ''
+
+
+
+
+
+# use <entity> with <attribute>=<value> as <key>
+
+
+        

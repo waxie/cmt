@@ -152,7 +152,7 @@ class InterfaceAdmin(admin.ModelAdmin):
         ('Physical', {'fields': (('iftype', 'host'), 'hwaddress', 'ip')}),
         ('Network', {'fields': ('network', ('label', 'aliasses'))}),
         GlobalAdmin.extra_fieldset)
-    list_display = ('__unicode__', 'hwaddress', 'ip', 'iftype')
+    list_display = ('__unicode__', 'hwaddress', 'ip', 'network', 'iftype')
     list_filter  = ('network', 'iftype') + GlobalAdmin.list_filter
 
 

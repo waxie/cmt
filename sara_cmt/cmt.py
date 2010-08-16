@@ -320,6 +320,12 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
     else:
         logger.info('[DRYRUN] %s' % write_msg)
         logger.info('[DRYRUN] %s' % created_msg)
+
+    if not parser.values.DRYRUN:
+        try:
+            os.system(c['epilogue'])
+        except KeyError, e:
+            logger.info('Did not find an epilogue script')
     return
 
 
