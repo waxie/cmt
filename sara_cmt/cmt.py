@@ -323,7 +323,8 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
 
     if not parser.values.DRYRUN:
         try:
-            os.system(c['epilogue'])
+            for script in c['epilogue']:
+                os.system(script)
         except KeyError, e:
             logger.info('Did not find an epilogue script')
     return

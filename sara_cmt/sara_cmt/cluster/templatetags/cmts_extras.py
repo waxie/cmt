@@ -79,7 +79,10 @@ class ScriptNode(template.Node):
 
     def render(self, context):
         script = self.nodelist.render(context)
-        context['epilogue'] = script
+        if context.has_key('epilogue'):
+            context['epilogue'].append(script)
+        else:
+            context['epilogue'] = [script]
         # All content between {% epilogue %} and {% endepilogue %} is parsed now
         return ''
 

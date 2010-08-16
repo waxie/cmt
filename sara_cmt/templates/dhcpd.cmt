@@ -29,6 +29,7 @@ echo /etc/init.d/dhcp3-server restart
 {% use interface with 'network__name=lisa switches' as ifaces_lisa_switches %}
 {% use interface with 'network__name=lisa admin' as ifaces_lisa_admin %}
 {% use interface with 'network__name=lisa extern' as ifaces_lisa_extern %}
+{% use interface with 'network__name=hpcv projects' as ifaces_hpcv_projects %}
 {% use interface with 'network__name=lisa consoles' as ifaces_lisa_consoles %}
 {% use interface with 'network__name=icua' as ifaces_icua %}
 
@@ -252,6 +253,13 @@ group { # Start Admin network (boot) & extern
 	option option-155 "rc_dell_ng";
 
     {% noblanklines %}
+    {% for iface in ifaces_hpcv_projects %}
+    host {{iface.fqdn}} {
+        hardware ethernet {{iface.hwaddress}};
+        fixed-address {{iface.ip}};
+        option host-name "{{iface.fqdn}}";
+    }
+    {% endfor %}
     {% for iface in ifaces_lisa_extern %}
     host {{iface.fqdn}} {
         hardware ethernet {{iface.hwaddress}};
