@@ -1,5 +1,5 @@
 {% load cmts_extras %}
-{% store /usr/sara/etc/support.nodes.jaap as output %}
+{% store /usr/sara/etc/support.nodes as output %}
 {% noblanklines %}
     {% for hw in HardwareUnit.objects.all %}
         {% if hw.cluster.name == 'Lisa' %}
