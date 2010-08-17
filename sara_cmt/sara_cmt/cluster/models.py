@@ -155,6 +155,8 @@ class Interface(ModelExtension):
                                  generated if kept empty')
     aliasses  = models.ManyToManyField(Alias, blank=True, null=True,
                                        related_name='_interfaces')
+    aliases   = models.CharField(max_length=255, help_text='Cnames comma-seperated', blank=True, null=True)
+
     hwaddress = models.CharField(max_length=17, blank=True, null=True,
                                  verbose_name='hardware address',
                                  help_text="6 Octets, optionally delimited by \
