@@ -150,7 +150,8 @@ class AliasAdmin(admin.ModelAdmin):
 class InterfaceAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Physical', {'fields': (('iftype', 'host'), 'hwaddress', 'ip')}),
-        ('Network', {'fields': ('network', ('label', 'aliasses'))}),
+        ('Network', {'fields': ('network', ('label', 'aliases'))}),
+        #('Network', {'fields': ('network', ('label', 'aliasses'))}),
         GlobalAdmin.extra_fieldset)
     list_display = ('__unicode__', 'hwaddress', 'ip', 'network', 'iftype')
     list_filter  = ('network', 'iftype') + GlobalAdmin.list_filter
