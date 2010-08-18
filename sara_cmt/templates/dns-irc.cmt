@@ -10,14 +10,15 @@
 # Generated   : {% now "r" %}
 #
 {% load cmts_extras %}
-{% store /usr/sara/etc/dns.nodes as output %}
+{% store /var/tmp/dns.nodes as output %}
+{# {% store /etc/bind/prim/db.irc.sara.nl as output %} #}
 {% noblanklines %}
 
+{% epilogue %}
+/usr/sara/sbin/bind.sh {{output}}
+{% endepilogue %}
 {# {% epilogue %} #}
-{# echo /usr/sara/sbin/bind.sh #}
-{# {% endepilogue %} #}
-{# {% epilogue %} #}
-{# echo /etc/init.d/bind9 restart #}
+{# /etc/init.d/bind9 restart #}
 {# {% endepilogue %} #}
 
 {% use interface with 'network__name=lisa consoles' as ifaces_lisa_consoles %}
@@ -26,7 +27,7 @@
 {% use interface with 'network__name=lisa switches' as ifaces_lisa_switches %}
 
 @       IN      SOA     ns.irc.sara.nl. root.ns.irc.sara.nl. (
-                                           {% now "YmjHi" %} ; Serial
+                                         {% now "YmjH" %}   ; Serial
                                         7200            ; Refresh
                                         600             ; Retry
                                         604800          ; Expire
@@ -39,18 +40,18 @@ $INCLUDE {{output}}.manual
 
 {% noblanklines %}
 {% for iface in ifaces_lisa_admin %}
-{{ iface.label }} IN  A       {{ iface.ip }}
+{{ iface.label }}	IN	A	{{ iface.ip }}
 {% endfor %}
 
 {% for iface in ifaces_lisa_consoles %}
-{{ iface.label }} IN  A       {{ iface.ip }}
+{{ iface.label }}	IN	A	{{ iface.ip }}
 {% endfor %}
 
 {% for iface in ifaces_lisa_infiniband %}
-{{ iface.label }} IN  A       {{ iface.ip }}
+{{ iface.label }}	IN	A	{{ iface.ip }}
 {% endfor %}
 
 {% for iface in ifaces_lisa_switches %}
-{{ iface.label }} IN  A       {{ iface.ip }}
+{{ iface.label }}	IN	A	{{ iface.ip }}
 {% endfor %}
 {% endnoblanklines %}
