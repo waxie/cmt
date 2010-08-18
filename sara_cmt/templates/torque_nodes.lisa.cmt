@@ -8,8 +8,8 @@
 # Description :
 #
 # SVN:
-#       {{ svn_id }}
-#       {{ svn_url }}
+#       $Id$
+#       $URL$
 #
 {% load cmts_extras %}
 {% noblanklines %}
