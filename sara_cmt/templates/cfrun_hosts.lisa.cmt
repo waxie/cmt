@@ -17,7 +17,6 @@
 {% store /usr/sara/etc/cfengine/rc.hosts.lisa.jaap as output %}
 outputdir=/data/cfengine/output/lisa
 maxchild=80
-batch-ng
     {% for hw in HardwareUnit.objects.all %}
         {% if hw.cluster.name == 'Lisa' %}
             {% for i in hw.interfaces.all %}
