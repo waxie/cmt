@@ -14,7 +14,7 @@
 {% load cmts_extras %}
 {% noblanklines %}
 
-    {% store /var/tmp/lisa_nodes as output %}
+    {% store /data/cfengine/data/method/config_torque/lisa/server/server_priv/nodes as output %}
     {% store "'r7n2 r7n3 r7n4 r7n5" as express_nodes %}
 
     {% use HardwareUnit with 'cluster__name=Lisa' as lisa_hosts %}
