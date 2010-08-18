@@ -12,9 +12,10 @@
 #       {{ svn_url }}
 #
 {% load cmts_extras %}
-
 {% noblanklines %}
+
     {% store /var/tmp/lisa_nodes as output %}
+    {% store "'r7n2 r7n3 r7n4 r7n5" as express_nodes %}
 
     {% use HardwareUnit with 'cluster__name=Lisa' as lisa_hosts %}
 
@@ -47,7 +48,7 @@ gb-{{ host.label }} np=8  cores8 f_qlogic infiniband mem24gb q_parallel q_expres
 
     {% endfor %}
 
-{# This are all M600 Host with infiniband #}
+{# This are all M600 Host with infiniband, r7n2 t/m r7n5 are express nodes #}
 
     {% for host in lisa_hosts %}
 
@@ -61,7 +62,11 @@ gb-{{ host.label }} np=8  cores8 f_qlogic infiniband mem24gb q_parallel q_expres
 
 	    {% for i in host.interfaces.all %}
 	    	{% if 'infiniband' in i.network.name %}
+			{% if host.label in express_nodes %}
+gb-{{ host.label }} np=8  cores8 f_express infiniband mem16gb q_express r{{host.rack.label }}{{ chassis }}
+			{% else %}
 gb-{{ host.label }} np=8  cores8 f_qlogic infiniband mem16gb q_parallel q_express q_serial r{{host.rack.label }}{{ chassis }}
+			{% endif %}
                 {% endif %}
 	    {% endfor %} 
 
