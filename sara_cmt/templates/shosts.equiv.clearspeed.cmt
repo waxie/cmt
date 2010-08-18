@@ -14,8 +14,8 @@
 {% load cmts_extras %}
 {% noblanklines %}
 
-{# {% store /data/cfengine/data/method/config_ssh/keys/clearspeed/shosts.equiv as output %} #}
-{% store /var/tmp/shosts.equiv as output %}
+{% store /data/cfengine/data/method/config_ssh/keys/clearspeed/shosts.equiv as output %}
+{# {% store /var/tmp/shosts.equiv.clearspeed as output %} #}
     {% for hw in HardwareUnit.objects.all %}
         {% if hw.cluster.name == 'Clearspeed' %}
             {% for i in hw.interfaces.all %}
