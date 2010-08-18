@@ -147,8 +147,9 @@ class QuerySetNode(template.Node):
         logger.debug('context = %s'%context)
         return ''
 
-
-
+@register.filter(name="subtract")
+def sum_subtract( value, subtract ):
+	return ( int( value ) - subtract )
 
 
 # use <entity> with <attribute>=<value> as <key>
