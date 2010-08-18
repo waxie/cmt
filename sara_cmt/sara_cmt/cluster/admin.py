@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-from sara_cmt.cluster.models import Cluster, HardwareUnit, Alias, Interface, \
-                                    Network, Rack
+from sara_cmt.cluster.models import Cluster, HardwareUnit, Interface, Network, Rack
 from sara_cmt.cluster.models import Country, Address, Room
 from sara_cmt.cluster.models import Company, Telephonenumber, Connection
 from sara_cmt.cluster.models import HardwareModel, Role, InterfaceType
@@ -143,10 +142,6 @@ class RackAdmin(admin.ModelAdmin):
     ordering     = ('room',)
 
 
-class AliasAdmin(admin.ModelAdmin):
-    pass
-
-
 class InterfaceAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Physical', {'fields': (('iftype', 'host'), 'hwaddress', 'ip')}),
@@ -231,7 +226,6 @@ class WarrantyTypeAdmin(admin.ModelAdmin):
 
 admin.site.register(Cluster, ClusterAdmin)
 admin.site.register(HardwareUnit, HardwareUnitAdmin)
-admin.site.register(Alias, AliasAdmin)
 admin.site.register(Interface, InterfaceAdmin)
 admin.site.register(Network, NetworkAdmin)
 admin.site.register(Rack, RackAdmin)

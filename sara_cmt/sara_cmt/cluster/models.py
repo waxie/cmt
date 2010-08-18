@@ -127,21 +127,6 @@ class HardwareUnit(ModelExtension):
             pass
 
 
-class Alias(ModelExtension):
-    label     = models.CharField(max_length=255, unique=True)
-
-    class Meta:
-        verbose_name_plural = 'aliases'
-
-    def _interfaces(self):
-        return ' | '.join([interface.label for interface in
-            self._interfaces.all()]) or '-'
-    interfaces = property(_interfaces)
-
-    def __unicode__(self):
-        return self.label
-
-
 class Interface(ModelExtension):
     re_mac = re.compile('([a-fA-F\d]{2}[:|\-]?){5}[a-fA-F\d]{2}')
     hwaddress_validator = RegexValidator(re_mac,'Enter a valid hardware address.', 'invalid')
@@ -153,8 +138,6 @@ class Interface(ModelExtension):
                                   verbose_name='type')
     label     = models.CharField(max_length=255, help_text='Automagically \
                                  generated if kept empty')
-    aliasses  = models.ManyToManyField(Alias, blank=True, null=True,
-                                       related_name='_interfaces')
     aliases   = models.CharField(max_length=255, help_text='Cnames comma-seperated', blank=True, null=True)
 
     hwaddress = models.CharField(max_length=17, blank=True, null=True,
