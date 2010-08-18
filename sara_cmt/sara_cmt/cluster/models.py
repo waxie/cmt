@@ -220,7 +220,7 @@ class Network(ModelExtension):
                                   infiniband')
     netaddress = models.IPAddressField(help_text='example: 192.168.1.0')
     netmask    = models.IPAddressField(help_text='example: 255.255.255.0')
-    gateway    = models.IPAddressField(help_text='Automagically generated if kept empty')
+    gateway    = models.IPAddressField(blank=True, help_text='Automagically generated if kept empty')
     domain     = models.CharField(max_length=255, help_text='example: \
                                   irc.sara.nl')
     vlan       = models.PositiveIntegerField(max_length=3, null=True,
