@@ -206,7 +206,7 @@ class Interface(ModelExtension):
             try:
                 super(Interface, self).save(force_insert, force_update)
             except IntegrityError, e:
-                logger.warning(e)
+                logger.error(e)
         except AssertionError, e: # !!! TODO: exception on other errors !!!
             print AssertionError, e
 
@@ -220,6 +220,7 @@ class Network(ModelExtension):
                                   infiniband')
     netaddress = models.IPAddressField(help_text='example: 192.168.1.0')
     netmask    = models.IPAddressField(help_text='example: 255.255.255.0')
+    gateway    = models.IPAddressField(help_text='Automagically generated if kept empty')
     domain     = models.CharField(max_length=255, help_text='example: \
                                   irc.sara.nl')
     vlan       = models.PositiveIntegerField(max_length=3, null=True,
@@ -285,18 +286,27 @@ class Network(ModelExtension):
 
         found = False
         while not found and poll_ip < broadcast:
-            if IP(poll_ip).strNormal() in  assigned:
+            poll_ip_str = IP(poll_ip).strNormal()
+            if poll_ip_str in assigned or poll_ip_str == self.gateway:
                 poll_ip += 1
                 continue
             found = True
 
         if found:
-            ip = IP(poll_ip).strNormal()
+            #ip = IP(poll_ip).strNormal()
+            ip = poll_ip_str
         else:
+            logger.warning("No more IP's available in network '%s'"%self)
             ip = None
-            print "WARNING: No more IP's available in network '%s'" % self
 
         return ip
+
+    def default_gateway(self):
+        """
+            Return the first available ip address as the default gateway.
+        """
+        network = IP("%s/%s" % (self.netaddress, self.netmask))
+        return IP(network.ip+1).strNormal()
 
     def construct_interface_label(self, machine):
         """
@@ -309,6 +319,15 @@ class Network(ModelExtension):
     def cidr(self):
         network = IP("%s/%s" % (self.netaddress, self.netmask))
         return network.strNormal()
+
+    def save(self, force_insert=False, force_update=False):
+        if not self.gateway:
+            self.gateway = default_gateway 
+        try:
+            super(Network, self).save(force_insert, force_update)
+        except IntegrityError, e:
+            logger.error(e)
+
 
 
 class Rack(ModelExtension):
