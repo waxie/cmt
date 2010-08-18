@@ -26,4 +26,14 @@
             {% endfor %}
         {% endif %}
     {% endfor %}
+    {% for hw in HardwareUnit.objects.all %}
+        {% if hw.cluster.name == 'Lisa' %}
+            {% for i in hw.interfaces.all %}
+                {% if i.network.name == 'lisa infiniband' and "PowerEdge" in hw.specifications.name and "computenode" in hw.roles %} 
+{{ i.fqdn }}
+{{ i.ip }}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
 {% endnoblanklines %}
