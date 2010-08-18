@@ -13,15 +13,17 @@
 #
 {% load cmts_extras %}
 
-{% use hardwareunit with 'label=mapserver' as machines %}
+{% use hardwareunit with 'rack=31' as machines %}
 
 {% noblanklines %}
 {% for machine in machines %}
 {% for iface in machine.interfaces.all %}
 {{ iface }}
+{% if iface.cnames != None %}
 {% for cname in iface.cnames %}
-{{ iface }}:{{cname}}
+--{{ iface }}:{{cname}}
 {% endfor %}
+{% endif %}
 {% endfor %}
 {% endfor %}
 {% endnoblanklines %}
