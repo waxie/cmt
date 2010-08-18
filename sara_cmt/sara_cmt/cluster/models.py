@@ -151,6 +151,11 @@ class Interface(ModelExtension):
         return '%s.%s' % (self.label, self.network.domain)
     fqdn = property(_fqdn)
 
+    def _cnames(self):
+        if self.aliases:
+            return self.aliases.split(',')
+    cnames = property(_cnames)
+
     def __unicode__(self):
         #return self.fqdn
         return self.label or 'anonymous'
