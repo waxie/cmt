@@ -75,7 +75,7 @@ class HardwareUnit(ModelExtension):
     room = property(_room)
 
     def _roles(self):
-        return ', '.join([role.label for role in self.role.all()]) or '-'
+        return [role.label for role in self.role.all()]
     roles = property(_roles)
 
     def _in_support(self):

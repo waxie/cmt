@@ -239,11 +239,13 @@ group { # Start Admin network (boot) & not extern
 
     {% noblanklines %}
     {% for iface in ifaces_lisa_admin %}
+        {% if 'externe service' not in iface.host.roles %}
     host {{iface.fqdn}} {
         hardware ethernet {{iface.hwaddress}};
         fixed-address {{iface.ip}};
         option host-name "{{iface.fqdn}}";
     }
+        {% endif %}
     {% endfor %}
     {% endnoblanklines %}
 } # End admin network (boot)
@@ -253,19 +255,14 @@ group { # Start Admin network (boot) & extern
 	option option-155 "rc_dell_ng";
 
     {% noblanklines %}
-    {% for iface in ifaces_hpcv_projects %}
+    {% for iface in ifaces_lisa_admin %}
+        {% if 'externe service' in iface.host.roles %}
     host {{iface.fqdn}} {
         hardware ethernet {{iface.hwaddress}};
         fixed-address {{iface.ip}};
         option host-name "{{iface.fqdn}}";
     }
-    {% endfor %}
-    {% for iface in ifaces_lisa_extern %}
-    host {{iface.fqdn}} {
-        hardware ethernet {{iface.hwaddress}};
-        fixed-address {{iface.ip}};
-        option host-name "{{iface.fqdn}}";
-    }
+        {% endif %}
     {% endfor %}
     {% endnoblanklines %}
 } # End admin network (boot)
