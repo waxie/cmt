@@ -10,16 +10,16 @@
 # Generated   : {% now "r" %}
 #
 {% load cmts_extras %}
-{% store /usr/sara/etc/dns.nodes as output %}
-{# {% store /etc/bind/prim/db.icua.sara.nl as output %} #}
+{# {% store /usr/sara/etc/dns.nodes as output %} #}
+{% store /etc/bind/prim/db.icua.sara.nl as output %}
 {% noblanklines %}
 
 {% epilogue %}
 /usr/sara/sbin/bind.sh {{output}}
 {% endepilogue %}
-{# {% epilogue %} #}
-{# echo /etc/init.d/bind9 restart #}
-{# {% endepilogue %} #}
+{% epilogue %} #}
+/etc/init.d/bind9 restart
+{% endepilogue %} #}
 
 {% use interface with 'network__name=icua' as ifaces_icua %}
 
@@ -38,5 +38,10 @@ $INCLUDE {{output}}.manual
 {% noblanklines %}
 {% for iface in ifaces_icua %}
 {{ iface.label }} IN  A       {{ iface.ip }}
+{% if iface.cnames != None %}
+{% for cname in iface.cnames %}
+{{cname}} 	IN 	CNAME 	{{ iface.label }}
+{% endfor %}
+{% endif %}
 {% endfor %}
 {% endnoblanklines %}

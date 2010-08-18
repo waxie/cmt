@@ -10,16 +10,16 @@
 # Generated   : {% now "r" %}
 #
 {% load cmts_extras %}
-{% store /var/tmp/dns.nodes as output %}
-{# {% store /etc/bind/prim/db.irc.sara.nl as output %} #}
+{# {% store /var/tmp/dns.nodes as output %} #}
+{% store /etc/bind/prim/db.irc.sara.nl as output %}
 {% noblanklines %}
 
 {% epilogue %}
 /usr/sara/sbin/bind.sh {{output}}
 {% endepilogue %}
-{# {% epilogue %} #}
-{# /etc/init.d/bind9 restart #}
-{# {% endepilogue %} #}
+{% epilogue %} #}
+/etc/init.d/bind9 restart
+{% endepilogue %}
 
 {% use interface with 'network__name=lisa consoles' as ifaces_lisa_consoles %}
 {% use interface with 'network__name=lisa admin' as ifaces_lisa_admin %}
@@ -41,17 +41,37 @@ $INCLUDE {{output}}.manual
 {% noblanklines %}
 {% for iface in ifaces_lisa_admin %}
 {{ iface.label }}	IN	A	{{ iface.ip }}
+{% if iface.cnames != None %}
+{% for cname in iface.cnames %}
+{{cname}} 	IN 	CNAME 	{{ iface.label }}
+{% endfor %}
+{% endif %}
 {% endfor %}
 
 {% for iface in ifaces_lisa_consoles %}
 {{ iface.label }}	IN	A	{{ iface.ip }}
+{% if iface.cnames != None %}
+{% for cname in iface.cnames %}
+{{cname}} 	IN 	CNAME 	{{ iface.label }}
+{% endfor %}
+{% endif %}
 {% endfor %}
 
 {% for iface in ifaces_lisa_infiniband %}
 {{ iface.label }}	IN	A	{{ iface.ip }}
+{% if iface.cnames != None %}
+{% for cname in iface.cnames %}
+{{cname}} 	IN 	CNAME 	{{ iface.label }}
+{% endfor %}
+{% endif %}
 {% endfor %}
 
 {% for iface in ifaces_lisa_switches %}
 {{ iface.label }}	IN	A	{{ iface.ip }}
+{% if iface.cnames != None %}
+{% for cname in iface.cnames %}
+{{cname}} 	IN 	CNAME 	{{ iface.label }}
+{% endfor %}
+{% endif %}
 {% endfor %}
 {% endnoblanklines %}
