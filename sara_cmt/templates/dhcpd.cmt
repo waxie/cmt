@@ -33,7 +33,7 @@ echo /etc/init.d/dhcp3-server restart
 {% use interface with 'network__name=lisa consoles' as ifaces_lisa_consoles %}
 {% use interface with 'network__name=icua' as ifaces_icua %}
 
-{% endnoblanklines%}
+{% endnoblanklines %}
 
 # general options
 authoritative;
