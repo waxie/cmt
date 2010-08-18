@@ -29,6 +29,7 @@
 
 		{% if 'admin' in i.network.name %}
 
+{# safe: else we get all kine off escaping, get rid of ' begin en ' end chars #}
 {{ i.label }} {{ node_properties|safe|slice:"1:-1" }}
 
 		{% endif %}
