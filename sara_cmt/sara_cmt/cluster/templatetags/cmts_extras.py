@@ -140,10 +140,7 @@ class QuerySetNode(template.Node):
     def render(self, context):
         attr, val = self.query.split('=')
         queryset = get_model('cluster', self.entity).objects.filter(**{attr:val})
-        if len(queryset) is 1:
-            context[self.key] = queryset[0]
-        else:
-            context[self.key] = queryset
+        context[self.key] = queryset
         logger.debug('context = %s'%context)
         return ''
 
