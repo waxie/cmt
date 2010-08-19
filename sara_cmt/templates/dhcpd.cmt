@@ -14,7 +14,7 @@
 {% load cmts_extras %}
 {% noblanklines %}
 
-{% store /var/tmp/cmttestdhcpd.conf as output %}
+{% store /etc/dhcp3/dhcpd.conf as output %}
 
 {% epilogue %}
 echo /etc/init.d/dhcp3-server restart
