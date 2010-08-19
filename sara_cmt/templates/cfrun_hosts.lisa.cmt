@@ -14,7 +14,7 @@
 {% load cmts_extras %}
 {% noblanklines %}
 
-{% store /usr/sara/etc/cfengine/rc.hosts.lisa.jaap as output %}
+{% store /usr/sara/etc/cfengine/rc.hosts.lisa as output %}
 outputdir=/data/cfengine/output/lisa
 maxchild=80
 batch-ng.irc.sara.nl
