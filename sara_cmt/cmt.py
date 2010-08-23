@@ -249,23 +249,49 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
 def generate(option, opt_str, value, parser, *args, **kwargs):
     from sara_cmt.template import CMTTemplate
     from django.template import Context
-    # !!! TODO: Do this in the templates
-    from sara_cmt.cluster.models import Cluster, HardwareUnit, Interface, Network # for template_data
 
     # Save full path of templatefile to generate
-    filename = '%s.cmt' % value
-    fullpath = os.path.join(settings.CMT_TEMPLATES_DIR, '%s.cmt' % value)
+    filename = CMTTemplate.to_filename(value)
+
+    # Make a dict with filenames of the available templates
+    files = [f for f in os.listdir(settings.CMT_TEMPLATES_DIR) if f[-4:]=='.cmt']
+    fdict = {}
+    i = 1
+    for f in files:
+        fdict[i] = f
+        i+=1
+
+    # Loop until a valid template has been chosen by the user
+    while filename not in fdict.values():
+        logger.warning("File '%s' not known"%filename)
+
+        # Give a numbered overview of the available templates
+        for key,val in fdict.items():
+            print '%s : %s'%(str(key).rjust(2),val)
+        logger.debug('fdict: %s'%fdict.values())
+        filename = raw_input('\nChoose: ')
+
+        # If number given, lookup the filename in the dictionary
+        if filename.isdigit():
+            num = int(filename)
+            if num <= len(fdict):
+                filename = fdict[num]
+                logger.debug('filename: %s'%filename)
+            else:
+                continue
+        # Else check for the extension
+        elif filename[-4:]!='.cmt':
+            filename+='.cmt'
+
+        logger.debug('%s (%s)'%(filename,type(filename)))
+
+    fullpath = os.path.join(settings.CMT_TEMPLATES_DIR, filename)
 
     # Load the contents of the templatefile as a CMTTemplate
     try:
         f = open(fullpath, 'r')
         templatestr = f.read()
         f.close()
-
-        ### <DEBUG>
-        #logger.debug('<TEMPSTR>\n%s'%templatestr)
-        #logger.debug('</TEMPSTR>')
-        ### </DEBUG>
 
         template = CMTTemplate(templatestr)
 
@@ -275,11 +301,6 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
         template_data['svn_id'] = '$Id:$'
         template_data['svn_url'] = '$URL:$'
         template_data['input'] = fullpath
-        # !!! TODO: Change from hardcoded to dynamic:
-        template_data['Cluster'] = Cluster
-        template_data['HardwareUnit'] = HardwareUnit
-        template_data['Interface'] = Interface
-        template_data['Network'] = Network
 
         c = Context(template_data)
         res = template.render(c)
@@ -288,21 +309,11 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
         # context, so these can be used for post-processing.
 
         ### <DEBUG>
-        #logger.debug('<CONTEXT>\n%s'%c)
-        #logger.debug('</CONTEXT>')
         logger.debug('<RESULT>\n%s'%res)
         logger.debug('</RESULT>')
         ### </DEBUG>
     except IOError, e:
         logger.error('Template does not exist: %s' % e)
-
-    ### <DEBUG>
-    #logger.info('Now executing epilogue script')
-    #logger.debug('<EPILOGUE>')
-    #os.system(c['epilogue'])
-    #logger.debug('</EPILOGUE>')
-    #logger.info('Finished epilogue script')
-    ### </DEBUG>
 
     if not parser.values.DRYRUN:
         write_msg = 'Writing outputfile'
@@ -324,7 +335,13 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
     if not parser.values.DRYRUN:
         try:
             for script in c['epilogue']:
+                ### <DEBUG>
+                #logger.info('Now executing epilogue script')
+                #logger.debug('<EPILOGUE>')
                 os.system(script)
+                #logger.debug('</EPILOGUE>')
+                #logger.info('Finished epilogue script')
+                ### </DEBUG>
         except KeyError, e:
             logger.info('Did not find an epilogue script')
     return
