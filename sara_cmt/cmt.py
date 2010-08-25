@@ -261,6 +261,9 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
         fdict[i] = f
         i+=1
 
+    if filename[-4:] != '.cmt':
+        filename += '.cmt'
+
     # Loop until a valid template has been chosen by the user
     while filename not in fdict.values():
         logger.warning("File '%s' not known"%filename)
