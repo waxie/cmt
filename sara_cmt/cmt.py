@@ -251,7 +251,7 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
     from django.template import Context
 
     # Save full path of templatefile to generate
-    filename = CMTTemplate.to_filename(value)
+    filename = value
 
     # Make a dict with filenames of the available templates
     files = [f for f in os.listdir(settings.CMT_TEMPLATES_DIR) if f[-4:]=='.cmt']
