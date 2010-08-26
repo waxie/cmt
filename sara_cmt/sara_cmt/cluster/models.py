@@ -310,7 +310,7 @@ class Network(ModelExtension):
 
     def save(self, force_insert=False, force_update=False):
         if not self.gateway:
-            self.gateway = default_gateway 
+            self.gateway = self.default_gateway() 
         try:
             super(Network, self).save(force_insert, force_update)
         except IntegrityError, e:
