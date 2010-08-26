@@ -15,16 +15,15 @@
 {% noblanklines %}
 
 {% store /usr/sara/etc/cfengine/rc.hosts.lisa as output %}
+{% use HardwareUnit with 'cluster__name=Lisa' as lisa_hosts %}
 outputdir=/data/cfengine/output/lisa
 maxchild=80
 batch-ng.irc.sara.nl
-    {% for hw in HardwareUnit.objects.all %}
-        {% if hw.cluster.name == 'Lisa' %}
+    {% for hw in lisa_hosts %}
             {% for i in hw.interfaces.all %}
                 {% if i.network.name == 'lisa admin' and "PowerEdge" in hw.specifications.name and "computenode" in hw.roles %} 
 {{ i.fqdn }}
                 {% endif %}
             {% endfor %}
-        {% endif %}
     {% endfor %}
 {% endnoblanklines %}

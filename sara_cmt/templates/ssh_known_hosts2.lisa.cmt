@@ -15,6 +15,7 @@
 {% noblanklines %}
 {# {% store /var/tmp/ssh_known_hosts2.lisa as output %} #}
 {% store /data/cfengine/data/method/config_ssh/keys/lisa/ssh_known_hosts2 as output %}
+{% use HardwareUnit with 'cluster__name=Lisa' as lisa_hosts %}
 
 # New boot keys
 boot,boot.irc.sara.nl,192.168.146.10 ssh-dss AAAAB3NzaC1kc3MAAACBAKfK3Q08f+2xIF6bTdbLWCvtC8V+gV00wERk5FjzkkUOVBHFxN32tc3Wyro389RZ3Iq6E7A3pj8M+ze2uYL8xenelLk4JX2uapaRXRGqBRX98RdeMuKcXxz4GkiKFAGBulOI8kA0g6Sf2jhlpl416RGVZ1Iv3DpmXe8nXAdsWL/lAAAAFQCypUSocTN/fkOyVEnOKw+meo/NlQAAAIB9P5jECPKwreVqHmup4BcFae/vQ14XWCR3+ATodSgKDSLg+LexZPuPGL1PXq0rOx7ZKIXIFu8/F67RiT1W4WTLt9QqZNPHZdra6YGhv5Tryv0p0H4ENgNj9TSCiS8hUMFurbaeFHLtv9xpe9XDeaEby+Ms6AqIABhmfYsvMDYzdQAAAIBWzWV2axklCSbM8vrknNFH7pPBRnzrPWwNsdPqFzIgrjEzqiScIfQEbyfCLYKfEWA6A91y7DQBygWyuAiL9OA/2M3Qu8wUU9C94lHi/pYQIe9fNS2qLCOfXNWEThFEqvEW7Zb2JdbwRVZqVVvQdoEIXPnE0eyaYUXTFFk0MtKb7w== root@boot.irc.sara.nl
@@ -24,24 +25,20 @@ install-ng,install-ng.irc.sara.nl,192.168.144.2 ssh-dss AAAAB3NzaC1kc3MAAACBAKym
 install-ng,install-ng.irc.sara.nl,192.168.144.2 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAvGo9XAVzR9gE74E8yzkCKrN4HLjgx3VsiajbDL2ILOQcQNFPLGhgmif2pwBTH+9ayXd3ph6i3rtTQV7Mpe8NgnI1v1I2JiqOjFxNjPh4BMdB11ZxC4EzgDW/vpYXi68WUfpD8cPptMax/g4q/XVhgkg5minzy80buqCr8hN6dsE=
 
 
-    {% for hw in HardwareUnit.objects.all %}
-        {% if hw.cluster.name == 'Lisa' %}
+    {% for hw in lisa_hosts %}
             {% for i in hw.interfaces.all %}
                 {% if i.network.name == 'lisa admin' and "PowerEdge" in hw.specifications.name and "computenode" in hw.roles %} 
 {{i.label}},{{ i.fqdn }},{{i.ip}} ssh-dss AAAAB3NzaC1kc3MAAACBAKfK3Q08f+2xIF6bTdbLWCvtC8V+gV00wERk5FjzkkUOVBHFxN32tc3Wyro389RZ3Iq6E7A3pj8M+ze2uYL8xenelLk4JX2uapaRXRGqBRX98RdeMuKcXxz4GkiKFAGBulOI8kA0g6Sf2jhlpl416RGVZ1Iv3DpmXe8nXAdsWL/lAAAAFQCypUSocTN/fkOyVEnOKw+meo/NlQAAAIB9P5jECPKwreVqHmup4BcFae/vQ14XWCR3+ATodSgKDSLg+LexZPuPGL1PXq0rOx7ZKIXIFu8/F67RiT1W4WTLt9QqZNPHZdra6YGhv5Tryv0p0H4ENgNj9TSCiS8hUMFurbaeFHLtv9xpe9XDeaEby+Ms6AqIABhmfYsvMDYzdQAAAIBWzWV2axklCSbM8vrknNFH7pPBRnzrPWwNsdPqFzIgrjEzqiScIfQEbyfCLYKfEWA6A91y7DQBygWyuAiL9OA/2M3Qu8wUU9C94lHi/pYQIe9fNS2qLCOfXNWEThFEqvEW7Zb2JdbwRVZqVVvQdoEIXPnE0eyaYUXTFFk0MtKb7w== root@boot.irc.sara.nl
 {{i.label}},{{ i.fqdn }},{{i.ip}} ssh-rsa AAAAB3NzaC1kc3MAAACBAKfK3Q08f+2xIF6bTdbLWCvtC8V+gV00wERk5FjzkkUOVBHFxN32tc3Wyro389RZ3Iq6E7A3pj8M+ze2uYL8xenelLk4JX2uapaRXRGqBRX98RdeMuKcXxz4GkiKFAGBulOI8kA0g6Sf2jhlpl416RGVZ1Iv3DpmXe8nXAdsWL/lAAAAFQCypUSocTN/fkOyVEnOKw+meo/NlQAAAIB9P5jECPKwreVqHmup4BcFae/vQ14XWCR3+ATodSgKDSLg+LexZPuPGL1PXq0rOx7ZKIXIFu8/F67RiT1W4WTLt9QqZNPHZdra6YGhv5Tryv0p0H4ENgNj9TSCiS8hUMFurbaeFHLtv9xpe9XDeaEby+Ms6AqIABhmfYsvMDYzdQAAAIBWzWV2axklCSbM8vrknNFH7pPBRnzrPWwNsdPqFzIgrjEzqiScIfQEbyfCLYKfEWA6A91y7DQBygWyuAiL9OA/2M3Qu8wUU9C94lHi/pYQIe9fNS2qLCOfXNWEThFEqvEW7Zb2JdbwRVZqVVvQdoEIXPnE0eyaYUXTFFk0MtKb7w== root@boot.irc.sara.nl
                 {% endif %}
             {% endfor %}
-        {% endif %}
     {% endfor %}
-    {% for hw in HardwareUnit.objects.all %}
-        {% if hw.cluster.name == 'Lisa' %}
+    {% for hw in lisa_hosts %}
             {% for i in hw.interfaces.all %}
                 {% if i.network.name == 'lisa infiniband' and "PowerEdge" in hw.specifications.name and "computenode" in hw.roles %} 
 {{i.label}},{{ i.fqdn }},{{i.ip}} ssh-dss AAAAB3NzaC1kc3MAAACBAKfK3Q08f+2xIF6bTdbLWCvtC8V+gV00wERk5FjzkkUOVBHFxN32tc3Wyro389RZ3Iq6E7A3pj8M+ze2uYL8xenelLk4JX2uapaRXRGqBRX98RdeMuKcXxz4GkiKFAGBulOI8kA0g6Sf2jhlpl416RGVZ1Iv3DpmXe8nXAdsWL/lAAAAFQCypUSocTN/fkOyVEnOKw+meo/NlQAAAIB9P5jECPKwreVqHmup4BcFae/vQ14XWCR3+ATodSgKDSLg+LexZPuPGL1PXq0rOx7ZKIXIFu8/F67RiT1W4WTLt9QqZNPHZdra6YGhv5Tryv0p0H4ENgNj9TSCiS8hUMFurbaeFHLtv9xpe9XDeaEby+Ms6AqIABhmfYsvMDYzdQAAAIBWzWV2axklCSbM8vrknNFH7pPBRnzrPWwNsdPqFzIgrjEzqiScIfQEbyfCLYKfEWA6A91y7DQBygWyuAiL9OA/2M3Qu8wUU9C94lHi/pYQIe9fNS2qLCOfXNWEThFEqvEW7Zb2JdbwRVZqVVvQdoEIXPnE0eyaYUXTFFk0MtKb7w== root@boot.irc.sara.nl
 {{i.label}},{{ i.fqdn }},{{i.ip}} ssh-rsa AAAAB3NzaC1kc3MAAACBAKfK3Q08f+2xIF6bTdbLWCvtC8V+gV00wERk5FjzkkUOVBHFxN32tc3Wyro389RZ3Iq6E7A3pj8M+ze2uYL8xenelLk4JX2uapaRXRGqBRX98RdeMuKcXxz4GkiKFAGBulOI8kA0g6Sf2jhlpl416RGVZ1Iv3DpmXe8nXAdsWL/lAAAAFQCypUSocTN/fkOyVEnOKw+meo/NlQAAAIB9P5jECPKwreVqHmup4BcFae/vQ14XWCR3+ATodSgKDSLg+LexZPuPGL1PXq0rOx7ZKIXIFu8/F67RiT1W4WTLt9QqZNPHZdra6YGhv5Tryv0p0H4ENgNj9TSCiS8hUMFurbaeFHLtv9xpe9XDeaEby+Ms6AqIABhmfYsvMDYzdQAAAIBWzWV2axklCSbM8vrknNFH7pPBRnzrPWwNsdPqFzIgrjEzqiScIfQEbyfCLYKfEWA6A91y7DQBygWyuAiL9OA/2M3Qu8wUU9C94lHi/pYQIe9fNS2qLCOfXNWEThFEqvEW7Zb2JdbwRVZqVVvQdoEIXPnE0eyaYUXTFFk0MtKb7w== root@boot.irc.sara.nl
                 {% endif %}
             {% endfor %}
-        {% endif %}
     {% endfor %}
 {% endnoblanklines %}

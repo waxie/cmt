@@ -15,25 +15,22 @@
 {% noblanklines %}
 
 {% store /data/cfengine/data/method/config_ssh/keys/lisa/shosts.equiv as output %}
+{% use HardwareUnit with 'cluster__name=Lisa' as lisa_hosts %}
 {# {% store /var/tmp/shosts.equiv.lisa as output %} #}
-    {% for hw in HardwareUnit.objects.all %}
-        {% if hw.cluster.name == 'Lisa' %}
+    {% for hw in lisa_hosts %}
             {% for i in hw.interfaces.all %}
                 {% if i.network.name == 'lisa admin' and "PowerEdge" in hw.specifications.name and "computenode" in hw.roles %} 
 {{ i.fqdn }}
 {{ i.ip }}
                 {% endif %}
             {% endfor %}
-        {% endif %}
     {% endfor %}
-    {% for hw in HardwareUnit.objects.all %}
-        {% if hw.cluster.name == 'Lisa' %}
+    {% for hw in lisa_hosts %}
             {% for i in hw.interfaces.all %}
                 {% if i.network.name == 'lisa infiniband' and "PowerEdge" in hw.specifications.name and "computenode" in hw.roles %} 
 {{ i.fqdn }}
 {{ i.ip }}
                 {% endif %}
             {% endfor %}
-        {% endif %}
     {% endfor %}
 {% endnoblanklines %}
