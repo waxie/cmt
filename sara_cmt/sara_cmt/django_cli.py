@@ -156,6 +156,8 @@ class ModelExtension(models.Model):
             #elif type(field) == ManyToManyField:
             #    # Leave M2Ms for later, because they need an object's id
             #    m2ms.append([field, arg_dict[arg]])
+            elif type(field) == ManyToManyField:
+                m2ms.append([field,arg_dict[arg]])
 
             #else:
             #    logger.debug("Assuming '%s' is a regular field" % arg)
@@ -327,6 +329,7 @@ class ModelExtension(models.Model):
             pass
         else:
             for object in objects:
+                # !!! TODO: make options to add (+=), remove(-=), and set (=)
                 self.__getattribute__(field.name).add(object)
 
         logger.critical('value to save: %s' % value)

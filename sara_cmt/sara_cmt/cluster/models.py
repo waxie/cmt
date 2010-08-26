@@ -75,7 +75,7 @@ class HardwareUnit(ModelExtension):
     room = property(_room)
 
     def _roles(self):
-        return [role.label for role in self.role.all()]
+        return [str(role.label) for role in self.role.all()]
     roles = property(_roles)
 
     def _in_support(self):
@@ -529,7 +529,7 @@ class Role(ModelExtension):
         verbose_name_plural = 'roles'
 
     def __unicode__(self):
-        return self.label
+        return str(self.label)
 
 
 class InterfaceType(ModelExtension):
