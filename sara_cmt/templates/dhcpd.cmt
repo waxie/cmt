@@ -17,7 +17,7 @@
 {% store /etc/dhcp3/dhcpd.conf as output %}
 
 {% epilogue %}
-echo /etc/init.d/dhcp3-server restart
+/etc/init.d/dhcp3-server restart
 {% endepilogue %}
 
 {% use network with 'name=lisa consoles' as net_lisa_consoles %}
