@@ -12,16 +12,13 @@
 #       {{ svn_url }}
 #
 {% load cmts_extras %}
+{% epilogue %} #}
+/etc/init.d/netbeat-server restart
+{% endepilogue %}
 {% noblanklines %}
-
+{% use interface with 'network__name=lisa admin' as ifaces_lisa_admin %}
 {% store /etc/netbeat-server.conf as output %}
-    {% for hw in HardwareUnit.objects.all %}
-        {% if hw.cluster.name == 'Lisa' %}
-            {% for i in hw.interfaces.all %}
-                {% if i.network.name == 'lisa admin' %} 
+{% for i in ifaces_lisa_admin %}
 {{ i.fqdn }}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endfor %}
+{% endfor %}
 {% endnoblanklines %}
