@@ -280,16 +280,16 @@ class ModelExtension(models.Model):
                 logger.warning(e)
         logger.debug('Found the following matching objects: %s' % qset)
 
-        objects = [obj for obj in qset]
+        objects = [_object for _object in qset]
         object_count = len(objects)
         if object_count is 0:
             logger.warning('No matching object found; Change your query.')
             pass
         elif object_count is 1:
-            obj = objects[0]
-            logger.debug('Found 1 match: %s' % obj)
-            self.__setattr__(field.attname, obj.id)
-            logger.debug('%s now references to %s' % (field.name, obj))
+            _object = objects[0]
+            logger.debug('Found 1 match: %s' % _object)
+            self.__setattr__(field.attname, _object.id)
+            logger.debug('%s now references to %s' % (field.name, _object))
         else:
             # !!! TODO: let the user refine the search !!!
             logger.warning('To many matching objects; Refine your query.')
@@ -322,15 +322,15 @@ class ModelExtension(models.Model):
                 **{'%s__in' % subfield.name: values})
         logger.debug('Found the following matching objects: %s' % qset)
 
-        objects = [object for object in qset]
+        objects = [_object for _object in qset]
         object_count = len(objects)
         if object_count is 0:
             logger.warning('No matching object found; Change your query.')
             pass
         else:
-            for object in objects:
+            for _object in objects:
                 # !!! TODO: make options to add (+=), remove(-=), and set (=)
-                self.__getattribute__(field.name).add(object)
+                self.__getattribute__(field.name).add(_object)
 
         logger.critical('value to save: %s' % value)
 
@@ -417,12 +417,12 @@ class ObjectManager():
             Save all objects of the given QuerySet.
         """
         # TODO: implement
-        for object in qset:
+        for _object in qset:
             try:
-                self._save_object(object)
+                self._save_object(_object)
             except:
                 logger.error('Error saving %s %s' \
-                    % (object.__class__.__name__, object))
+                    % (_object.__class__.__name__, _object))
 
     def display(self, instance):
         """

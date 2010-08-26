@@ -176,8 +176,8 @@ def show(option, opt_str, value, parser, *args, **kwargs):
 
     # !!! TODO: either print short, or print long lists !!!
     # !!! TODO: use config files for fields (not) to print (maybe
-    for object in objects:
-        ModelExtension.display(object)
+    for _object in objects:
+        ModelExtension.display(_object)
 
 
 @crud_validate
@@ -193,15 +193,15 @@ def change(option, opt_str, value, parser, *args, **kwargs):
     objects = object_mgr.get_objects(query)
 
     if objects:
-        logger.debug('Found %s entities matching query: %s'
-            % (len(objects), objects))
+        logger.info('Found %s entities matching query: %s'
+            % (len(objects), ', '.join([_object.label for _object in objects])))
         confirmed = not parser.values.INTERACTIVE or \
             raw_input('Are you sure? [Yn] ')
         if confirmed in ['', 'y', 'Y', True]:
-            for object in objects:
-                attr_set_msg = 'Attributes has been set: %s' % object
+            for _object in objects:
+                attr_set_msg = 'Attributes has been set: %s' % _object
                 if not parser.values.DRYRUN:
-                    object.setattrs_from_dict(query['set'])
+                    _object.setattrs_from_dict(query['set'])
                     logger.debug(attr_set_msg)
                 else:
                     logger.debug('[DRYRUN] %s' % attr_set_msg)
@@ -222,18 +222,18 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
 
     if objects:
         logger.info('Found %s objects matching query: %s'\
-            % (len(objects), ', '.join([object.__str__()
-                for object in objects])))
+            % (len(objects), ', '.join([_object.__str__()
+                for _object in objects])))
         confirmation = not parser.values.INTERACTIVE or \
             raw_input('Are you sure? [Yn] ')
         print 'confirmation', confirmation
         # Delete and log
         if confirmation in ['', 'y', 'Y', True]:
             logger.info('deleting...')
-            for object in objects:
-                del_msg = 'Deleted %s' % object
+            for _object in objects:
+                del_msg = 'Deleted %s' % _object
                 if not parser.values.DRYRUN:
-                    object.delete()
+                    _object.delete()
                     logger.info(del_msg)
                 else:
                     logger.info('[DRYRUN] %s' % del_msg)
@@ -350,32 +350,33 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
     return
 
 
-def mac(option, opt_str, value, parser, *args, **kwargs):
-    """
-        Change the MAC-address of an existing interface.
-    """
-    old_mac, new_mac = value
+#def mac(option, opt_str, value, parser, *args, **kwargs):
+#    """
+#        Change the MAC-address of an existing interface.
+#    """
+#    old_mac, new_mac = value
+#
+#    query = {'ent': search_model('interface'),
+#        'get': {'hwaddress': [old_mac]}, 'set': {'hwaddress': [new_mac]}}
+#
+#    _object = object_mgr.get_object(query)
+#
+#    if _object:
+#        logger.debug('Found a unique object matching query: %s' % _object)
+#        confirmed = not parser.values.INTERACTIVE or \
+#            raw_input('Are you sure? [Yn] ')
+#        if confirmed in ['', 'y', 'Y', True]:
+#            attr_set_msg = 'Attributes has been set: %s' % _object
+#            if not parser.values.DRYRUN:
+#                _object.setattrs_from_dict(query['set'])
+#                logger.debug(attr_set_msg)
+#            else:
+#                logger.debug('[DRYRUN] %s' % attr_set_msg)
+#        else:
+#            logger.info('Change of MAC-address has been cancelled')
+#    else:
+#        logger.error('Unable to execute this request')
 
-    query = {'ent': search_model('interface'),
-        'get': {'hwaddress': [old_mac]}, 'set': {'hwaddress': [new_mac]}}
-
-    object = object_mgr.get_object(query)
-
-    if object:
-        logger.debug('Found a unique object matching query: %s' % object)
-        confirmed = not parser.values.INTERACTIVE or \
-            raw_input('Are you sure? [Yn] ')
-        if confirmed in ['', 'y', 'Y', True]:
-            attr_set_msg = 'Attributes has been set: %s' % object
-            if not parser.values.DRYRUN:
-                object.setattrs_from_dict(query['set'])
-                logger.debug(attr_set_msg)
-            else:
-                logger.debug('[DRYRUN] %s' % attr_set_msg)
-        else:
-            logger.info('Change of MAC-address has been cancelled')
-    else:
-        logger.error('Unable to execute this request')
 #
 # </Database related methods>
 #
@@ -483,13 +484,13 @@ def main():
 
                         The query, which consists out of one or more terms, is
                         used to make a selection of objects to list.""")
-    parser.add_option('-m', '--mac',
-                    action='callback',
-                    callback=mac,
-                    type='string',
-                    metavar='<old MAC> <new MAC>',
-                    nargs=2,
-                    help='Change the MAC-address of an interface')
+#    parser.add_option('-m', '--mac',
+#                    action='callback',
+#                    callback=mac,
+#                    type='string',
+#                    metavar='<old MAC> <new MAC>',
+#                    nargs=2,
+#                    help='Change the MAC-address of an interface')
     parser.add_option('-r', '--remove',
                     action='callback',
                     callback=remove,

@@ -86,7 +86,7 @@ class HardwareUnit(ModelExtension):
             retval = not self.warranty.expired
         except:
             retval = False
-            logger.error("Hardware with label '%s' hasn't got a warranty \
+            logger.warning("Hardware with label '%s' hasn't got a warranty \
                 contract" % self.label)
         return retval
 
@@ -443,7 +443,7 @@ class Connection(ModelExtension):
         This makes it possible to lookup contactpersons in case of problems on a
         site or with specific hardware.
     """
-    address = models.ForeignKey(Address, related_name='connections')
+    address = models.ForeignKey(Address, blank=True, null=True, related_name='connections')
     company = models.ForeignKey(Company, related_name='companies')
 
     active = models.BooleanField(editable=True, default=True)
