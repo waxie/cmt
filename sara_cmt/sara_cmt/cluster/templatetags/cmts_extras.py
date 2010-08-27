@@ -104,7 +104,7 @@ def do_use(parser, token):
     """
         Compilation function to definine Querysets for later use.
         
-        Usage: {% use <entity> with <attribute>=<value> as <key> %}
+        Usage: {% use <entity> with <attribute>=<value> as <list/var> <key> %}
     """
     tag = token.contents.split()[0]
     try:

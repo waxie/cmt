@@ -20,10 +20,6 @@ from sara_cmt import settings
 import datetime
 
 
-# !!! TODO: classes for templates !!!
-
-
-
 
 ######
 #
@@ -128,7 +124,8 @@ class HardwareUnit(ModelExtension):
 
 
 class Interface(ModelExtension):
-    re_mac = re.compile('([a-fA-F\d]{2}[:|\-]?){5}[a-fA-F\d]{2}')
+    #re_mac = re.compile('([a-fA-F\d]{2}[:|\-]?){5}[a-fA-F\d]{2}')
+    re_mac = re.compile('([a-f\d]{2}[:]?){5}[a-f\d]{2}')
     hwaddress_validator = RegexValidator(re_mac,'Enter a valid hardware address.', 'invalid')
 
     network   = models.ForeignKey('Network', related_name='interfaces')
@@ -169,7 +166,7 @@ class Interface(ModelExtension):
         """
         try:
             if self.hwaddress and len(self.hwaddress) >= 12:
-                self.hwaddress = ':'.join(re.findall(r'[A-Za-z\d]{2}', self.hwaddress))
+                self.hwaddress = ':'.join(re.findall(r'[A-Za-z\d]{2}', self.hwaddress.lower))
             # To be sure that the interface has a valid network
             #assert isinstance(self.network, Network), "network doesn't exist"
 
@@ -470,7 +467,7 @@ class Telephonenumber(ModelExtension):
     connection = models.ForeignKey(Connection, blank=False, null=False, related_name='telephone_numbers')
     areacode          = models.CharField(max_length=4) # because it can start with a zero
     subscriber_number = models.IntegerField(verbose_name='number', max_length=15)
-    # !!! TODO: type is a reserved name, so rename to numtype in a migration !!!
+    # !!! TODO: type is a reserved name, so rename to numtype in a migration.... and make this a ChoiceField? !!!
     type = models.CharField(max_length=1, choices=NUMBER_CHOICES)
 
     # !!! TODO: link to company / contact / etc... !!!
@@ -534,7 +531,6 @@ class Role(ModelExtension):
 
 class InterfaceType(ModelExtension):
     label = models.CharField(max_length=255, help_text="'DRAC 4' for example")
-    # ??? TODO: add a CharField for version ???
     vendor = models.ForeignKey('Company', null=True, blank=True, related_name='interfaces')
 
     class Meta:

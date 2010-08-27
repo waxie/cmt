@@ -213,10 +213,9 @@ class ModelExtension(models.Model):
             fields are given.
         """
         # !!! Note: This function should only be called in INTERACTIVE mode !!!
-        # ??? TODO: Check raw_input for ValueError. ???
 
-        # !!! TODO: Validation via forms:
-        #     http://docs.djangoproject.com/en/dev/ref/forms/validation/ !!!
+        # ??? TODO: Validation via forms:
+        #     http://docs.djangoproject.com/en/dev/ref/forms/validation/ ???
 
         missing = self._missing_fields()
 
