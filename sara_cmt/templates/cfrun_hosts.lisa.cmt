@@ -21,7 +21,7 @@ maxchild=80
 batch-ng.irc.sara.nl
     {% for hw in lisa_hosts %}
             {% for i in hw.interfaces.all %}
-                {% if i.network.name == 'lisa admin' and "PowerEdge" in hw.specifications.name and "computenode" in hw.roles %} 
+                {% if i.network.name == 'lisa admin' and "PowerEdge" in hw.specifications.name and "computenode" in hw.roles or i.network.name == 'lisa admin' and "PowerEdge 1950" in hw.specifications.name and "loginnode" in hw.roles %} 
 {{ i.fqdn }}
                 {% endif %}
             {% endfor %}
