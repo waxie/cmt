@@ -15,15 +15,19 @@
 {% noblanklines %}
 
 {% store /usr/sara/etc/cfengine/rc.hosts.fileservers as output %}
+{# {% store /var/tmp/rc.hosts.fileservers as output %} #}
+{% use HardwareUnit with 'cluster__name=Lisa' as lisa_hosts %}
+
 outputdir=/data/cfengine/output/fileservers
 maxchild=8
-    {% for hw in HardwareUnit.objects.all %}
-        {% if hw.cluster.name == 'Lisa' %}
-            {% for i in hw.interfaces.all %}
-                {% if i.network.name == 'lisa admin' and "Fire X" in hw.specifications.name %} 
+
+{% for hw in lisa_hosts %}
+	{% if "fileserver" in hw.roles %}
+		{% for i in hw.interfaces.all %}
+			{% if i.network.name == 'lisa admin' %}
 {{ i.fqdn }}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endfor %}
+			{% endif %}
+		{% endfor %}
+	{% endif %}
+{% endfor %}
 {% endnoblanklines %}

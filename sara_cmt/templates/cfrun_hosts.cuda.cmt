@@ -15,15 +15,20 @@
 {% noblanklines %}
 
 {% store /usr/sara/etc/cfengine/rc.hosts.cuda as output %}
+{# {% store /var/tmp/rc.hosts.cuda as output %} #}
+{% use HardwareUnit with 'cluster__name=GPU' as cuda_hosts %}
+
 outputdir=/data/cfengine/output/cuda
-maxchild=80
-    {% for hw in HardwareUnit.objects.all %}
-        {% if hw.cluster.name == 'GPU' %}
-            {% for i in hw.interfaces.all %}
-                {% if i.network.name == 'lisa admin' and "ProLiant" in hw.specifications.name %} 
+maxchild=8
+login1.irc.sara.nl
+
+{% for hw in cuda_hosts %}
+	{% if "GPU node" in hw.roles %}
+		{% for i in hw.interfaces.all %}
+			{% if i.network.name == 'lisa admin' %}
 {{ i.fqdn }}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endfor %}
+			{% endif %}
+		{% endfor %}
+	{% endif %}
+{% endfor %}
 {% endnoblanklines %}

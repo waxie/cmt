@@ -15,15 +15,17 @@
 {% noblanklines %}
 
 {% store /usr/sara/etc/cfengine/rc.hosts.cua as output %}
+{# {% store /var/tmp/rc.hosts.cua as output %} #}
+{% use HardwareUnit with 'cluster__name=LDAP/CUA' as cua_hosts %}
+
 outputdir=/data/cfengine/output/cua
 maxchild=8
-    {% for hw in HardwareUnit.objects.all %}
-        {% if hw.cluster.name == 'LDAP/CUA' %}
-            {% for i in hw.interfaces.all %}
-                {% if i.network.name == 'cua' and "PowerEdge" in hw.specifications.name %} 
+
+{% for hw in cua_hosts %}
+	{% for i in hw.interfaces.all %}
+		{% if i.network.name == 'cua' %}
 {{ i.fqdn }}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endfor %}
+		{% endif %}
+	{% endfor %}
+{% endfor %}
 {% endnoblanklines %}

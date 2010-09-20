@@ -14,16 +14,31 @@
 {% load cmts_extras %}
 {% noblanklines %}
 
-{% store /usr/sara/etc/cfengine/rc.hosts.hpcserver as output %}
+{# {% store /usr/sara/etc/cfengine/rc.hosts.hpcserver as output %} #}
+{% store /var/tmp/rc.hosts.hpcserver as output %}
+{% use HardwareUnit with 'cluster__name=HPCV intern' as hpcvi_hosts %}
+{% use HardwareUnit with 'cluster__name=HPCV projects' as hpcvp_hosts %}
+
 outputdir=/data/cfengine/output/hpcserver
 maxchild=8
-    {% for hw in HardwareUnit.objects.all %}
-        {% if hw.cluster.name == 'HPCV intern' %}
-            {% for i in hw.interfaces.all %}
-                {% if i.network.name == 'lisa admin' %} 
+login1.irc.sara.nl
+
+{% for hw in hpcvi_hosts %}
+	{% if "switch" not in hw.roles %}
+		{% for i in hw.interfaces.all %}
+			{% if i.network.name == 'lisa admin' %}
 {{ i.fqdn }}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endfor %}
+			{% endif %}
+		{% endfor %}
+	{% endif %}
+{% endfor %}
+{% for hw in hpcvp_hosts %}
+	{% if "switch" not in hw.roles %}
+		{% for i in hw.interfaces.all %}
+			{% if i.network.name == 'lisa admin' %}
+{{ i.fqdn }}
+			{% endif %}
+		{% endfor %}
+	{% endif %}
+{% endfor %}
 {% endnoblanklines %}
