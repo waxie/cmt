@@ -14,12 +14,12 @@
 {% load cmts_extras %}
 {% noblanklines %}
 
-{# {% store /data/cfengine/data/method/config_ssh/keys/gpu/shosts.equiv as output %} #}
-{% store /var/tmp/shosts.equiv.gpu as output %}
+{% store /data/cfengine/data/method/config_ssh/keys/gpu/shosts.equiv as output %}
+{# {% store /var/tmp/shosts.equiv.gpu as output %} #}
 {% use HardwareUnit with 'cluster__name=GPU' as gpu_hosts %}
 
 {% for hw in gpu_hosts %}
-	{% if "computenode" in hw.roles %}
+	{% if "GPU node" in hw.roles %}
 		{% for i in hw.interfaces.all %}
 			{% if i.network.name == 'lisa admin' or i.network.name == 'lisa infiniband' %} 
 {{ i.fqdn }}

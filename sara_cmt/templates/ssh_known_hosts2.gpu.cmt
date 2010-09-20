@@ -25,7 +25,7 @@ install-ng,install-ng.irc.sara.nl,192.168.144.2 ssh-dss AAAAB3NzaC1kc3MAAACBAKym
 install-ng,install-ng.irc.sara.nl,192.168.144.2 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAvGo9XAVzR9gE74E8yzkCKrN4HLjgx3VsiajbDL2ILOQcQNFPLGhgmif2pwBTH+9ayXd3ph6i3rtTQV7Mpe8NgnI1v1I2JiqOjFxNjPh4BMdB11ZxC4EzgDW/vpYXi68WUfpD8cPptMax/g4q/XVhgkg5minzy80buqCr8hN6dsE=
 
 {% for hw in gpu_hosts %}
-	{% if "computenode" in hw.roles %}
+	{% if "GPU node" in hw.roles %}
 		{% for i in hw.interfaces.all %}
 			{% if i.network.name == 'lisa admin' or i.network.name == 'lisa infiniband' %}
 {{i.label}},{{ i.fqdn }},{{i.ip}} ssh-dss AAAAB3NzaC1kc3MAAACBANEU3JNaeJH2Y+691f1AtrMZb0NuRvmG5LGsXsJcKyyI4YWY8eVq9nHxk0LLmaPajDhTW3o7nFrlx+ayark5oscG4YOD+D6FBLJWUuq2Q+Uv+u1szVrlsQ6BE30fLiNeTWSGDGeXkt/I+yLqLLADrYsn4jC2CCgBQGju0NBWZSIDAAAAFQCGbiKfLppspsCyvWaLTaq/dPbybwAAAIAkrtYjy0aIwOhC3L0N5JaZqKlgiMGgrpd2OLXEvb18xmJUN8NY3MEYR51tc1UOwUIkxC55EhqciKcP7kh93C2+y6wFDJUiw22Muj0aBuAEjO9PKi2NvcXLqDP4BeuIXLhU8ayPDhT5K+S9Y+7y50rVGz8UFcpx+TwPWn0AlYmjoAAAAIAWdYq1Fn9Xz5wXd5SGNy4uZiG4fEv0GTUWuERPQ9JlPkHbG5Y9LZiYPzwjSeonrw7wGTO2Hg1SyjnoqLBHQNCt7/2UVtWyscqiVJqMJE+zEo9EQoJsDkdcFUx0AMnGsh40yTqnm68LDyjdZAVFHUVSzVkMbT4ubHyES+ca5gLE/g== root@boot.irc.sara.nl

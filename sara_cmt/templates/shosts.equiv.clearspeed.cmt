@@ -14,12 +14,12 @@
 {% load cmts_extras %}
 {% noblanklines %}
 
-{# {% store /data/cfengine/data/method/config_ssh/keys/clearspeed/shosts.equiv as output %} #}
-{% store /var/tmp/shosts.equiv.clearspeed as output %}
+{% store /data/cfengine/data/method/config_ssh/keys/clearspeed/shosts.equiv as output %}
+{# {% store /var/tmp/shosts.equiv.clearspeed as output %} #}
 {% use HardwareUnit with 'cluster__name=Clearspeed' as clearspeed_hosts %}
 
 {% for hw in clearspeed_hosts %}
-	{% if "computenode" in hw.roles %}
+	{% if "computenode" in hw.roles or "loginnode" in hw.roles %}
 		{% for i in hw.interfaces.all %}
 			{% if i.network.name == 'lisa admin' or i.network.name == 'lisa infiniband' %}
 {{ i.fqdn }}
