@@ -14,8 +14,8 @@
 {% load cmts_extras %}
 {% noblanklines %}
 
-{# {% store /usr/sara/etc/cfengine/rc.hosts.hpcserver as output %} #}
-{% store /var/tmp/rc.hosts.hpcserver as output %}
+{% store /usr/sara/etc/cfengine/rc.hosts.hpcserver as output %}
+{# {% store /var/tmp/rc.hosts.hpcserver as output %} #}
 {% use HardwareUnit with 'cluster__name=HPCV intern' as hpcvi_hosts %}
 {% use HardwareUnit with 'cluster__name=HPCV projects' as hpcvp_hosts %}
 
