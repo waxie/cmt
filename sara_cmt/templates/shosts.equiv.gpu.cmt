@@ -14,26 +14,18 @@
 {% load cmts_extras %}
 {% noblanklines %}
 
-{% store /data/cfengine/data/method/config_ssh/keys/gpu/shosts.equiv as output %}
-{# {% store /var/tmp/shosts.equiv.gpu as output %} #}
-    {% for hw in HardwareUnit.objects.all %}
-        {% if hw.cluster.name == 'GPU' %}
-            {% for i in hw.interfaces.all %}
-                {% if i.network.name == 'lisa admin' and "ProLiant" in hw.specifications.name %} 
+{# {% store /data/cfengine/data/method/config_ssh/keys/gpu/shosts.equiv as output %} #}
+{% store /var/tmp/shosts.equiv.gpu as output %}
+{% use HardwareUnit with 'cluster__name=GPU' as gpu_hosts %}
+
+{% for hw in gpu_hosts %}
+	{% if "computenode" in hw.roles %}
+		{% for i in hw.interfaces.all %}
+			{% if i.network.name == 'lisa admin' or i.network.name == 'lisa infiniband' %} 
 {{ i.fqdn }}
 {{ i.ip }}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endfor %}
-    {% for hw in HardwareUnit.objects.all %}
-        {% if hw.cluster.name == 'GPU' %}
-            {% for i in hw.interfaces.all %}
-                {% if i.network.name == 'lisa infiniband' and "ProLiant" in hw.specifications.name %} 
-{{ i.fqdn }}
-{{ i.ip }}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endfor %}
+			{% endif %}
+		{% endfor %}
+	{% endif %}
+{% endfor %}
 {% endnoblanklines %}
