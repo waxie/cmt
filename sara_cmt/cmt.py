@@ -255,6 +255,8 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
 
     # Make a dict with filenames of the available templates
     files = [f for f in os.listdir(settings.CMT_TEMPLATES_DIR) if f[-4:]=='.cmt']
+    files.sort()
+
     fdict = {}
     i = 1
     for f in files:
