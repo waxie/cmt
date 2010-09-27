@@ -120,7 +120,7 @@ gb-{{ host.label }} np=8  cores8 f_qlogic infiniband mem16gb q_parallel q_expres
 	   	{% for i in host.interfaces.all %} 
 		
 			{% if "admin" in i.network.name %}
-{{ i.label }} np=12 cores12 cores8 f_gigabit mem24gb q_express q_serial f_r{{host.rack.label }}{{ chassis }}
+{{ i.label }} np=12 cores12 cores8 f_gigabit mem24gb q_serial f_r{{host.rack.label }}{{ chassis }}
 			{% endif %}
 
 		{% endfor %} 
@@ -138,7 +138,7 @@ gb-{{ host.label }} np=8  cores8 f_qlogic infiniband mem16gb q_parallel q_expres
 		{% for i in host.interfaces.all %} 
 
 			{% if "admin" in i.network.name %}
-{{ i.label }} np=8  cores8 f_gigabit mem24gb q_express q_serial f_r{{host.rack.label }}{{ chassis }}
+{{ i.label }} np=8  cores8 f_gigabit mem24gb q_serial f_r{{host.rack.label }}{{ chassis }}
 			{% endif %}
 
 		{% endfor %} 
