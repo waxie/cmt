@@ -62,19 +62,20 @@ class HardwareUnit(ModelExtension):
         ordering = ['cluster__name', 'rack__label', 'first_slot']
         unique_together = ('rack', 'first_slot')
 
-    def _address(self):
+    @property
+    def address(self):
         return self.rack.address
-    address = property(_address)
 
-    def _room(self):
+    @property
+    def room(self):
         return self.rack.room
-    room = property(_room)
 
-    def _roles(self):
+    @property
+    def roles(self):
         return [str(role.label) for role in self.role.all()]
-    roles = property(_roles)
 
-    def _in_support(self):
+    @property
+    def in_support(self):
         retval = False
         try:
             assert bool(self.warranty), 'No warranty contract for %s %s' % \
@@ -85,8 +86,6 @@ class HardwareUnit(ModelExtension):
             logger.warning("Hardware with label '%s' hasn't got a warranty \
                 contract" % self.label)
         return retval
-
-    in_support = property(_in_support)
 
     def __unicode__(self):
         try:
@@ -144,14 +143,14 @@ class Interface(ModelExtension):
                                  unique=True, validators=[hwaddress_validator])
     ip        = models.IPAddressField(blank=True)
 
-    def _fqdn(self):
+    @property
+    def fqdn(self):
         return '%s.%s' % (self.label, self.network.domain)
-    fqdn = property(_fqdn)
 
-    def _cnames(self):
+    @property
+    def cnames(self):
         if self.aliases:
             return self.aliases.split(',')
-    cnames = property(_cnames)
 
     def __unicode__(self):
         #return self.fqdn
@@ -331,9 +330,9 @@ class Rack(ModelExtension):
         verbose_name = 'rack'
         verbose_name_plural = 'racks'
 
-    def _address(self):
+    @property
+    def address(self):
         return self.room.address
-    address = property(_address)
 
     def __unicode__(self):
         return 'rack %s' % (self.label)
@@ -375,9 +374,9 @@ class Address(ModelExtension):
     postalcode = models.CharField(max_length=9, blank=True)
     city       = models.CharField(max_length=255)
 
-    def _companies(self):
+    @property
+    def companies(self):
         return ' | '.join([comp.name for comp in self._companies.all()]) or '-'
-    companies = property(_companies)
 
     class Meta:
         unique_together = ('address', 'city')
@@ -576,9 +575,9 @@ class WarrantyContract(ModelExtension):
     date_from = models.DateField(verbose_name='valid from')
     date_to   = models.DateField(verbose_name='expires at')
 
-    def is_expired(self):
+    @property
+    def expired(self):
         return self.date_to < datetime.date.today()
-    expired = property(is_expired)
 
     def __unicode__(self):
         return self.label

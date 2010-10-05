@@ -427,6 +427,7 @@ class ObjectManager():
         """
             Print all values
         """
+        # TODO: implement
         pass
 
 
@@ -458,36 +459,6 @@ class QueryManager():
             self['set'] = {}
             # ??? TODO: maybe implement something like `self['fields'] = {}`
             #     to narrow the searchspace ???
-
-        def as_tuple(self):
-            """
-                Returns a tuple of tuples. Those tuples are based on the the
-                items from the output of queries_to_dict(queries). Example:
-
-                {'hostname':'node1', 'rack':['3', '4']}
-
-                should become
-
-                (('hostname', 'node1'), ('rack', ('3', '4')))
-            """
-            # TODO: implement function which converts a (nested) dict into a
-            #       (nested) tuple
-            pass
-
-        def as_list(self):
-            """
-                Returns a list of lists. Those lists are based on the items
-                from the output of queries_to_dict(queries). For example:
-
-                {'hostname':'node1', 'rack':['3', '4']}
-
-                should become
-
-                [['hostname', 'node1'], ['rack', ['3', '4']]]
-            """
-            # TODO: implement function which converts a (nested) dict into a
-            #       (nested) list
-            pass
 
     def push_args(self, args, entity, keys=['default']):
         """
