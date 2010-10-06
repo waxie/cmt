@@ -59,7 +59,8 @@ class HardwareUnit(ModelExtension):
     class Meta:
         #verbose_name = "piece of hardware"
         verbose_name_plural = "hardware"
-        ordering = ('cluster__name', 'rack__label', 'first_slot')
+        #ordering = ('cluster__name', 'rack__label', 'first_slot')
+        ordering = ('rack__label', 'first_slot')
         unique_together = ('rack', 'first_slot')
 
     @property
@@ -542,7 +543,12 @@ class InterfaceType(ModelExtension):
     vendor = models.ForeignKey('Company', null=True, blank=True, related_name='interfaces')
 
     class Meta:
-        ordering = ('vendor', 'label')
+        # Note in docs of Model Meta options,
+        # see http://docs.djangoproject.com/en/dev/ref/models/options/#ordering
+        # "Regardless of how many fields are in ordering, the admin site uses
+        # only the first field."
+        #ordering = ('vendor', 'label')
+        ordering = ('label')
         verbose_name = 'type of interface'
         verbose_name_plural = 'types of interfaces'
 

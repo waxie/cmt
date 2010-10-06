@@ -85,6 +85,7 @@ class HardwareUnitAdmin(admin.ModelAdmin):
     list_filter  = ('cluster', 'rack', 'role', 'specifications') + \
         GlobalAdmin.list_filter
     inlines = [InterfaceInline]
+    search_fields = ('label', 'warranty_tag')
 
     #filter_horizontal = ('role',)
 
@@ -146,6 +147,7 @@ class InterfaceAdmin(admin.ModelAdmin):
         GlobalAdmin.extra_fieldset)
     list_display = ('__unicode__', 'hwaddress', 'ip', 'network', 'iftype')
     list_filter  = ('network', 'iftype') + GlobalAdmin.list_filter
+    search_fields = ('label', 'aliases', 'host__label')
 
 
 class InterfaceTypeAdmin(admin.ModelAdmin):
