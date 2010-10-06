@@ -217,7 +217,7 @@ class Network(ModelExtension):
                                   'ib-{machine}''')
 
     class Meta:
-        ordering = ('cidr',)
+        ordering = ('domain', 'name')
         verbose_name = 'network'
         verbose_name_plural = 'networks'
 
@@ -587,7 +587,7 @@ class WarrantyContract(ModelExtension):
     date_to   = models.DateField(verbose_name='expires at')
 
     class Meta:
-        ordering = ('hardware__cluster__name', 'label')
+        ordering = ('label',)
 
     @property
     def expired(self):
