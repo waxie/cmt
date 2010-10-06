@@ -548,7 +548,7 @@ class InterfaceType(ModelExtension):
         # "Regardless of how many fields are in ordering, the admin site uses
         # only the first field."
         #ordering = ('vendor', 'label')
-        ordering = ('label')
+        ordering = ('label',)
         verbose_name = 'type of interface'
         verbose_name_plural = 'types of interfaces'
 
