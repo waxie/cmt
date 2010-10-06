@@ -95,7 +95,6 @@ class CountryAdmin(admin.ModelAdmin):
         GlobalAdmin.extra_fieldset)
     list_display = ('country_code', 'name')
     list_filter  = GlobalAdmin.list_filter
-    ordering = ('name',)
 
 
 class AddressAdmin(admin.ModelAdmin):
@@ -105,7 +104,7 @@ class AddressAdmin(admin.ModelAdmin):
                       'classes': ('wide',)}),
         GlobalAdmin.extra_fieldset)
     list_display  = ('address', 'postalcode', 'city', 'country', 'companies')
-    list_filter   = ('city', 'country') + GlobalAdmin.list_filter
+    list_filter   = ('country', 'city') + GlobalAdmin.list_filter
     search_fields = ('address',)
 
     inlines = [RoomInline]
@@ -117,7 +116,6 @@ class RoomAdmin(admin.ModelAdmin):
         GlobalAdmin.extra_fieldset)
     list_filter = ('address', 'floor') + GlobalAdmin.list_filter
     list_display = ('address', 'floor', 'label')
-    ordering = ('address', 'floor')
 
 
 class ConnectionAdmin(admin.ModelAdmin):
@@ -139,7 +137,6 @@ class RackAdmin(admin.ModelAdmin):
         GlobalAdmin.extra_fieldset)
     list_display = ('address', 'room', 'label')
     list_filter  = ('room',) + GlobalAdmin.list_filter
-    ordering     = ('room',)
 
 
 class InterfaceAdmin(admin.ModelAdmin):

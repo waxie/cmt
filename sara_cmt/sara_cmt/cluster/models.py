@@ -31,7 +31,7 @@ class Cluster(ModelExtension):
     name = models.CharField(max_length=255, unique=True)
 
     class Meta:
-        ordering = ['name']
+        ordering = ('name',)
 
     def __unicode__(self):
         return self.name or None
@@ -59,7 +59,7 @@ class HardwareUnit(ModelExtension):
     class Meta:
         #verbose_name = "piece of hardware"
         verbose_name_plural = "hardware"
-        ordering = ['cluster__name', 'rack__label', 'first_slot']
+        ordering = ('cluster__name', 'rack__label', 'first_slot')
         unique_together = ('rack', 'first_slot')
 
     @property
@@ -143,6 +143,9 @@ class Interface(ModelExtension):
                                  unique=True, validators=[hwaddress_validator])
     ip        = models.IPAddressField(blank=True)
 
+    class Meta:
+        ordering = ('host__cluster__name', 'host__rack__label', 'host__first_slot')
+
     @property
     def fqdn(self):
         return '%s.%s' % (self.label, self.network.domain)
@@ -214,7 +217,7 @@ class Network(ModelExtension):
                                   'ib-{machine}''')
 
     class Meta:
-        ordering = ('name', 'domain',)
+        ordering = ('cidr',)
         verbose_name = 'network'
         verbose_name_plural = 'networks'
 
@@ -300,6 +303,7 @@ class Network(ModelExtension):
         interface_label = self.hostnames.format(machine=machine)
         return interface_label
 
+    @property
     def cidr(self):
         network = IP("%s/%s" % (self.netaddress, self.netmask))
         return network.strNormal()
@@ -326,7 +330,7 @@ class Rack(ModelExtension):
     capacity = models.PositiveIntegerField(verbose_name='number of slots')
 
     class Meta:
-        ordering = ('room', 'label',)
+        ordering = ('room', 'label')
         verbose_name = 'rack'
         verbose_name_plural = 'racks'
 
@@ -360,6 +364,7 @@ class Country(ModelExtension):
 
     class Meta:
         verbose_name_plural = 'countries'
+        ordering = ('name',)
 
     def __unicode__(self):
         return self.name
@@ -381,6 +386,7 @@ class Address(ModelExtension):
     class Meta:
         unique_together = ('address', 'city')
         verbose_name_plural = 'addresses'
+        ordering = ('postalcode',)
 
     def __unicode__(self):
         return '%s - %s' % (self.city, self.address)
@@ -394,6 +400,7 @@ class Room(ModelExtension):
 
     class Meta:
         unique_together = ('address', 'floor', 'label')
+        ordering = ('address__postalcode', 'floor')
 
     def __unicode__(self):
         #return unicode('%s - %s'%(self.address,self.label))
@@ -431,6 +438,7 @@ class Company(ModelExtension):
 
     class Meta:
         verbose_name_plural = 'companies'
+        ordering = ('name',) 
 
 
 class Connection(ModelExtension):
@@ -455,6 +463,7 @@ class Connection(ModelExtension):
     class Meta:
         verbose_name = 'contact'
         unique_together = ('company', 'name')
+        ordering = ('company', 'address')
 
 
 class Telephonenumber(ModelExtension):
@@ -520,8 +529,8 @@ class Role(ModelExtension):
     label = models.CharField(max_length=255, unique=True)
 
     class Meta:
-        ordering = ['label']
-        verbose_name = ('role')
+        ordering = ('label',)
+        verbose_name = 'role'
         verbose_name_plural = 'roles'
 
     def __unicode__(self):
@@ -533,7 +542,7 @@ class InterfaceType(ModelExtension):
     vendor = models.ForeignKey('Company', null=True, blank=True, related_name='interfaces')
 
     class Meta:
-        ordering = ['label']
+        ordering = ('vendor', 'label')
         verbose_name = 'type of interface'
         verbose_name_plural = 'types of interfaces'
 
@@ -560,6 +569,8 @@ A type of warranty offered by a company.
 
     label = models.CharField(max_length=255, unique=True)
 
+    class Meta:
+        ordering = ('contact__company__name', 'label')
     def __unicode__(self):
         return self.label
 
@@ -568,12 +579,15 @@ class WarrantyContract(ModelExtension):
     """
         A class which contains warranty information of (a collection of) hardware.
     """
-    # !!! TODO: type is a reserved name, so rename to wartype in a migratino !!!
+    # !!! TODO: type is a reserved name, so rename to vartype in a migration !!!
     type = models.ForeignKey(WarrantyType, blank=True, null=True, related_name='contracts')
 
     label     = models.CharField(max_length=255, unique=True)
     date_from = models.DateField(verbose_name='valid from')
     date_to   = models.DateField(verbose_name='expires at')
+
+    class Meta:
+        ordering = ('hardware__cluster__name', 'label')
 
     @property
     def expired(self):
