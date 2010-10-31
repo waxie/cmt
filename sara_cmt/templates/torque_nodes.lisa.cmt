@@ -23,7 +23,7 @@
 login3
 login4
 
-{# This are all M610 Host with infiniband 12 cores, rack 2 and 13 #}
+{# These are all M610 Host with infiniband 12 cores, rack 2 and 13 #}
 
 {% for host in lisa_hosts %} 
 	{% if host.rack.label|get_digit:"0" = 2 or host.rack.label|get_digit:"0" = 13 and "computenode" in host.roles %} 
@@ -37,7 +37,7 @@ login4
     	{% for i in host.interfaces.all %}
 
     		{% if 'infiniband' in i.network.name %}
-gb-{{ host.label }} np=12 cores12 cores8 f_qlogic infiniband mem24gb q_parallel q_express q_serial f_r{{host.rack.label }}{{ chassis }}
+gb-{{ host.label }} np=12 cores12 f_qlogic infiniband mem24gb q_parallel q_express q_serial f_r{{host.rack.label }}{{ chassis }}
 			{% endif %}
 
 	   	{% endfor %}
@@ -45,7 +45,7 @@ gb-{{ host.label }} np=12 cores12 cores8 f_qlogic infiniband mem24gb q_parallel 
 	{% endif %}
 {% endfor %}
 
-{# This are all M610 Host with infiniband and 8 cores rack 3 - 12, not rack 7 #}
+{# These are all M610 Host with infiniband and 8 cores rack 3 - 12, not rack 7 #}
 
 {% for host in lisa_hosts %}
 
@@ -104,7 +104,7 @@ gb-{{ host.label }} np=8  cores8 f_qlogic infiniband mem16gb q_parallel q_expres
 
 {% endfor %}
 
-{# This are all M610 Host without infiniband and cores 12, rack = 36 #}
+{# These are all M610 Host without infiniband and cores 12, rack = 36 #}
 
 {% for host in lisa_hosts %} 
 
@@ -120,7 +120,7 @@ gb-{{ host.label }} np=8  cores8 f_qlogic infiniband mem16gb q_parallel q_expres
 	   	{% for i in host.interfaces.all %} 
 		
 			{% if "admin" in i.network.name %}
-{{ i.label }} np=12 cores12 cores8 f_gigabit mem24gb q_serial f_r{{host.rack.label }}{{ chassis }}
+{{ i.label }} np=12 cores12 f_gigabit mem24gb q_serial f_r{{host.rack.label }}{{ chassis }}
 			{% endif %}
 
 		{% endfor %} 
@@ -129,7 +129,7 @@ gb-{{ host.label }} np=8  cores8 f_qlogic infiniband mem16gb q_parallel q_expres
 
 {% endfor %} 
 
-{# This are all M610 Host without infiniband and cores 8, rack >= 32  and <= 35 #}
+{# These are all M610 Host without infiniband and cores 8, rack >= 32  and <= 35 #}
 
 {% for host in lisa_hosts %} 
 
