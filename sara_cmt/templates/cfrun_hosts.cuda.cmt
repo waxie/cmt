@@ -20,7 +20,6 @@
 
 outputdir=/data/cfengine/output/cuda
 maxchild=8
-login1.irc.sara.nl
 
 {% for hw in cuda_hosts %}
 	{% if "GPU node" in hw.roles %}
