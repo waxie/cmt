@@ -17,14 +17,14 @@
 {% epilogue %}
 /usr/sara/sbin/bind.sh {{output}}
 {% endepilogue %}
-{% epilogue %} #}
+{% epilogue %}
 /etc/init.d/bind9 restart
-{% endepilogue %} #}
+{% endepilogue %}
 
 {% use interface with 'network__name=icua' as ifaces_icua %}
 
 @       IN      SOA     ns.irc.sara.nl. root.ns.irc.sara.nl. (
-                                           {% now "YmjHi" %} ; Serial
+                                           {% now "YmjH" %} ; Serial
                                         7200            ; Refresh
                                         600             ; Retry
                                         604800          ; Expire
