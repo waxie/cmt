@@ -108,7 +108,6 @@ subnet {{net_icua.netaddress}} netmask {{net_icua.netmask}} {
 subnet {{net_lisa_admin.netaddress}} netmask {{net_lisa_admin.netmask}} {
   #option domain-name-servers 192.168.16.3;
   option domain-name-servers 192.168.145.37, 192.168.146.10;
-  option routers 192.168.144.1;
 
   # option-140 is the IP address of your SystemImager image server
   option sali-imgsrv 192.168.146.10;
@@ -236,6 +235,7 @@ group { # Start switches
 group { # Start Admin network (boot) & not extern
 	option domain-name "{{net_lisa_admin.domain}}";
 	option option-155 "rc_dell_ng";
+	option routers 192.168.144.1;
 
     {% noblanklines %}
     {% for iface in ifaces_lisa_admin %}
