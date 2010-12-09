@@ -124,9 +124,9 @@ class HardwareUnit(ModelExtension):
 
 
 class Interface(ModelExtension):
-    #re_mac = re.compile('([a-fA-F\d]{2}[:|\-]?){5}[a-fA-F\d]{2}')
-    re_mac = re.compile('([a-f\d]{2}[:]?){5}[a-f\d]{2}')
-    hwaddress_validator = RegexValidator(re_mac,'Enter a valid hardware address.', 'invalid')
+    re_valid_mac = re.compile(r'([A-Fa-f\d]{2}[:-]?){5}[A-Fa-f\d]{2}')
+    re_mac_octets = re.compile(r'[A-Fa-f\d]{2}')
+    hwaddress_validator = RegexValidator(re_valid_mac,'Enter a valid hardware address.', 'invalid')
 
     network   = models.ForeignKey('Network', related_name='interfaces')
     host      = models.ForeignKey('HardwareUnit', related_name='interfaces',
@@ -169,7 +169,7 @@ class Interface(ModelExtension):
         """
         try:
             if self.hwaddress and len(self.hwaddress) >= 12:
-                self.hwaddress = ':'.join(re.findall(r'[A-Za-z\d]{2}', self.hwaddress.lower))
+                self.hwaddress = ':'.join(self.re_mac_octets.findall(self.hwaddress.lower()))
             # To be sure that the interface has a valid network
             #assert isinstance(self.network, Network), "network doesn't exist"
 
