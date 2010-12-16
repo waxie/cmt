@@ -3,6 +3,7 @@ from django.contrib import databrowse
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
+import sara_cmt.api.urls
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -16,6 +17,9 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
     (r'^db/(.*)', databrowse.site.root),
+
+    # Piston API:
+    (r'^api/', include('sara_cmt.api.urls')),
 
     # !!! Multiple admin-sites !!!
     #  http://docs.djangoproject.com/en/dev/ref/contrib/admin/#multiple-admin-sites-in-the-same-urlconf
