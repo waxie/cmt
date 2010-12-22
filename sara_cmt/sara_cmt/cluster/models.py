@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 
 import re
+from datetime import date
 
 from psycopg2 import IntegrityError
 
@@ -16,8 +17,6 @@ from tagging.fields import TagField
 from django_extensions.db.fields import CreationDateTimeField, \
                                         ModificationDateTimeField
 from sara_cmt import settings
-
-import datetime
 
 
 
@@ -591,13 +590,14 @@ class WarrantyContract(ModelExtension):
     label     = models.CharField(max_length=255, unique=True)
     date_from = models.DateField(verbose_name='valid from')
     date_to   = models.DateField(verbose_name='expires at')
+    date_to.in_support_filter = True
 
     class Meta:
         ordering = ('label',)
 
     @property
     def expired(self):
-        return self.date_to < datetime.date.today()
+        return self.date_to < date.today()
 
     def __unicode__(self):
         return self.label

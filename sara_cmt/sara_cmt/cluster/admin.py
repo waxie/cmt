@@ -6,6 +6,8 @@ from sara_cmt.cluster.models import Company, Telephonenumber, Connection
 from sara_cmt.cluster.models import HardwareModel, Role, InterfaceType
 from sara_cmt.cluster.models import WarrantyContract, WarrantyType
 
+from sara_cmt.cluster.filters import InSupportFilterSpec
+
 # Some info about the Django admin site can be found at:
 #   http://docs.djangoproject.com/en/dev/intro/tutorial02/#intro-tutorial02
 
@@ -211,7 +213,7 @@ class WarrantyContractAdmin(admin.ModelAdmin):
         GlobalAdmin.extra_fieldset)
 
     list_display = ('label', 'date_from', 'date_to', 'expired')
-    list_filter  = GlobalAdmin.list_filter
+    list_filter  = ('date_to', ) + GlobalAdmin.list_filter
 
 
 class WarrantyTypeAdmin(admin.ModelAdmin):
