@@ -1,5 +1,7 @@
 from piston.handler import BaseHandler
-from sara_cmt.cluster.models import Interface
+from piston.utils import rc
+from sara_cmt.cluster.models import Interface, WarrantyContract
+from datetime import date, timedelta
 
 # Some notes:
 #
@@ -11,6 +13,7 @@ from sara_cmt.cluster.models import Interface
 #   Should update an existing product and return them (or rc.ALL_OK).
 # delete() is called on DELETE requests:
 #   Should delete an existing object, and not return anything, just rc.DELETED.
+
 
 class InterfaceHandler(BaseHandler):
     allowed_methods = ('GET',)
@@ -24,4 +27,33 @@ class InterfaceHandler(BaseHandler):
             return base.get(label=interface_label)
         else:
             return base.all() # Or base.filter(...)
-    
+
+
+class WarrantyHandler(BaseHandler):
+    allowed_methods = ('GET', 'PUT')
+    model = WarrantyContract
+    exclude = ('tags', 'note', 'created_on', 'type', ('tags', 'label'))
+
+    def read(self, request, warranty_status=None):
+        warranties = WarrantyContract.objects
+        today = date.today()
+        critical_period = timedelta(30)
+
+        if warranty_status == 'expired':
+            return warranties.filter(date_to__lt=str(today))
+        elif warranty_status == 'active':
+            return warranties.filter(date_from_lte=str(today),date_to_gte=str(today))
+        elif warranty_status == 'critical':
+            return warranties.filter(date_to__gte=str(today),date_to__lt=str(date.today()+critical_period))
+        else:
+            resp = rc.NOT_IMPLEMENTED
+            return resp
+
+    #def update(self, request, label, date_to, date_from):
+    #    user = User.objects.get(username=username)
+    #    if request.username != user:
+    #        return rc.FORBIDDEN
+
+
+
+

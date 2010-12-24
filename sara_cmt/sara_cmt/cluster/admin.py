@@ -6,7 +6,6 @@ from sara_cmt.cluster.models import Company, Telephonenumber, Connection
 from sara_cmt.cluster.models import HardwareModel, Role, InterfaceType
 from sara_cmt.cluster.models import WarrantyContract, WarrantyType
 
-from sara_cmt.cluster.filters import InSupportFilterSpec
 
 # Some info about the Django admin site can be found at:
 #   http://docs.djangoproject.com/en/dev/intro/tutorial02/#intro-tutorial02
@@ -49,7 +48,6 @@ class AddressInline(admin.TabularInline):
 class InterfaceInline(admin.TabularInline):
     model = Interface
     exclude = GlobalAdmin.fields
-    extra = 3
 
 
 class PhoneInline(admin.TabularInline):
