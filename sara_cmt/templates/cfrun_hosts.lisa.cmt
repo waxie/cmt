@@ -18,7 +18,7 @@
 {% use HardwareUnit with 'cluster__name=Lisa' as lisa_hosts %}
 outputdir=/data/cfengine/output/lisa
 maxchild=80
-batch-ng.irc.sara.nl
+batch1.irc.sara.nl
     {% for hw in lisa_hosts %}
             {% for i in hw.interfaces.all %}
                 {% if i.network.name == 'lisa admin' and "PowerEdge" in hw.specifications.name and "computenode" in hw.roles or i.network.name == 'lisa admin' and "PowerEdge 1950" in hw.specifications.name and "loginnode" in hw.roles %} 
