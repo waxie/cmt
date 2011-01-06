@@ -24,7 +24,7 @@ maxchild=8
 login1.irc.sara.nl
 
 {% for hw in hpcvi_hosts %}
-	{% if "switch" not in hw.roles %}
+	{% if "switch" not in hw.roles and "inactive" not in hw.roles and "cfengine3" not in hw.roles and "nocfengine" not in hw.roles %}
 		{% for i in hw.interfaces.all %}
 			{% if i.network.name == 'lisa admin' %}
 {{ i.fqdn }}
@@ -33,7 +33,7 @@ login1.irc.sara.nl
 	{% endif %}
 {% endfor %}
 {% for hw in hpcvp_hosts %}
-	{% if "switch" not in hw.roles %}
+	{% if "switch" not in hw.roles and "inactive" not in hw.roles and "cfengine3" not in hw.roles and "nocfengine" not in hw.roles %}
 		{% for i in hw.interfaces.all %}
 			{% if i.network.name == 'lisa admin' %}
 {{ i.fqdn }}
