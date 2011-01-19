@@ -145,11 +145,13 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     os.path.normpath(os.path.join(os.path.dirname(__file__), 'cluster/templates')),
-    os.path.normpath(os.path.join(os.path.dirname(__file__), '../templates')),
+    #os.path.normpath(os.path.join(os.path.dirname(__file__), '../templates')),
+    '/etc/sara_cmt/templates'
 )
 
-CMT_TEMPLATES_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), \
-    '../templates'))
+CMT_TEMPLATES_DIR = '/etc/sara_cmt/templates'
+#CMT_TEMPLATES_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), \
+#    '../templates'))
 #CMT_TEMPLATE_DIRS = (os.path.normpath(os.path.join(os.path.dirname(__file__),
 #'../templates')),)
 
