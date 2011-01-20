@@ -23,23 +23,21 @@
 {% use HardwareUnit with 'cluster__name=Gina' as gina_hosts %}
 
 {% for hw in gina_hosts %}
-  {% if not "administration" in hw.roles %}
-    {% for i in hw.interfaces.all %}
-      {% if i.network.name == 'gina admin' %}
+  {% for i in hw.interfaces.all %}
+    {% if i.network.name == 'gina admin' %}
 
 {{ hw.label }}
 {{ i.fqdn }}
 {{ i.ip }}
 
-      {% endif %}
-      {% if i.network.name == 'gina productie' %}
+    {% endif %}
+    {% if i.network.name == 'gina productie' %}
 
 {{ i.fqdn }}
 {{ i.ip }}
 
-      {% endif %}
-    {% endfor %}
-  {% endif %}
+    {% endif %}
+  {% endfor %}
 {% endfor %}
 
 {% endnoblanklines %}
