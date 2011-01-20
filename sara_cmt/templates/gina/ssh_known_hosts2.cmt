@@ -14,7 +14,11 @@
 {% load cmts_extras %}
 {% noblanklines %}
 
-{% store /var/tmp/ssh_known_hosts2.lisa as output %}
+{% store /data/cfengine/data/co5/overlay/global/etc/ssh/ssh_known_hosts2 as output %}
+
+{% epilogue %}
+/bin/cp --force /data/cfengine/data/co5/overlay/global/etc/ssh/ssh_known_hosts2 /data/cfengine/data/sl4/overlay/global/etc/ssh/ssh_known_hosts2
+{% endepilogue %}
 
 {% use HardwareUnit with 'cluster__name=Gina' as gina_hosts %}
 
