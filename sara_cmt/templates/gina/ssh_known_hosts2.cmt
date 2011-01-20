@@ -29,8 +29,8 @@ install,install.int.gina.sara.nl,192.168.20.10 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAA
     {% for i in hw.interfaces.all %}
       {% if i.network.name == 'gina admin' or i.network.name == 'gina productie' %}
 
-{{i.label}},{{ i.fqdn }},{{i.ip}} ssh-dss #eenkey
-{{i.label}},{{ i.fqdn }},{{i.ip}} ssh-rsa #eenkey
+{{i.label}},{{ i.fqdn }},{{i.ip}} ssh-dss AAAAB3NzaC1kc3MAAACBAOHg2cXFhM86ZgNYlB9Mk72OUfW1MVN85//nFSmxx7ez10AIUn00Ca+8a/hFwnetM9B3EcMGvN1n3iO2XB0zoiUbuwt9kNOuOE9UJ5r49a7Aqn9di7i5MPO2JNjSmOIOTxl7p0v9HFhSyJky759U8u5aoerTpXPAoW/u6OmU31QdAAAAFQDfKei86IpY0nNjdAn/r6G7O4wSwQAAAIAFnUxosSpfesfge/asghMw+Kd5UVBx5TZlypep4cNkMKKa8SeMf4Wl/u2Mf5ngDlq4+YIY10cATau3ZDk/B/dspJ7JiEpc6vI7f8kLrSN3/lTnpdKDYM0fPZcfER1ulEu6D9gYjkwHe68ryATojCUtTpdQPbIeDyx2KXr9QhQpIgAAAIEAs60zLMGIwFCS+ciannSt+3rZROmZ0ExAh/LvVlmyeLuXUV+ZQW6CgpAw0tR77iTaYJoU/xQgq0C57gnHf981rdh0Xoyf6M2qBNWCSYLDyH3QbSFyu6WVQha1fCXiN/h4Pq6J8TFjTctUc+8wuiWbGLMqFUlZMTZ4idNJrUKRaHA=
+{{i.label}},{{ i.fqdn }},{{i.ip}} ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAyNICzOjOG+SdfnnmTZDvkguNFplv4fswU8cSCRYqYz02onrEhbAzRs3TgbRtQPsPVRYIRLkoyu2p9PLDYO+LUiN/gt0kDF93plTiZWLV9pqy3Xynx9lGblCg/Gl5jA0JIzC567bHuUvLHpN/0HRzOgro/27wExyddaW/d3fVND30o91XMtRIFTq8SEvtLx9LJRCAy0sFZH66DqlDCcPutBGlVeooe3HHH+6p42FgDT4NLxhkvFx4TpmeG0y13jxJ+w/rJ+s8eqUDDLbQHpd3w+uMBARyiVWopgU29c7hdH/FMtG01n/4lZ5hs4rG+3ujzZmkBAH9Ss61/q1jYtfQRQ==
 
       {% endif %}
     {% endfor %}
