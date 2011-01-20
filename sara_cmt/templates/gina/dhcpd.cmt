@@ -93,11 +93,15 @@ subnet {{net_gina_productie.netaddress}} netmask {{net_gina_productie.netmask}} 
 group {
     {% noblanklines %}
     {% for iface in ifaces_gina_admin %}
+      {% if not 'administration' in iface.host.roles %}
+
     host {{iface.fqdn}} {
         hardware ethernet {{iface.hwaddress}};
         fixed-address {{iface.ip}};
         option host-name "{{iface.fqdn}}";
     }
+
+      {% endif %}
     {% endfor %}
     {% endnoblanklines %}
 }
@@ -107,11 +111,15 @@ group {
 group {
     {% noblanklines %}
     {% for iface in ifaces_gina_console %}
+      {% if not 'administration' in iface.host.roles %}
+
     host {{iface.fqdn}} {
         hardware ethernet {{iface.hwaddress}};
         fixed-address {{iface.ip}};
         option host-name "{{iface.fqdn}}";
     }
+
+      {% endif %}
     {% endfor %}
     {% endnoblanklines %}
 }
@@ -121,11 +129,15 @@ group {
 group {
     {% noblanklines %}
     {% for iface in ifaces_gina_productie %}
+      {% if not 'administration' in iface.host.roles %}
+
     host {{iface.fqdn}} {
         hardware ethernet {{iface.hwaddress}};
         fixed-address {{iface.ip}};
         option host-name "{{iface.fqdn}}";
     }
+
+      {% endif %}
     {% endfor %}
     {% endnoblanklines %}
 }
