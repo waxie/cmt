@@ -14,11 +14,11 @@
 {% load cmts_extras %}
 {% noblanklines %}
 
-{% store /var/tmp/dhcpd.conf as output %}
+{% store /etc/dhcpd.conf as output %}
 
-{# {% epilogue %} #}
-{# /etc/init.d/dhcp3-server restart #}
-{# {% endepilogue %} #}
+{% epilogue %}
+/etc/init.d/dhcpd restart
+{% endepilogue %}
 
 {% use network with 'name=gina console' as net_gina_console %}
 {% use network with 'name=gina admin' as net_gina_admin %}
