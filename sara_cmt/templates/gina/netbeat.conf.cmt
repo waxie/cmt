@@ -18,11 +18,19 @@
 {% noblanklines %}
 {% use interface with 'network__name=gina admin' as ifaces_gina_admin %}
 {% use interface with 'network__name=gina productie' as ifaces_gina_productie %}
-{% store /var/tmp/netbeat-server.conf as output %}
+{% store /etc/netbeat-server.conf as output %}
 {% for i in ifaces_gina_admin %}
-{{ i.fqdn }}
+  {% if not 'administration' in iface.host.roles %}
+
+{{ i.ip }} {{ i.fqdn }}
+
+  {% endif %}
 {% endfor %}
 {% for i in ifaces_gina_productie %}
-{{ i.fqdn }}
+  {% if not 'administration' in iface.host.roles %}
+
+{{ i.ip }} {{ i.fqdn }}
+
+  {% endif %}
 {% endfor %}
 {% endnoblanklines %}
