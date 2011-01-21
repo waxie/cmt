@@ -20,14 +20,14 @@
 {% use interface with 'network__name=gina productie' as ifaces_gina_productie %}
 {% store /etc/netbeat-server.conf as output %}
 {% for i in ifaces_gina_admin %}
-  {% if not 'administration' in iface.host.roles %}
+  {% if not 'administration' in i.host.roles %}
 
 {{ i.ip }} {{ i.fqdn }}
 
   {% endif %}
 {% endfor %}
 {% for i in ifaces_gina_productie %}
-  {% if not 'administration' in iface.host.roles %}
+  {% if not 'administration' in i.host.roles %}
 
 {{ i.ip }} {{ i.fqdn }}
 
