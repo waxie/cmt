@@ -8,8 +8,8 @@
 # Description : This is an ISC DHCP v3 configuration file.
 #
 # SVN:
-#       {{ svn_id }}
-#       {{ svn_url }}
+#       $Id$
+#       $URL$
 #
 {% load cmts_extras %}
 {% noblanklines %}
