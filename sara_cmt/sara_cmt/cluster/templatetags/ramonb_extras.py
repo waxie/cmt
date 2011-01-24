@@ -1,5 +1,4 @@
-import os
-import re
+import os, re, string
 
 # Inspired by Django tips on:
 #   http://www.b-list.org/weblog/2006/jun/07/django-tips-write-better-template-tags/
@@ -50,14 +49,31 @@ class MetaNode(template.Node):
         return ''
 
 
+@stringfilter
+def base_net(value):
+    ip_blocks = value.split('.')
+
+    return string.join( ip_blocks[:3], '.' )
+
+register.filter( 'base_net', base_net )
+
+@stringfilter
+def ip_last_digit(value):
+    ip_blocks = value.split('.')
+
+    return ip_blocks[3]
+
+register.filter( 'ip_last_digit', ip_last_digit )
+
 @register.tag(name='store')
 #@stringfilter
 def do_save_meta(parser, token):
     """
         Compilation function to use for meta-info.
+
+        Usage: {% store '/path/to/file' %}
+               {% store variable %} # variable = '/path/to/file'
     """
-    # RB: {% store '/path/to/file' %}
-    # RB: {% store variable %} # variable = '/path/to/string'
     try:
         # RB: split_contents respects quoted 'strings containing spaces'
         tag, path_str = token.split_contents()
@@ -75,15 +91,17 @@ def do_save_meta(parser, token):
         else:
             path_str = ''
     else:
+        # RB: remove the quotes
         path_str = path_str[1:-1]
 
     # RB: parse the template thing until %endstore found
     nodelist = parser.parse(('endstore',))
     parser.delete_first_token()
 
-    return WriteRamonCrap(tag, path, path_str, nodelist)
+    # RB: Now lets start writing output files
+    return WriteFiles(tag, path, path_str, nodelist)
 
-class WriteRamonCrap(template.Node):
+class WriteFiles(template.Node):
 
     def __init__(self, tag, path, path_str, nodelist):
         self.tag = tag
@@ -96,7 +114,7 @@ class WriteRamonCrap(template.Node):
             try:
                 self.path_str = self.path.resolve(context)
             except template.VariableDoesNotExist:
-                raise template.TemplateSyntaxError, '%r tag argument 1: cannot resolve variable %r' %( self.tag, self.path_str )
+                raise template.TemplateSyntaxError, '%r tag argument 1: cannot resolve variable %r' %( self.tag, str( self.path ) )
 
         output = self.nodelist.render(context)
 
@@ -105,9 +123,10 @@ class WriteRamonCrap(template.Node):
         my_fp.write(output)
         my_fp.close()
 
+        context['stored'] = True
+
 	# RB: we wrote output to file so we return nothing
         return ''
-        # RB: wes done bitches cyyaa
 
 class ScriptNode(template.Node):
     """
