@@ -66,7 +66,6 @@ def ip_last_digit(value):
 register.filter( 'ip_last_digit', ip_last_digit )
 
 @register.tag(name='store')
-#@stringfilter
 def do_save_meta(parser, token):
     """
         Compilation function to use for meta-info.
@@ -99,9 +98,9 @@ def do_save_meta(parser, token):
     parser.delete_first_token()
 
     # RB: Now lets start writing output files
-    return WriteFiles(tag, path, path_str, nodelist)
+    return generateStoreOutput(tag, path, path_str, nodelist)
 
-class WriteFiles(template.Node):
+class generateStoreOutput(template.Node):
 
     def __init__(self, tag, path, path_str, nodelist):
         self.tag = tag
@@ -116,16 +115,16 @@ class WriteFiles(template.Node):
             except template.VariableDoesNotExist:
                 raise template.TemplateSyntaxError, '%r tag argument 1: cannot resolve variable %r' %( self.tag, str( self.path ) )
 
+	# RB: render template between store tags
         output = self.nodelist.render(context)
 
-        # RB: write that stuff
-        my_fp = open( str(self.path_str) , "w")
-        my_fp.write(output)
-        my_fp.close()
+	if not context.has_key( 'stores' ):
+		context['stores'] = {}
 
-        context['stored'] = True
+	# RB: store output in context dict for later writing to file
+        context['stores'][ self.path_str ] = output
 
-	# RB: we wrote output to file so we return nothing
+	# RB: output generated into context dict, so we return nothing
         return ''
 
 class ScriptNode(template.Node):
