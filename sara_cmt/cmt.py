@@ -321,21 +321,30 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
         logger.error('Template does not exist: %s' % e)
 
     if not parser.values.DRYRUN:
-        write_msg = 'Writing outputfile'
-        created_msg = 'Outputfile is created'
-        try:
-            logger.info(write_msg)
-            f = open(c['output'], 'w')
-            f.writelines(res)
-            f.close()
-            logger.info(created_msg)
-        except IOError, e:
-            logger.error('Failed creating outputfile: %s' % e)
-        except KeyError, e:
-            logger.error('No output defined in template')
+	
+	if not c.has_key( 'stores' ):
+	
+		c[ 'stores' ] = { c['output'] : res }
+
+	for store_file, store_output in c['stores'].items():
+
+		write_msg = 'Writing outputfile: %s' %store_file
+		created_msg = 'Outputfile(s) created: %s' %store_file
+
+		try:
+		    logger.info(write_msg)
+		    f = open(store_file, 'w')
+		    f.writelines(store_output)
+		    f.close()
+		    logger.info(created_msg)
+		except IOError, e:
+		    logger.error('Failed creating outputfile: %s' % e)
+		except KeyError, e:
+		    logger.error('No output/stores defined in template')
+
     else:
-        logger.info('[DRYRUN] %s' % write_msg)
-        logger.info('[DRYRUN] %s' % created_msg)
+        logger.info('[DRYRUN] Not writing files' )
+        logger.info('[DRYRUN] Nothing created' )
 
     if not parser.values.DRYRUN:
         try:
