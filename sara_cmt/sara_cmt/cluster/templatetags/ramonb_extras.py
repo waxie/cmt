@@ -170,7 +170,9 @@ def do_getracks(parser, token):
 class getRacks(template.Node):
 
     """
-        Something weird
+        Get list of racks in a cluter
+
+        Usage: {% getracks <cluster> as <listname> %}
     """
 
     def __init__(self, name, cluster):
@@ -180,16 +182,11 @@ class getRacks(template.Node):
         self.racks = [ ]
 
     def render(self, context):
-	attr='cluster__name'
-	val =self.cluster
-
-	rack_names = [ ]
 
         cluster_units = get_model('cluster', 'HardwareUnit').objects.filter( cluster__name=str(self.cluster) )
 
         for u in cluster_units:
-            if u.rack.label not in rack_names:
-	        rack_names.append( u.rack.label )
+            if u.rack not in self.racks:
 	        self.racks.append( u.rack )
 
         context[ self.name ] = self.racks
