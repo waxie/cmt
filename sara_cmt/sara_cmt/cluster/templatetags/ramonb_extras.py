@@ -157,6 +157,44 @@ def do_epilogue(parser, token):
 
 from django.db.models import get_model
 
+@register.tag(name='getracks')
+def do_getracks(parser, token):
+
+    try:
+        tag, cluster, kw_as, name = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError, '%r tag requires exactly 4 arguments' % tag
+
+    return getRacks( name, cluster )
+
+class getRacks(template.Node):
+
+    """
+        Something weird
+    """
+
+    def __init__(self, name, cluster):
+
+        self.name = name
+        self.cluster = cluster.strip("'").strip('"').__str__()
+        self.racks = [ ]
+
+    def render(self, context):
+	attr='cluster__name'
+	val =self.cluster
+
+	rack_names = [ ]
+
+        cluster_units = get_model('cluster', 'HardwareUnit').objects.filter( cluster__name=str(self.cluster) )
+
+        for u in cluster_units:
+            if u.rack.label not in rack_names:
+	        rack_names.append( u.rack.label )
+	        self.racks.append( u.rack )
+
+        context[ self.name ] = self.racks
+        return ''
+
 @register.tag(name='use')
 def do_use(parser, token):
     """
