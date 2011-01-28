@@ -245,11 +245,7 @@ class getBaseNets(template.Node):
 
         from IPy import IP
 
-	print network_str
-
         network_units = get_model('cluster', 'Network').objects.filter( name=str(network_str) )
-
-	print len( network_units )
 
         for n in network_units:
 
@@ -259,8 +255,8 @@ class getBaseNets(template.Node):
                     self.basenets.append( str( base_net( ipnum ) ) )
 
         context[ self.varname ] = self.basenets
-        print self.basenets
         self.basenets = [ ]
+
         return ''
 
 
