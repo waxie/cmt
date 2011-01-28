@@ -52,13 +52,20 @@ register.filter( 'ip_last_digit', ip_last_digit )
 def do_assign(parser,token):
 
     """
-        Leipe shit ouwe
+        Variable assignment within template
+
+        Usage: {% assign newvar = <space seprated list of strings/vars %}
+         i.e.: {% assign file_name = '/var/tmp/rack-' rack.label '.txt' %}
     """
-    mijn_poep = token.split_contents()
-    tag = mijn_poep[0]
-    new_var = mijn_poep[1]
-    is_teken = mijn_poep[2]
-    assignees = mijn_poep[3:]
+    definition = token.split_contents()
+
+    if len(definition) < 4:
+        raise template.TemplateSyntaxError, '%r tag requires at least 4 arguments' % tag
+
+    tag = definition[0]
+    new_var = definition[1]
+    is_teken = definition[2]
+    assignees = definition[3:]
 
     return resolveVariables( new_var, assignees )
 
@@ -68,32 +75,38 @@ class resolveVariables(template.Node):
 
         self.varname = varname
         self.varlist = varlist
-	self.resvars = [ ]
 
     def render(self, context):
 
-        aarsvars = [ ]
+	resvars = [ ]
 
         for a in self.varlist:
 
 	    var_str = ''
+
             if not (a[0] == a[-1] and a[0] in ('"', "'")):
                 try:
+                    # RB: assume strings are quoted
+                    #
                     a_var = template.Variable( a )
                     var_str = a_var.resolve(context)
+
                 except template.VariableDoesNotExist:
+
+                    #RB: still think not allowed to raise exceptions from render function
+                    #
                     #raise template.TemplateSyntaxError, 'cannot resolve variable %r' %(  str( self.path ) )
                     pass
 
-                aarsvars.append( str(var_str) )
+                resvars.append( str(var_str) )
 
             else:
+                #RB: strip quotes from string
                 a = str( a.strip("'").strip('"') )
-                aarsvars.append( str(a) )
+                resvars.append( str(a) )
 
-        #print aarsvars
-
-        context[ self.varname ] = string.join( aarsvars, '' )
+        #RB: finally assign the concatenated string to new varname
+        context[ self.varname ] = string.join( resvars, '' )
 
 	#RB: Django render functions not supposed/allowed to raise Exception, I think
 	return ''
