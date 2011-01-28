@@ -249,7 +249,6 @@ class getBaseNets(template.Node):
 
         for n in network_units:
 
-            print n.netaddress
             for ipnum in IP( n.cidr ):
                 if not base_net( ipnum ) in self.basenets:
                     self.basenets.append( str( base_net( ipnum ) ) )
