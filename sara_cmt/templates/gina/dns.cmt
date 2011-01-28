@@ -28,12 +28,6 @@
 ; Generated   : {% now "r" %}
 ;
 
-
-
-{# {% use interface with 'network__name=gina console' as ifaces_gina_console %} #}
-{# {% use interface with 'network__name=gina admin' as ifaces_gina_admin %} #}
-{# {% use interface with 'network__name=gina productie' as ifaces_gina_productie %} #}
-
 @       IN      SOA     ns.gina.sara.nl. root.ns.gina.sara.nl. (
                                          {% now "YmjH" %}   ; Serial
                                         7200            ; Refresh
