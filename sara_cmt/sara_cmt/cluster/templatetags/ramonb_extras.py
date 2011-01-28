@@ -86,7 +86,7 @@ class resolveVariables(template.Node):
 
             if not (a[0] == a[-1] and a[0] in ('"', "'")):
                 try:
-                    # RB: assume strings are quoted
+                    # RB: no quotes must mean its an variable
                     #
                     a_var = template.Variable( a )
                     var_str = a_var.resolve(context)
@@ -101,7 +101,9 @@ class resolveVariables(template.Node):
                 resvars.append( str(var_str) )
 
             else:
+                #RB: assume strings are quoted
                 #RB: strip quotes from string
+                #
                 a = str( a.strip("'").strip('"') )
                 resvars.append( str(a) )
 
