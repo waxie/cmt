@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.6
 
 #####
 #
@@ -306,6 +306,7 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
         template_data['svn_id'] = '$Id:$'
         template_data['svn_url'] = '$URL:$'
         template_data['input'] = fullpath
+        template_data['stores'] = { }
 
         c = Context(template_data)
         res = template.render(c)
