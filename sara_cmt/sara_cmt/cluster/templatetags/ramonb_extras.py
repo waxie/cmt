@@ -13,7 +13,6 @@ logger = Logger().getLogger()
 
 register = template.Library()
 
-
 class NoBlankLinesNode(template.Node):
     """
         Renderer that'll remove all blank lines.
@@ -33,22 +32,6 @@ def noblanklines(parser, token):
     parser.delete_first_token()
     return NoBlankLinesNode(nodelist)
 
-
-class MetaNode(template.Node):
-    """
-        Renderer, which stores the save path to the context.
-    """
-
-    def __init__(self, tag, values):
-        self.tag = tag
-        self.values = values
-
-    def render(self, context):
-        # This is where the work actually happens
-        context[self.tag] = self.values
-        return ''
-
-
 @stringfilter
 def base_net(value):
     ip_blocks = value.split('.')
@@ -65,6 +48,56 @@ def ip_last_digit(value):
 
 register.filter( 'ip_last_digit', ip_last_digit )
 
+@register.tag(name='assign')
+def do_assign(parser,token):
+
+    """
+        Leipe shit ouwe
+    """
+    mijn_poep = token.split_contents()
+    tag = mijn_poep[0]
+    new_var = mijn_poep[1]
+    is_teken = mijn_poep[2]
+    assignees = mijn_poep[3:]
+
+    return resolveVariables( new_var, assignees )
+
+class resolveVariables(template.Node):
+
+    def __init__(self, varname, varlist ):
+
+        self.varname = varname
+        self.varlist = varlist
+	self.resvars = [ ]
+
+    def render(self, context):
+
+        aarsvars = [ ]
+
+        for a in self.varlist:
+
+	    var_str = ''
+            if not (a[0] == a[-1] and a[0] in ('"', "'")):
+                try:
+                    a_var = template.Variable( a )
+                    var_str = a_var.resolve(context)
+                except template.VariableDoesNotExist:
+                    #raise template.TemplateSyntaxError, 'cannot resolve variable %r' %(  str( self.path ) )
+                    pass
+
+                aarsvars.append( str(var_str) )
+
+            else:
+                a = str( a.strip("'").strip('"') )
+                aarsvars.append( str(a) )
+
+        #print aarsvars
+
+        context[ self.varname ] = string.join( aarsvars, '' )
+
+	#RB: Django render functions not supposed/allowed to raise Exception, I think
+	return ''
+
 @register.tag(name='store')
 def do_save_meta(parser, token):
     """
@@ -79,50 +112,39 @@ def do_save_meta(parser, token):
     except ValueError:
         raise template.TemplateSyntaxError, '%r tag requires at least 1 argument' % tag
 
-    path = None
-
-    if not (path_str[0] == path_str[-1] and path_str[0] in ('"', "'")):
-        # RB: Not quoted: must be an variable: attempt to resolve to value
-        try:
-            path = template.Variable( path_str )
-        except template.VariableDoesNotExist:
-            raise template.TemplateSyntaxError, '%r tag argument 1: not an variable %r' %( tag, path_str )
-        else:
-            path_str = ''
-    else:
-        # RB: remove the quotes
-        path_str = path_str[1:-1]
-
     # RB: parse the template thing until %endstore found
     nodelist = parser.parse(('endstore',))
     parser.delete_first_token()
 
     # RB: Now lets start writing output files
-    return generateStoreOutput(tag, path, path_str, nodelist)
+    return generateStoreOutput(tag, path_str, nodelist)
 
 class generateStoreOutput(template.Node):
 
-    def __init__(self, tag, path, path_str, nodelist):
+    def __init__(self, tag, path_str, nodelist):
         self.tag = tag
         self.nodelist = nodelist
-        self.path = path
         self.path_str = path_str
 
     def render(self, context):
-        if self.path_str == '':
+
+        if (self.path_str[0] == self.path_str[-1] and self.path_str[0] in ('"', "'")):
+
+            mypath_str = str(self.path_str)[1:-1]
+
+        else:
+            # RB: Not quoted: must be an variable: attempt to resolve to value
             try:
-                self.path_str = self.path.resolve(context)
+                pathvar = template.Variable( str(self.path_str) )
+                mypath_str = pathvar.resolve(context)
             except template.VariableDoesNotExist:
-                raise template.TemplateSyntaxError, '%r tag argument 1: cannot resolve variable %r' %( self.tag, str( self.path ) )
+                raise template.TemplateSyntaxError, '%r tag argument 1: not an variable %r' %( tag, path_str )
 
 	# RB: render template between store tags
         output = self.nodelist.render(context)
 
-	if not context.has_key( 'stores' ):
-		context['stores'] = {}
-
 	# RB: store output in context dict for later writing to file
-        context['stores'][ self.path_str ] = output
+        context['stores'][ mypath_str ] = output
 
 	# RB: output generated into context dict, so we return nothing
         return ''
