@@ -33,6 +33,16 @@ def noblanklines(parser, token):
     return NoBlankLinesNode(nodelist)
 
 @stringfilter
+def arpanize(value):
+    ip_blocks = value.split('.')
+
+    reverse_block = [ ip_blocks[2], ip_blocks[1], ip_blocks[0], 'in-addr.arpa' ]
+
+    return string.join( reverse_block, '.' )
+
+register.filter( 'arpanize', arpanize )
+
+@stringfilter
 def base_net(value):
     ip_blocks = value.split('.')
 
@@ -153,7 +163,8 @@ class generateStoreOutput(template.Node):
                 pathvar = template.Variable( str(self.path_str) )
                 mypath_str = pathvar.resolve(context)
             except template.VariableDoesNotExist:
-                raise template.TemplateSyntaxError, '%r tag argument 1: not an variable %r' %( tag, path_str )
+                #raise template.TemplateSyntaxError, '%r tag argument 1: not an variable %r' %( tag, path_str )
+                pass
 
 	# RB: render template between store tags
         output = self.nodelist.render(context)
@@ -193,6 +204,65 @@ def do_epilogue(parser, token):
 
 
 from django.db.models import get_model
+
+@register.tag(name='getbasenets')
+def do_getbasenets(parser, token):
+
+    try:
+        tag, network_name, kw_as, varname = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError, '%r tag requires exactly 4 arguments' % tag
+
+    return getBaseNets( varname, network_name )
+
+class getBaseNets(template.Node):
+
+    """
+        Get list of basenets in a network (name)
+
+        Usage: {% getbasenets <network name> as <listname> %}
+    """
+
+    def __init__(self, varname, network_name ):
+
+        self.varname = varname
+        self.network_name = network_name.strip("'").strip('"').__str__()
+        self.basenets = [ ]
+
+    def render(self, context):
+
+        if (self.network_name[0] == self.network_name[-1] and self.network_name[0] in ('"', "'")):
+
+            network_str = str( self.network_name.strip("'").strip('"') )
+        else:
+            # RB: Not quoted: must be an variable: attempt to resolve to value
+            try:
+                networkvar = template.Variable( str(self.network_name) )
+                network_str = networkvar.resolve(context)
+            except template.VariableDoesNotExist:
+                #raise template.TemplateSyntaxError, '%r tag argument 1: not an variable %r' %( tag, path_str )
+                pass
+
+        from IPy import IP
+
+	print network_str
+
+        network_units = get_model('cluster', 'Network').objects.filter( name=str(network_str) )
+
+	print len( network_units )
+
+        for n in network_units:
+
+            print n.netaddress
+            for ipnum in IP( n.cidr ):
+                if not base_net( ipnum ) in self.basenets:
+                    self.basenets.append( str( base_net( ipnum ) ) )
+
+        context[ self.varname ] = self.basenets
+        print self.basenets
+        self.basenets = [ ]
+        return ''
+
 
 @register.tag(name='getracks')
 def do_getracks(parser, token):
@@ -248,14 +318,12 @@ def do_use(parser, token):
         raise template.TemplateSyntaxError, "second argument of %r tag has to be 'with'" % tag
     if definition[-2] != 'as':
         raise template.TemplateSyntaxError, "second last argument of %r tag has to be 'as'" % tag
+
     entity = definition[1]
     query = definition[-3]
-    #attr,val = query.split('=')
     key = definition[-1]
-    #queryset = get_model('cluster', entity).objects.filter(**{attr:val})
-    #return ObjectNode(definition[-1], definition[1])
-    return QuerySetNode(entity, query, key)
 
+    return QuerySetNode(entity, query, key)
 
 class QuerySetNode(template.Node):
     """
@@ -264,11 +332,24 @@ class QuerySetNode(template.Node):
 
     def __init__(self, entity, query, key):
         self.entity = entity
-        self.query = query.strip("'").strip('"').__str__()
+        self.query = query
         self.key = key
 
     def render(self, context):
-        attr, val = self.query.split('=')
+
+        if (self.query[0] == self.query[-1] and self.query[0] in ('"', "'")):
+
+            myquery_str = str( self.query.strip("'").strip('"') )
+	else:
+            # RB: Not quoted: must be an variable: attempt to resolve to value
+            try:
+                queryvar = template.Variable( str(self.query) )
+                myquery_str = queryvar.resolve(context)
+            except template.VariableDoesNotExist:
+                #raise template.TemplateSyntaxError, '%r tag argument 1: not an variable %r' %( tag, path_str )
+                pass
+
+        attr, val = myquery_str.split('=')
         queryset = get_model('cluster', self.entity).objects.filter(**{attr:val})
         if len(queryset) == 1:
             queryset = queryset[0]
