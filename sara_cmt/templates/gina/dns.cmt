@@ -2,13 +2,7 @@
 {% noblanklines %}
 
 {% epilogue %}
-/usr/bin/test -f /var/tmp/test-dns/db.gina.sara.nl.manual || /bin/touch /var/tmp/test-dns/db.gina.sara.nl.manual
-/usr/bin/test -f /var/tmp/test-dns/db.192.168.32.manual || /bin/touch /var/tmp/test-dns/db.192.168.32.manual
-/usr/bin/test -f /var/tmp/test-dns/db.192.168.33.manual || /bin/touch /var/tmp/test-dns/db.192.168.33.manual
-/usr/bin/test -f /var/tmp/test-dns/db.192.168.20.manual || /bin/touch /var/tmp/test-dns/db.192.168.20.manual
-/usr/bin/test -f /var/tmp/test-dns/db.192.168.21.manual || /bin/touch /var/tmp/test-dns/db.192.168.21.manual
-/usr/bin/test -f /var/tmp/test-dns/db.145.100.48.manual || /bin/touch /var/tmp/test-dns/db.145.100.48.manual
-/usr/bin/test -f /var/tmp/test-dns/db.145.100.49.manual || /bin/touch /var/tmp/test-dns/db.145.100.49.manual
+/bin/echo /usr/bin/test -f /var/tmp/test-dns/db.gina.sara.nl.manual || /bin/touch /var/tmp/test-dns/db.gina.sara.nl.manual
 /bin/echo dummy /etc/init.d/named reload
 {% endepilogue %}
 
@@ -70,6 +64,11 @@ $INCLUDE db.{{ n.domain }}.manual
   {% for bnet in network_basenets %}
 
     {% assign filename = '/var/tmp/test-dns/db.' bnet %}
+    {% epilogue %}
+
+/bin/echo /usr/bin/test -f {{ filename }}.manual || /bin/touch {{ filename }}.manual
+
+    {% endepilogue %}
     {% store filename %}
     {% noblanklines %}
 $TTL 3600
