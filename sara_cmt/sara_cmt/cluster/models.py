@@ -130,7 +130,7 @@ class Interface(ModelExtension):
     network   = models.ForeignKey('Network', related_name='interfaces')
     host      = models.ForeignKey('HardwareUnit', related_name='interfaces',
                                   verbose_name='machine')
-    iftype      = models.ForeignKey('InterfaceType', related_name='interfaces',
+    iftype    = models.ForeignKey('InterfaceType', related_name='interfaces',
                                   verbose_name='type')
     label     = models.CharField(max_length=255, help_text='Automagically \
                                  generated if kept empty')

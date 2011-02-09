@@ -139,25 +139,22 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'sara_cmt.urls'
 
+# Templates for the CMT web-frontend.
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates"
     # or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     os.path.normpath(os.path.join(os.path.dirname(__file__), 'cluster/templates')),
-    #os.path.normpath(os.path.join(os.path.dirname(__file__), '../templates')),
-    '/etc/sara_cmt/templates'
 )
 
+# Templates for the CMT command line interface.
+# (thus, the templates for our configfiles, etc)
 CMT_TEMPLATES_DIR = '/etc/sara_cmt/templates'
-#CMT_TEMPLATES_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), \
-#    '../templates'))
-#CMT_TEMPLATE_DIRS = (os.path.normpath(os.path.join(os.path.dirname(__file__),
-#'../templates')),)
 
 FIXTURE_DIRS = (
     # A fixture is a collection of files that contain serialized contents of
-    # the database.
+    # the database. (can be used for testing)
     os.path.normpath(os.path.join(os.path.dirname(__file__), 'fixtures')),
 )
 

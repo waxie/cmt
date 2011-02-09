@@ -64,7 +64,7 @@ def do_assign(parser,token):
     """
         Variable assignment within template
 
-        Usage: {% assign newvar = <space seprated list of strings/vars %}
+        Usage: {% assign newvar = <space seprated list of strings/vars> %}
          i.e.: {% assign file_name = '/var/tmp/rack-' rack.label '.txt' %}
     """
     definition = token.split_contents()
@@ -96,7 +96,7 @@ class resolveVariables(template.Node):
 
             if not (a[0] == a[-1] and a[0] in ('"', "'")):
                 try:
-                    # RB: no quotes must mean its an variable
+                    # RB: no quotes must mean its a variable
                     #
                     a_var = template.Variable( a )
                     var_str = a_var.resolve(context)
@@ -158,12 +158,12 @@ class generateStoreOutput(template.Node):
             mypath_str = str(self.path_str)[1:-1]
 
         else:
-            # RB: Not quoted: must be an variable: attempt to resolve to value
+            # RB: Not quoted: must be a variable: attempt to resolve to value
             try:
                 pathvar = template.Variable( str(self.path_str) )
                 mypath_str = pathvar.resolve(context)
             except template.VariableDoesNotExist:
-                #raise template.TemplateSyntaxError, '%r tag argument 1: not an variable %r' %( tag, path_str )
+                #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
                 pass
 
 	# RB: render template between store tags
@@ -235,12 +235,12 @@ class getBaseNets(template.Node):
 
             network_str = str( self.network_name.strip("'").strip('"') )
         else:
-            # RB: Not quoted: must be an variable: attempt to resolve to value
+            # RB: Not quoted: must be a variable: attempt to resolve to value
             try:
                 networkvar = template.Variable( str(self.network_name) )
                 network_str = networkvar.resolve(context)
             except template.VariableDoesNotExist:
-                #raise template.TemplateSyntaxError, '%r tag argument 1: not an variable %r' %( tag, path_str )
+                #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
                 pass
 
         from IPy import IP
@@ -336,12 +336,12 @@ class QuerySetNode(template.Node):
 
             myquery_str = str( self.query.strip("'").strip('"') )
 	else:
-            # RB: Not quoted: must be an variable: attempt to resolve to value
+            # RB: Not quoted: must be a variable: attempt to resolve to value
             try:
                 queryvar = template.Variable( str(self.query) )
                 myquery_str = queryvar.resolve(context)
             except template.VariableDoesNotExist:
-                #raise template.TemplateSyntaxError, '%r tag argument 1: not an variable %r' %( tag, path_str )
+                #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
                 pass
 
         attr, val = myquery_str.split('=')
