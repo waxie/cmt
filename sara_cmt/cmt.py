@@ -321,27 +321,25 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
     except IOError, e:
         logger.error('Template does not exist: %s' % e)
 
-    if not parser.values.DRYRUN:
-	
-	if not c.has_key( 'stores' ):
-	
-		c[ 'stores' ] = { c['output'] : res }
+    if not parser.values.DRYRUN: # Write output file(s)
+        
+        c['stores'] = c['stores'] or {c['output']:res}
 
-	for store_file, store_output in c['stores'].items():
+        for store_file, store_output in c['stores'].items():
 
-		write_msg = 'Writing outputfile: %s' %store_file
-		created_msg = 'Outputfile(s) created: %s' %store_file
+            write_msg = 'Writing outputfile: %s' %store_file
+            created_msg = 'Outputfile(s) created: %s' %store_file
 
-		try:
-		    logger.info(write_msg)
-		    f = open(store_file, 'w')
-		    f.writelines(store_output)
-		    f.close()
-		    logger.info(created_msg)
-		except IOError, e:
-		    logger.error('Failed creating outputfile: %s' % e)
-		except KeyError, e:
-		    logger.error('No output/stores defined in template')
+            try:
+                logger.info(write_msg)
+                f = open(store_file, 'w')
+                f.writelines(store_output)
+                f.close()
+                logger.info(created_msg)
+            except IOError, e:
+                logger.error('Failed creating outputfile: %s' % e)
+            except KeyError, e:
+                logger.error('No output/stores defined in template')
 
     else:
         logger.info('[DRYRUN] Not writing files' )
@@ -351,11 +349,11 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
         try:
             for script in c['epilogue']:
                 ### <DEBUG>
-                #logger.info('Now executing epilogue script')
+                logger.info('Now executing epilogue script')
                 #logger.debug('<EPILOGUE>')
                 os.system(script)
                 #logger.debug('</EPILOGUE>')
-                #logger.info('Finished epilogue script')
+                logger.info('Finished epilogue script')
                 ### </DEBUG>
         except KeyError, e:
             logger.info('Did not find an epilogue script')

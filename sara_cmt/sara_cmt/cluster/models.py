@@ -224,6 +224,18 @@ class Network(ModelExtension):
     def __unicode__(self):
         return self.name
 
+    #
+    def _rev_name(self):
+        network = IP("%s/%s" % (self.netaddress, self.netmask))
+        reverse_name = network.reverseName()
+        return reverse_name
+
+    #
+    def _rev_names(self):
+        network = IP("%s/%s" % (self.netaddress, self.netmask))
+        reverse_names = network.reverseNames()
+        return reverse_names
+
     def _max_hosts(self):
         """
             Give the total amount of IP-addresses which could be assigned to hosts in
