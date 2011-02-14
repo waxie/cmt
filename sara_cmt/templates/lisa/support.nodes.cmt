@@ -3,10 +3,12 @@
 {% noblanklines %}
 {% use HardwareUnit with 'cluster__name=Lisa' as lisa_hosts %}
     {% for hw in lisa_hosts %}
+	{% if 'inactive' not in hw.roles %}
             {% for i in hw.interfaces.all %}
                 {% if i.network.name == 'lisa consoles' and "PowerEdge" in hw.specifications.name %} 
 {{ i.fqdn }}
                 {% endif %}
             {% endfor %}
+	{% endif %}
     {% endfor %}
 {% endnoblanklines %}
