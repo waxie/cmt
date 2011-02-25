@@ -28,13 +28,13 @@
 ; Generated   : {% now "r" %}
 ;
 
-@       IN      SOA     ns.gina.sara.nl. root.ns.gina.sara.nl. (
+@       IN      SOA     ns1.gina.sara.nl. root.ns1.gina.sara.nl. (
                                          {% now "YmjH" %}   ; Serial
                                         7200            ; Refresh
                                         600             ; Retry
                                         604800          ; Expire
                                         86400 )         ; Minimum
-        IN      NS      ns.gina.sara.nl.
+        IN      NS      ns1.gina.sara.nl.
         IN      NS      ns2.gina.sara.nl.
 {% endnoblanklines %}
 
@@ -89,13 +89,13 @@ $TTL 3600
 ; Date        : Jan 24 2011
 ; Version     : {{ version }}
 ; Generated   : {% now "r" %}
-@       IN      SOA     ns.gina.sara.nl. root.ns.gina.sara.nl. (
+@       IN      SOA     ns1.gina.sara.nl. root.ns1.gina.sara.nl. (
                                          {% now "YmjH" %}   ; Serial
                                         7200            ; Refresh
                                         600             ; Retry
                                         604800          ; Expire
                                         86400 )         ; Minimum
-        IN      NS      ns.gina.sara.nl.
+        IN      NS      ns1.gina.sara.nl.
         IN      NS      ns2.gina.sara.nl.
 {% endnoblanklines %}
 
