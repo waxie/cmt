@@ -4,6 +4,10 @@
 {% epilogue %}
 /bin/echo /usr/bin/test -f /var/named/primary/db.gina.sara.nl.manual || /bin/touch /var/named/primary/db.gina.sara.nl.manual
 /usr/bin/test -f /var/named/primary/db.gina.sara.nl.manual || /bin/touch /var/named/primary/db.gina.sara.nl.manual
+/bin/echo /usr/bin/test -f /var/named/primary/db.int.gina.sara.nl.manual || /bin/touch /var/named/primary/db.int.gina.sara.nl.manual
+/usr/bin/test -f /var/named/primary/db.int.gina.sara.nl.manual || /bin/touch /var/named/primary/db.int.gina.sara.nl.manual
+/bin/echo /usr/bin/test -f /var/named/primary/db.con.gina.sara.nl.manual || /bin/touch /var/named/primary/db.con.gina.sara.nl.manual
+/usr/bin/test -f /var/named/primary/db.con.gina.sara.nl.manual || /bin/touch /var/named/primary/db.con.gina.sara.nl.manual
 /bin/echo /etc/init.d/named reload
 /etc/init.d/named reload
 {% endepilogue %}
