@@ -2,12 +2,14 @@
 {% noblanklines %}
 
 {% epilogue %}
-/bin/echo /usr/bin/test -f /var/tmp/test-dns/db.gina.sara.nl.manual || /bin/touch /var/tmp/test-dns/db.gina.sara.nl.manual
-/bin/echo dummy /etc/init.d/named reload
+/bin/echo /usr/bin/test -f /var/named/primary/db.gina.sara.nl.manual || /bin/touch /var/named/primary/db.gina.sara.nl.manual
+/usr/bin/test -f /var/named/primary/db.gina.sara.nl.manual || /bin/touch /var/named/primary/db.gina.sara.nl.manual
+/bin/echo /etc/init.d/named reload
+/etc/init.d/named reload
 {% endepilogue %}
 
 {% endnoblanklines %}
-{% store '/var/tmp/test-dns/db.gina.sara.nl' %}
+{% store '/var/named/primary/db.gina.sara.nl' %}
 {% noblanklines %}
 
 ;
@@ -63,10 +65,11 @@ $INCLUDE db.{{ n.domain }}.manual
   {% getbasenets n.name as network_basenets %}
   {% for bnet in network_basenets %}
 
-    {% assign filename = '/var/tmp/test-dns/db.' bnet %}
+    {% assign filename = '/var/named/primary/db.' bnet %}
     {% epilogue %}
 
 /bin/echo /usr/bin/test -f {{ filename }}.manual || /bin/touch {{ filename }}.manual
+/usr/bin/test -f {{ filename }}.manual || /bin/touch {{ filename }}.manual
 
     {% endepilogue %}
     {% store filename %}
