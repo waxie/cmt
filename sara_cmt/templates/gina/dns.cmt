@@ -38,14 +38,14 @@
         IN      NS      ns2.gina.sara.nl.
 {% endnoblanklines %}
 
+$INCLUDE db.gina.sara.nl.manual
+
 {% use Network with 'name__contains=gina' as gina_networks %}
 {% for n in gina_networks %}
   {% assign network_query = 'network__name=' n.name %}
   {% use interface with network_query as network_interfaces %}
 
 $ORIGIN {{ n.domain }}.
-
-$INCLUDE db.{{ n.domain }}.manual
 
   {% noblanklines %}
   {% for iface in network_interfaces %}
@@ -99,9 +99,9 @@ $TTL 3600
         IN      NS      ns2.gina.sara.nl.
 {% endnoblanklines %}
 
-$ORIGIN {{ bnet|arpanize }}.
-
 $INCLUDE db.{{ bnet }}.manual
+
+$ORIGIN {{ bnet|arpanize }}.
 
     {% noblanklines %}
     {% assign network_query = 'network__name=' n.name %}
