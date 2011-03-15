@@ -17,6 +17,11 @@
 {% store /usr/sara/etc/cfengine3/hosts.lisa as output %}
 {% use HardwareUnit with 'cluster__name=Lisa' as lisa_hosts %}
 
+{% epilogue %}
+/usr/bin/scp /usr/sara/etc/cfengine3/hosts.lisa cfengine3:/data/cfengine3/cf-runagent
+{% endepilogue %}
+
+
 body runagent control
 {
         any::
@@ -26,10 +31,9 @@ body runagent control
                 trustkey         => "true";
 
                 output_to_file   => "true";
-                output_directory => "/data/cfengine3/cf-runagent/lisa";
+                output_directory => "/var/log/cf-runagent/lisa";
 
 		max_children     => "40"; 
-
 
                 hosts => {
 {% for hw in lisa_hosts %}
