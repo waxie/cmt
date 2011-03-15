@@ -23,10 +23,12 @@ body runagent control
                 # Hack else we can not use it. Lisa cluster has the same keys for
                 # compute nodes.
                 #
-                trustkey        => "true";
+                trustkey         => "true";
 
-                output_to_file  => "true";
+                output_to_file   => "true";
                 output_directory => "/data/cfengine3/cf-runagent/lisa";
+
+		max_children     => "40"; 
 
 
                 hosts => {
