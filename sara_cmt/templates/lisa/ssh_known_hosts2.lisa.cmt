@@ -16,6 +16,9 @@
 {# {% store /var/tmp/ssh_known_hosts2.lisa as output %} #}
 {% store /data/cfengine/data/method/config_ssh/keys/lisa/ssh_known_hosts2 as output %}
 {% use HardwareUnit with 'cluster__name=Lisa' as lisa_hosts %}
+{% epilogue %}
+/usr/bin/scp /data/cfengine3/data/method/config_ssh/keys/lisa/ssh_known_hosts2 cfengine3:/data/cfengine3/data/bundles/ssh/lisa/etc/ssh/
+{% endepilogue %}
 
 # New boot keys
 boot,boot.irc.sara.nl,192.168.146.10 ssh-dss AAAAB3NzaC1kc3MAAACBAKfK3Q08f+2xIF6bTdbLWCvtC8V+gV00wERk5FjzkkUOVBHFxN32tc3Wyro389RZ3Iq6E7A3pj8M+ze2uYL8xenelLk4JX2uapaRXRGqBRX98RdeMuKcXxz4GkiKFAGBulOI8kA0g6Sf2jhlpl416RGVZ1Iv3DpmXe8nXAdsWL/lAAAAFQCypUSocTN/fkOyVEnOKw+meo/NlQAAAIB9P5jECPKwreVqHmup4BcFae/vQ14XWCR3+ATodSgKDSLg+LexZPuPGL1PXq0rOx7ZKIXIFu8/F67RiT1W4WTLt9QqZNPHZdra6YGhv5Tryv0p0H4ENgNj9TSCiS8hUMFurbaeFHLtv9xpe9XDeaEby+Ms6AqIABhmfYsvMDYzdQAAAIBWzWV2axklCSbM8vrknNFH7pPBRnzrPWwNsdPqFzIgrjEzqiScIfQEbyfCLYKfEWA6A91y7DQBygWyuAiL9OA/2M3Qu8wUU9C94lHi/pYQIe9fNS2qLCOfXNWEThFEqvEW7Zb2JdbwRVZqVVvQdoEIXPnE0eyaYUXTFFk0MtKb7w== root@boot.irc.sara.nl

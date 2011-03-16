@@ -15,6 +15,10 @@
 {% noblanklines %}
 
 {% store /data/cfengine/data/method/config_ssh/keys/lisa/shosts.equiv as output %}
+{% epilogue %}
+/usr/bin/scp /data/cfengine3/data/method/config_ssh/keys/lisa/ssh_known_hosts2 cfengine3:/data/cfengine3/data/bundles/ssh/lisa/etc/ssh/
+{% endepilogue %}
+
 {% use HardwareUnit with 'cluster__name=Lisa' as lisa_hosts %}
 {# {% store /var/tmp/shosts.equiv.lisa as output %} #}
     {% for hw in lisa_hosts %}
