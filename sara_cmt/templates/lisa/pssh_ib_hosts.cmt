@@ -18,7 +18,7 @@
 {% use Interface with 'network__name=lisa infiniband' as ib_interfaces %}
 
 {% for i in ib_interfaces %}
-  {% if i.host.cluster.name = 'Lisa' %}
+  {% if i.host.cluster.name = 'Lisa' and 'computenode' in i.host.roles and 'inactive' not in i.host.roles %}
 gb-{{ i.host.label }}.irc.sara.nl
   {% endif %}
 {% endfor %}
