@@ -88,8 +88,11 @@ config_parser.optionxform = lambda x: x
 config_parser.read(configfile)
 
 # Setup the logger for logging
-loglevel_str = config_parser.get('defaults', 'LOGLEVEL')
-logger.setLevel(config_parser.getint('loglevels', loglevel_str))
+loglevel = config_parser.get('defaults', 'LOGLEVEL')
+if loglevel == 'NOTSET' and settings.DEBUG == True:
+    logger.setLevel(config_parser.getint('loglevels', 'DEBUG'))
+else:
+    logger.setLevel(config_parser.getint('loglevels', loglevel))
 
 
 # Collect package information
@@ -247,11 +250,10 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
 
 
 def generate(option, opt_str, value, parser, *args, **kwargs):
-    from sara_cmt.template import CMTTemplate
     from django.template import Context
 
     # Save full path of templatefile to generate
-    filename = value
+    template_filename = value
 
     # Make a dict with filenames of the available templates
     files = [f for f in os.listdir(settings.CMT_TEMPLATES_DIR) if f[-4:]=='.cmt']
@@ -263,141 +265,92 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
         fdict[i] = f
         i+=1
 
-    if filename[-4:] != '.cmt':
-        filename += '.cmt'
+    if template_filename[-4:] != '.cmt':
+        template_filename += '.cmt'
 
     # Loop until a valid template has been chosen by the user
-    while filename not in fdict.values():
-        logger.warning("File '%s' not known"%filename)
+    while template_filename not in fdict.values():
+        logger.warning("File '%s' not known"%template_filename)
 
         # Give a numbered overview of the available templates
         for key,val in fdict.items():
             print '%s : %s'%(str(key).rjust(2),val)
         logger.debug('fdict: %s'%fdict.values())
-        filename = raw_input('\nChoose: ')
+        template_filename = raw_input('\nChoose: ')
 
         # If number given, lookup the filename in the dictionary
-        if filename.isdigit():
-            num = int(filename)
+        if template_filename.isdigit():
+            num = int(template_filename)
             if num <= len(fdict):
-                filename = fdict[num]
-                logger.debug('filename: %s'%filename)
+                template_filename = fdict[num]
+                logger.debug('filename: %s'%template_filename)
             else:
                 continue
         # Else check for the extension
-        elif filename[-4:]!='.cmt':
-            filename+='.cmt'
+        elif template_filename[-4:] != '.cmt':
+            template_filename += '.cmt'
 
-        logger.debug('%s (%s)'%(filename,type(filename)))
+        logger.debug('%s (%s)'%(template_filename,type(template_filename)))
 
-    fullpath = os.path.join(settings.CMT_TEMPLATES_DIR, filename)
+    template_fullpath = os.path.join(settings.CMT_TEMPLATES_DIR, template_filename)
 
-    # Load the contents of the templatefile as a CMTTemplate
     try:
-        f = open(fullpath, 'r')
-        templatestr = f.read()
-        f.close()
-
-        template = CMTTemplate(templatestr)
-
-        # Render the CMTTemplate with a Context
+        # Initialize a Context to render the template with
         template_data = {}
         template_data['version'] = CMTSARA_VERSION
         template_data['svn_id'] = '$Id:$'
         template_data['svn_url'] = '$URL:$'
-        template_data['input'] = fullpath
-        template_data['stores'] = { }
+        template_data['input'] = template_fullpath
+        template_data['__template_outputfiles__'] = {} # reserved for data to write to files
+        context = Context(template_data)
 
-        c = Context(template_data)
-        res = template.render(c)
+        template_data['stores'] = template_data['__template_outputfiles__'] # to stay bw compatible with ramon's code (temporary)
+        
+        rendered_string = render_to_string(template_filename, context_instance=context)
+        # While rendering the template there are variables added to the
+        # Context, so these can be used for post-processing.
+        logger.debug('<RESULT>\n%s\n</RESULT>'%rendered_string)
 
-        # While rendering the CMTTemplate there are variables added to the
-        # context, so these can be used for post-processing.
-
-        ### <DEBUG>
-        logger.debug('<RESULT>\n%s'%res)
-        logger.debug('</RESULT>')
-        ### </DEBUG>
     except IOError, e:
         logger.error('Template does not exist: %s' % e)
 
-    if not parser.values.DRYRUN: # Write output file(s)
         
-        c['stores'] = c['stores'] or {c['output']:res}
+    for outputfile, content in context['__template_outputfiles__'].items():
+        write_msg = 'Writing outputfile: %s' % outputfile
+        created_msg = 'Outputfile(s) created: %s' % outputfile
 
-        for store_file, store_output in c['stores'].items():
-
-            write_msg = 'Writing outputfile: %s' %store_file
-            created_msg = 'Outputfile(s) created: %s' %store_file
-
+        if not parser.values.DRYRUN: # Write output file(s)
             try:
                 logger.info(write_msg)
-                f = open(store_file, 'w')
-                f.writelines(store_output)
+                f = open(outputfile, 'w')
+                f.writelines(content)
                 f.close()
                 logger.info(created_msg)
             except IOError, e:
                 logger.error('Failed creating outputfile: %s' % e)
             except KeyError, e:
-                logger.error('No output/stores defined in template')
-
-    else:
-        logger.info('[DRYRUN] Not writing files' )
-        logger.info('[DRYRUN] Nothing created' )
+                logger.error('No outputfiles defined in template')
+        else:
+            write_msg = '[DRYRUN] %s' % write_msg
+            created_msg = '[DRYRUN] %s' % created_msg
+            logger.info(write_msg)
+            logger.info(created_msg)
 
     if not parser.values.DRYRUN:
         try:
-            for script in c['epilogue']:
-                ### <DEBUG>
-                logger.info('Now executing epilogue script')
-                #logger.debug('<EPILOGUE>')
+            for script in context['epilogue']:
+                logger.info('Executing epilogue script')
                 os.system(script)
-                #logger.debug('</EPILOGUE>')
                 logger.info('Finished epilogue script')
-                ### </DEBUG>
         except KeyError, e:
-            logger.info('Did not find an epilogue script')
+            logger.debug('No epilogue script found')
     return
-
-
-#def mac(option, opt_str, value, parser, *args, **kwargs):
-#    """
-#        Change the MAC-address of an existing interface.
-#    """
-#    old_mac, new_mac = value
-#
-#    query = {'ent': search_model('interface'),
-#        'get': {'hwaddress': [old_mac]}, 'set': {'hwaddress': [new_mac]}}
-#
-#    _object = object_mgr.get_object(query)
-#
-#    if _object:
-#        logger.debug('Found a unique object matching query: %s' % _object)
-#        confirmed = not parser.values.INTERACTIVE or \
-#            raw_input('Are you sure? [Yn] ')
-#        if confirmed in ['', 'y', 'Y', True]:
-#            attr_set_msg = 'Attributes has been set: %s' % _object
-#            if not parser.values.DRYRUN:
-#                _object.setattrs_from_dict(query['set'])
-#                logger.debug(attr_set_msg)
-#            else:
-#                logger.debug('[DRYRUN] %s' % attr_set_msg)
-#        else:
-#            logger.info('Change of MAC-address has been cancelled')
-#    else:
-#        logger.error('Unable to execute this request')
-
-#
-# </Database related methods>
-#
-#####
 
 
 #####
 #
 # <Methods for processing of arguments>
 #
-#def collect_args(option):
 
 
 def collect_args(option, parser):
@@ -494,13 +447,6 @@ def main():
 
                         The query, which consists out of one or more terms, is
                         used to make a selection of objects to list.""")
-#    parser.add_option('-m', '--mac',
-#                    action='callback',
-#                    callback=mac,
-#                    type='string',
-#                    metavar='<old MAC> <new MAC>',
-#                    nargs=2,
-#                    help='Change the MAC-address of an interface')
     parser.add_option('-r', '--remove',
                     action='callback',
                     callback=remove,
