@@ -166,10 +166,10 @@ class ModelExtension(models.Model):
 
         # Save object to give it an id, and make the M2M relations
         if not parser.values.DRYRUN:
-            if self.is_complete():
+            try:
                 self.save()
-            else:
-                logger.info('Not enough data provided')
+            except:
+                logger.warning('Not enough data provided')
 
         for m2m in m2ms:
             self._setm2m(m2m[0], m2m[1])
@@ -180,7 +180,7 @@ class ModelExtension(models.Model):
                 try:
                     self.save()
                     logger.info(save_msg)
-                except (sqlite3.IntegrityError, ValueError), err:
+                except (sqlite3.IntegrityError, ValueError), err: # ??? what if using non-sqlite db? ???
                     logger.error(err)
             else:
                 logger.info('[DRYRUN] %s' % save_msg)
@@ -263,6 +263,7 @@ class ModelExtension(models.Model):
 
         qset = models.query.EmptyQuerySet(model=to_model)
         # OR-filtering QuerySets
+        # !!! TODO: have to use Q-objects for this !!!
         # !!! TODO: have to write a Custom Manager for this !!!
         for subfield in subfields:
             # !!! TODO: support multiple values[] !!!
@@ -271,7 +272,7 @@ class ModelExtension(models.Model):
                     **{'%s__in' % subfield.name: value})
                 logger.debug('Iteration done, found: %s (%s)'%(found, type(found)))
                 # higher priority on the label-field:
-                if len(found) == 1 and subfield.name == 'label':
+                if len(found) == 1 and (subfield.name == 'label' or subfield.name == 'name'):
                     qset = found
                     break
                 qset |= found
@@ -295,28 +296,24 @@ class ModelExtension(models.Model):
             # Try the match with the highest number of matches, ...
             pass
 
-    def _setm2m(self, field, value, subfields=None):
+    def _setm2m(self, field, values, subfields=None):
         """
             Set a ManyToMany-relation.
         """
         to_model = field.rel.to
-        values = value[0].split(',')
         logger.debug("Trying to make M2M-relations to %s based on '%s'" \
-            % (to_model.__name__, value))
+            % (to_model.__name__, values))
 
         # determine which fields should be searched for
         if not subfields:
             #subfields = to_model()._required_fields()
             subfields = to_model()._required_local_fields() # exclude FKs
 
-        logger.debug('Searching a %s matching on fields %s' \
-            % (to_model.__name__, [f.name for f in subfields]))
-
         qset = models.query.EmptyQuerySet(model=to_model)
         # OR-filtering QuerySets
         # !!! TODO: have to write a Custom Manager for this !!!
         for subfield in subfields:
-            logger.critical('searching in field: %s' % subfield.name)
+            logger.debug("Searching in field '%s'" % subfield.name)
             qset |= to_model.objects.filter(
                 **{'%s__in' % subfield.name: values})
         logger.debug('Found the following matching objects: %s' % qset)
@@ -331,10 +328,8 @@ class ModelExtension(models.Model):
                 # !!! TODO: make options to add (+=), remove(-=), and set (=)
                 self.__getattribute__(field.name).add(_object)
 
-        logger.critical('value to save: %s' % value)
-
-
         pass
+
 
     def _setattr(self, field, value):
         """
@@ -357,10 +352,8 @@ class ModelExtension(models.Model):
         if isinstance(field, ForeignKey):
             self._setfk(field, value)
         elif isinstance(field, ManyToManyField):
-            logger.debug('We found a M2M field, but first have to implement \
-                a function to handle this')
-            pass
-            # !!! TODO: Implement M2M relations !!!
+            logger.debug("""Found an M2M field. Can't assign it as long as the" \
+                object doesn't have an id, so leave this for later""")
         else:
             logger.debug('Trying to set attribute of %s'%type(field))
             for e in value: # iterate through all elements
@@ -489,8 +482,7 @@ class QueryManager():
                     # this is the first time we see this attribute
                     self.query[key][attr] = [val]
 
-        logger.debug("push_args built query '%s' from args '%s'" \
-            % (self.query, args))
+        logger.debug("push_args built query '%s'" % self.query)
 
     def get_query(self):
         return self.query
