@@ -104,7 +104,7 @@ parser = parse_object.getParser()
 
 # Get and set the defaults
 DRYRUN = config_parser.getboolean('defaults', 'DRYRUN')
-INTERACTIVE = config_parser.getboolean('defaults', 'DRYRUN')
+INTERACTIVE = config_parser.getboolean('defaults', 'INTERACTIVE')
 #
 # </CMT-specific settings from file>
 #
@@ -158,7 +158,6 @@ def add(option, opt_str, value, parser, *args, **kwargs):
     if not parser.values.DRYRUN:
         try:
             new_obj.save()
-            logger.info(save_msg)
         except Exception, e:
             logger.error('Could not add new %s: '%(value,e))
     else:
