@@ -4,7 +4,7 @@ import os, sys
 sys.path.append('/var/lib/python-support/python%s/django'%sys.version[:3])
 
 # Append SARA CMT specific paths
-PROJECTPATH = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),'../..'))
+PROJECTPATH = os.path.normpath('/opt/sara_cmt')
 
 sys.path.append(PROJECTPATH)
 sys.path.append(os.path.join(PROJECTPATH,'site-packages')) # should be a symbolic link to (non-global) site-packages
