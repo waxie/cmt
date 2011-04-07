@@ -139,6 +139,7 @@ class ModelExtension(models.Model):
             Each key in the dictionary should match a fieldname in the model.
         """
         m2ms = [] # to collect M2Ms (which should be done at last)
+
         for arg in arg_dict:
             field = self._meta.get_field(arg)
             logger.debug("Have to assign %s to attribute '%s' (%s)" \
@@ -150,18 +151,10 @@ class ModelExtension(models.Model):
                     this one")
                 continue
 
-            #if type(field) == ForeignKey:
-            #    self._setfk(field, arg_dict[arg])
-
-            #elif type(field) == ManyToManyField:
-            #    # Leave M2Ms for later, because they need an object's id
-            #    m2ms.append([field, arg_dict[arg]])
+            # Leave M2Ms for later, because they need an object's id
             elif type(field) == ManyToManyField:
                 m2ms.append([field,arg_dict[arg]])
 
-            #else:
-            #    logger.debug("Assuming '%s' is a regular field" % arg)
-            #    self._setattr(field=arg, value=arg_dict[arg])
             self._setattr(field=arg, value=arg_dict[arg])
 
         # Save object to give it an id, and make the M2M relations
@@ -235,7 +228,7 @@ class ModelExtension(models.Model):
                 missing.remove(current_field)
             except AssertionError, err:
                 logger.error(err)
-            except sqlite3.IntegrityError, err:
+            except sqlite3.IntegrityError, err: # ??? what if using non-sqlite db? ???
                 logger.error('IntegrityError:', err)
 
             logger.debug('Current values: %s' % self.__dict__)

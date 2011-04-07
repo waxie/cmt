@@ -35,7 +35,6 @@ import sys
 
 from sara_cmt.django_cli import ModelExtension, ObjectManager, QueryManager, \
     logger, parser
-from sara_cmt.parser import Parser
 
 import sara_cmt.cluster.models
 
@@ -79,7 +78,6 @@ def crud_validate(func):
 #
 
 # Instantiate ConfigParser
-#configfile = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config/cmt.cfg')
 configfile = os.path.join(settings.PROJECT_BASE, 'config/cmt.cfg')
 config_parser = ConfigParser.ConfigParser()
 config_parser.optionxform = lambda x: x
@@ -99,12 +97,6 @@ else:
 CMTSARA_VERSION = config_parser.get('info', 'version').strip("'")
 CMTSARA_DESCRIPTION = config_parser.get('info', 'description').strip("'")
 
-parse_object = Parser()
-parser = parse_object.getParser()
-
-# Get and set the defaults
-DRYRUN = config_parser.getboolean('defaults', 'DRYRUN')
-INTERACTIVE = config_parser.getboolean('defaults', 'INTERACTIVE')
 #
 # </CMT-specific settings from file>
 #
@@ -391,75 +383,71 @@ def main():
     parser.description = CMTSARA_DESCRIPTION
 
     parser.add_option('-n', '--dry-run',
-                    action='store_true',
-                    dest='DRYRUN',
-                    default=config_parser.getboolean('defaults', 'DRYRUN'),
-                    help="""This flag has to be given before -[aclmr]""")
+        action='store_true',
+        dest='DRYRUN',
+        default=config_parser.getboolean('defaults', 'DRYRUN'),
+        help="""This flag has to be given before -[aclmr]""")
     parser.add_option('--script',
-                    action='store_false',
-                    dest='INTERACTIVE',
-                    default=config_parser.getboolean('defaults',
-                                                     'INTERACTIVE'))
+        action='store_false',
+        dest='INTERACTIVE',
+        default=config_parser.getboolean('defaults', 'INTERACTIVE'))
     parser.add_option('-a', '--add',
-                    action='callback',
-                    callback=add,
-                    type='string',
-                    metavar='ENTITY',
-                    nargs=1,
-                    help="""Add an object of given ENTITY.
+        action='callback',
+        callback=add,
+        type='string',
+        metavar='ENTITY',
+        nargs=1,
+        help="""Add an object of given ENTITY.
 
-                        arguments:   set <ASSIGNMENTS>
+            arguments:   set <ASSIGNMENTS>
 
-                        The object will get values according to the given
-                        assignments. Assignments could be formed like
-                        [<FK>__]<attr>=<value>""")
+            The object will get values according to the given assignments. 
+            Assignments could be formed like [<FK>__]<attr>=<value>""")
     parser.add_option('-c', '--change',
-                    action='callback',
-                    callback=change,
-                    type='string',
-                    metavar='ENTITY',
-                    nargs=1,
-                    help="""Change value(s) of object(s) of given ENTITY.
+        action='callback',
+        callback=change,
+        type='string',
+        metavar='ENTITY',
+        nargs=1,
+        help="""Change value(s) of object(s) of given ENTITY.
 
-                        arguments:   get <QUERY> set <ASSIGNMENTS>
+            arguments:   get <QUERY> set <ASSIGNMENTS>
 
-                        The query, which consists out of one or more terms, is
-                        used to make a selection of objects to change. These
-                        objects will be changed according to the given
-                        assignments.""")
+            The query, which consists out of one or more terms, is used to make
+            a selection of objects to change. These objects will be changed
+            according to the given assignments.""")
     parser.add_option('-g', '--generate',
-                    action='callback',
-                    callback=generate,
-                    type='string',
-                    metavar='TEMPLATE',
-                    nargs=1,
-                    help='Render the given template')
+        action='callback',
+        callback=generate,
+        type='string',
+        metavar='TEMPLATE',
+        nargs=1,
+        help='Render the given template')
     parser.add_option('-l', '--list',
-                    action='callback',
-                    callback=show,
-                    type='string',
-                    metavar='ENTITY [ATTRIBUTE=VALUE]',
-                    nargs=1,
-                    help="""List object(s) of the given ENTITY.
+        action='callback',
+        callback=show,
+        type='string',
+        metavar='ENTITY [ATTRIBUTE=VALUE]',
+        nargs=1,
+        help="""List object(s) of the given ENTITY.
 
-                        arguments:   get <QUERY>
+            arguments:   get <QUERY>
 
-                        The query, which consists out of one or more terms, is
-                        used to make a selection of objects to list.""")
+            The query, which consists out of one or more terms, is used to make
+            a selection of objects to list.""")
     parser.add_option('-r', '--remove',
-                    action='callback',
-                    callback=remove,
-                    type='string',
-                    metavar='ENTITY [ATTRIBUTE=VALUE]',
-                    nargs=1,
-                    help='Remove objects which reflect the given query')
+        action='callback',
+        callback=remove,
+        type='string',
+        metavar='ENTITY [ATTRIBUTE=VALUE]',
+        nargs=1,
+        help='Remove objects which reflect the given query')
 
     # TODO: implement the following option(s)
     parser.add_option('-v', '--verbose',
-                    action='store_true',
-                    dest='VERBOSE',
-                    default=config_parser.getboolean('defaults',
-                                                     'VERBOSE'))
+        action='store_true',
+        dest='VERBOSE',
+        default=config_parser.getboolean('defaults', 'VERBOSE'))
 
     (options, args) = parser.parse_args()
     logger.debug('(options, args) = (%s, %s)' % (options, args))

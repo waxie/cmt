@@ -9,9 +9,7 @@ import os
 SARACMT_BASE = os.path.normpath(os.path.dirname(__file__))
 PROJECT_BASE = os.path.normpath(os.path.join(SARACMT_BASE, os.path.pardir))
 
-#DEBUG = False
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     ('Sil Westerveld', 'sil.westerveld@sara.nl'),
@@ -24,8 +22,12 @@ MANAGERS = ADMINS
 # The database settings are imported, due to confidential data which should be
 # excluded from the SVN repository. An example of the needed info for database
 # configuration is commented out.
+# DATABASE_ENGINE    = 'postgresql_psycopg2'
+# DATABASE_NAME      = 'my_database'
+# DATABASE_USER      = 'db_user'
+# DATABASE_PASSWORD  = 'secret'
+# DATABASE_HOST      = 'database.example.com'
 from settings_db import *
-#TEST_DATABASE_NAME = ''
 
 
 
@@ -139,6 +141,10 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'sara_cmt.urls'
 
+# Templates for the CMT command line interface.
+# (thus, the templates for our configfiles, etc)
+CMT_TEMPLATES_DIR = '/etc/sara_cmt/templates'
+
 # Templates for the CMT web-frontend.
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates"
@@ -146,11 +152,8 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     os.path.normpath(os.path.join(os.path.dirname(__file__), 'cluster/templates')),
+    CMT_TEMPLATES_DIR,
 )
-
-# Templates for the CMT command line interface.
-# (thus, the templates for our configfiles, etc)
-CMT_TEMPLATES_DIR = '/etc/sara_cmt/templates'
 
 FIXTURE_DIRS = (
     # A fixture is a collection of files that contain serialized contents of
