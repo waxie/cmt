@@ -342,6 +342,7 @@ class Rack(ModelExtension):
     capacity = models.PositiveIntegerField(verbose_name='number of slots')
 
     class Meta:
+        unique_together = ('room', 'label')
         ordering = ('room', 'label')
         verbose_name = 'rack'
         verbose_name_plural = 'racks'
