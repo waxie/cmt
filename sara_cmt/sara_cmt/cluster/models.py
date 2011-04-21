@@ -216,7 +216,7 @@ class Network(ModelExtension):
                                   'ib-{machine}''')
 
     class Meta:
-        ordering = ('domain', 'name')
+        ordering = ('name', 'domain')
         verbose_name = 'network'
         verbose_name_plural = 'networks'
 
