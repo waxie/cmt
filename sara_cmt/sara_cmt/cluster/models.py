@@ -416,7 +416,7 @@ class Room(ModelExtension):
 
     def __unicode__(self):
         #return unicode('%s - %s'%(self.address,self.label))
-        return self.label
+        return '%s (%s, %s)' % (self.label, self.address.address, self.address.city)
 
 #
 #
