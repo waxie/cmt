@@ -8,7 +8,7 @@ import os
 
 SARACMT_BASE = os.path.normpath(os.path.dirname(__file__))
 PROJECT_BASE = os.path.normpath(os.path.join(SARACMT_BASE, os.path.pardir))
-CLIENT_ONLY = True
+CLIENT_ONLY = False
 
 DEBUG = True
 
