@@ -143,6 +143,7 @@ class Interface(ModelExtension):
     ip        = models.IPAddressField(blank=True)
 
     class Meta:
+        unique_together = ('network', 'ip')
         ordering = ('host__cluster__name', 'host__rack__label', 'host__first_slot')
 
     @property
