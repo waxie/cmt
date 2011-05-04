@@ -306,6 +306,8 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
         logger.error('Template does not exist: %s' % e)
 
         
+    context['__template_outputfiles__'][context['output']]=rendered_string # temporary to be fwd-compatible
+
     for outputfile, content in context['__template_outputfiles__'].items():
         write_msg = 'Writing outputfile: %s' % outputfile
         created_msg = 'Outputfile(s) created: %s' % outputfile
