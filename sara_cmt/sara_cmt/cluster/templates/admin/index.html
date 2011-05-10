@@ -64,11 +64,11 @@
                 <span class="mini quiet">On {{ entry.action_time }}</span>
                 <br/>
                 {{ entry.user }}
-                {% if entry.is_addition or entry.is_deletion %}
-                    {% if entry.is_addition %}added{% endif %}{% if entry.is_deletion %}deleted{% endif %}
-                    {{ entry.object_repr }}
+                {% if entry.is_addition or entry.is_change %}
+                    {% if entry.is_addition %}added{% endif %}{% if entry.is_change%}changed{% endif %}
+                    <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
                 {% else %}
-                    changed <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+                    deleted {{ entry.object_repr }}
                 {% endif %}
                 <br/>
                 {% if entry.content_type %}
