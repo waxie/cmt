@@ -36,8 +36,9 @@ log-facility local7;
 
 filename "pxelinux.0";
 
-default-lease-time 3600;
-max-lease-time 3600;
+# set lease time to infinite (-1)
+default-lease-time -1;
+max-lease-time -1;
 
 ## Support for the SALI and the 'old' imageserver settings
 #
