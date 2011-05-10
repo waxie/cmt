@@ -26,16 +26,22 @@ from django_extensions.db.fields import CreationDateTimeField, \
 
 
 class Cluster(ModelExtension):
+    """
+        A labeled group of hardware pieces.
+    """
     name = models.CharField(max_length=255, unique=True)
 
     class Meta:
         ordering = ('name',)
 
-    def __unicode__(self):
+    def __unicode__(self):nam
         return self.name or None
 
 
 class HardwareUnit(ModelExtension):
+    """
+        A specific piece of hardware.
+    """
     cluster      = models.ForeignKey('Cluster', related_name='hardware')
     role         = models.ManyToManyField('Role', related_name='hardware')
     network      = models.ManyToManyField('Network', related_name='hardware',
@@ -122,6 +128,9 @@ class HardwareUnit(ModelExtension):
 
 
 class Interface(ModelExtension):
+    """
+        An interface of a piece of hardware.
+    """
     re_valid_mac = re.compile(r'([A-Fa-f\d]{2}[:-]?){5}[A-Fa-f\d]{2}')
     re_mac_octets = re.compile(r'[A-Fa-f\d]{2}')
     hwaddress_validator = RegexValidator(re_valid_mac,'Enter a valid hardware address.', 'invalid')
@@ -333,7 +342,7 @@ class Network(ModelExtension):
 class Rack(ModelExtension):
     """
         A Rack is a standardized system for mounting various HardwareUnits in a
-        stack of slots. It is located on a site.
+        stack of slots.
     """
 
     room = models.ForeignKey('Room', related_name='racks')
@@ -406,6 +415,10 @@ class Address(ModelExtension):
 
 
 class Room(ModelExtension):
+    """
+        A room is located at an address. This is where racks of hardware can be
+        found.
+    """
     address = models.ForeignKey(Address, related_name='rooms')
 
     floor   = models.IntegerField(max_length=2)
@@ -439,7 +452,7 @@ class Company(ModelExtension):
 
     addresses = models.ManyToManyField(Address, related_name='_companies')
 
-    #type    = models.ChoiceField() # !!! TODO: add choices like vendor / support / partner / etc... !!!
+    #type    = models.ChoiceField() # !!! TODO: add choices like vendor / support / partner / customer / etc... !!!
     name    = models.CharField(max_length=255)
     website = models.URLField()
 
@@ -480,6 +493,10 @@ class Connection(ModelExtension):
 
 
 class Telephonenumber(ModelExtension):
+    """
+        Telephonenumber to link to a contact. Split in country-, area- and
+        subscriber-part for easy filtering.
+    """
     NUMBER_CHOICES = (
         ('T', 'Telephone'),
         ('C', 'Cellphone'),
@@ -514,7 +531,7 @@ class Telephonenumber(ModelExtension):
 
 class HardwareModel(ModelExtension):
     """
-        The Model-model is being used to specify some extra information about a
+        This model is being used to specify some extra information about a
         specific type (model) of hardware.
     """
     vendor = models.ForeignKey(Company, related_name='model specifications')
@@ -551,8 +568,12 @@ class Role(ModelExtension):
 
 
 class InterfaceType(ModelExtension):
-    label = models.CharField(max_length=255, help_text="'DRAC 4' for example")
+    """
+        Contains information about different types of interfaces.
+    """
     vendor = models.ForeignKey('Company', null=True, blank=True, related_name='interfaces')
+
+    label = models.CharField(max_length=255, help_text="'DRAC 4' for example")
 
     class Meta:
         # Note in docs of Model Meta options,
@@ -581,7 +602,7 @@ class InterfaceType(ModelExtension):
 
 class WarrantyType(ModelExtension):
     """
-A type of warranty offered by a company.
+        A type of warranty offered by a company.
     """
     contact = models.ForeignKey(Connection, related_name='warranty types')
 
