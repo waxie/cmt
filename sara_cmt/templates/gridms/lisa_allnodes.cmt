@@ -1,0 +1,14 @@
+{% extends 'ported/base_allnodes.cmt' %}
+
+{% block description %}
+# Description : List all hostnames of computenodes in the Lisa-cluster.
+#
+{% endblock description %}
+
+{% block hw_cluster_name %}
+  {% ifequal hw.cluster.name 'Lisa' %}
+    {% ifequal hw.rack.label '7' %}
+{{ hw.label }}.irc.sara.nl
+    {% endifequal %}
+  {% endifequal %}
+{% endblock hw_cluster_name %}
