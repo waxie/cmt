@@ -56,7 +56,7 @@ if not CLIENT_ONLY:
     AUTH_LDAP_GROUP_TYPE = PosixGroupType()
 
     ## Only users in this group can log in.
-    AUTH_LDAP_REQUIRE_GROUP = 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl'
+    AUTH_LDAP_REQUIRE_GROUP = 'cn=cmt,ou=Groups,dc=hpcv,dc=sara,dc=nl'
 
     # Populate the Django user from the LDAP directory.
     AUTH_LDAP_USER_ATTR_MAP = {
@@ -66,9 +66,9 @@ if not CLIENT_ONLY:
     }
 
     AUTH_LDAP_USER_FLAGS_BY_GROUP = {
-        'is_active': 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl',
-        'is_staff': 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl',
-        'is_superuser': 'cn=hpcv_admin,ou=Groups,dc=hpcv,dc=sara,dc=nl',
+        'is_active': 'cn=cmt,ou=Groups,dc=hpcv,dc=sara,dc=nl',
+        'is_staff': 'cn=cmt,ou=Groups,dc=hpcv,dc=sara,dc=nl',
+        'is_superuser': 'cn=cmt,ou=Groups,dc=hpcv,dc=sara,dc=nl',
     }
 
     # This is the default, but I like to be explicit.
