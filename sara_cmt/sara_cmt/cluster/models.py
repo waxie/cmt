@@ -144,7 +144,7 @@ class Interface(ModelExtension):
                                  generated if kept empty')
     aliases   = models.CharField(max_length=255, help_text='Cnames comma-seperated', blank=True, null=True)
 
-    hwaddress = models.CharField(max_length=17, blank=True, #null=True,
+    hwaddress = models.CharField(max_length=17, blank=True, null=True,
                                  verbose_name='hardware address',
                                  help_text="6 Octets, optionally delimited by \
                                  a space ' ', a hyphen '-', or a colon ':'.",
@@ -176,6 +176,9 @@ class Interface(ModelExtension):
             yet, or when the network has been changed.
         """
         try:
+            if not self.hwaddress:
+                self.hwaddress = None
+
             if self.hwaddress and len(self.hwaddress) >= 12:
                 self.hwaddress = ':'.join(self.re_mac_octets.findall(self.hwaddress.lower()))
             # To be sure that the interface has a valid network

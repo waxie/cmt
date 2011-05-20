@@ -8,18 +8,14 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         
-        # Changing field 'Telephonenumber.connection'
-        #db.alter_column('cluster_telephonenumber', 'connection_id', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, to=orm['cluster.Connection']))
-        db.rename_column('cluster_telephonenumber', 'type', 'number_type')
-        db.rename_column('cluster_warrantycontract', 'type_id', 'warranty_type_id')
+        # Changing field 'Interface.hwaddress'
+        db.alter_column('cluster_interface', 'hwaddress', self.gf('django.db.models.fields.CharField')(max_length=17, unique=True, null=True, blank=True))
 
 
     def backwards(self, orm):
         
-        # Changing field 'Telephonenumber.connection'
-        #db.alter_column('cluster_telephonenumber', 'connection_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cluster.Connection']))
-        db.rename_column('cluster_telephonenumber', 'number_type', 'type')
-        db.rename_column('cluster_warrantycontract', 'warranty_type_id', 'type_id')
+        # Changing field 'Interface.hwaddress'
+        db.alter_column('cluster_interface', 'hwaddress', self.gf('django.db.models.fields.CharField')(max_length=17, unique=True, blank=True))
 
 
     models = {
@@ -112,7 +108,7 @@ class Migration(SchemaMigration):
             'aliases': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'created_on': ('django_extensions.db.fields.CreationDateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
             'host': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'interfaces'", 'to': "orm['cluster.HardwareUnit']"}),
-            'hwaddress': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '17', 'blank': 'True'}),
+            'hwaddress': ('django.db.models.fields.CharField', [], {'max_length': '17', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'iftype': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'interfaces'", 'to': "orm['cluster.InterfaceType']"}),
             'ip': ('django.db.models.fields.IPAddressField', [], {'max_length': '15', 'blank': 'True'}),
@@ -186,9 +182,9 @@ class Migration(SchemaMigration):
             'created_on': ('django_extensions.db.fields.CreationDateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'note': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'number_type': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
             'subscriber_number': ('django.db.models.fields.IntegerField', [], {'max_length': '15'}),
             'tags': ('tagging.fields.TagField', [], {}),
-            'number_type': ('django.db.models.fields.CharField', [], {'default': "'T'", 'max_length': '1'}),
             'updated_on': ('django_extensions.db.fields.ModificationDateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'})
         },
         'cluster.warrantycontract': {
@@ -200,8 +196,8 @@ class Migration(SchemaMigration):
             'label': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
             'note': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'tags': ('tagging.fields.TagField', [], {}),
-            'warranty_type': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'contracts'", 'null': 'True', 'to': "orm['cluster.WarrantyType']"}),
-            'updated_on': ('django_extensions.db.fields.ModificationDateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'})
+            'updated_on': ('django_extensions.db.fields.ModificationDateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
+            'warranty_type': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'contracts'", 'null': 'True', 'to': "orm['cluster.WarrantyType']"})
         },
         'cluster.warrantytype': {
             'Meta': {'object_name': 'WarrantyType'},
