@@ -197,16 +197,16 @@ class CompanyAdmin(admin.ModelAdmin):
 
 class TelephonenumberAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Owner', {'fields': (('connection', 'type'),)}),
+        ('Owner', {'fields': (('connection', 'number_type'),)}),
         ('Number', {'fields': (('country', 'areacode', 'subscriber_number'),)}),
         GlobalAdmin.extra_fieldset)
-    list_display = ('connection', 'type', '__unicode__')
-    list_filter  = ('type', 'country', 'areacode') + GlobalAdmin.list_filter
+    list_display = ('connection', 'number_type', '__unicode__')
+    list_filter  = ('number_type', 'country', 'areacode') + GlobalAdmin.list_filter
 
 
 class WarrantyContractAdmin(admin.ModelAdmin):
     fieldsets = (
-        (None, {'fields': ('label', 'type')}),
+        (None, {'fields': ('label', 'warranty_type')}),
         ('Period', {'fields': ('date_from', 'date_to')}),
         GlobalAdmin.extra_fieldset)
 

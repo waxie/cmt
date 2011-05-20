@@ -37,9 +37,6 @@ class Cluster(ModelExtension):
     def __unicode__(self):
         return self.name or None
 
-    def validate_unique(exclude=None):
-        logger.error('Called VALIDATE_UNIQUE')
-
 
 class HardwareUnit(ModelExtension):
     """
