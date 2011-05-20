@@ -37,6 +37,9 @@ class Cluster(ModelExtension):
     def __unicode__(self):
         return self.name or None
 
+    def validate_unique(exclude=None):
+        logger.error('Called VALIDATE_UNIQUE')
+
 
 class HardwareUnit(ModelExtension):
     """
@@ -144,7 +147,7 @@ class Interface(ModelExtension):
                                  generated if kept empty')
     aliases   = models.CharField(max_length=255, help_text='Cnames comma-seperated', blank=True, null=True)
 
-    hwaddress = models.CharField(max_length=17, blank=True,
+    hwaddress = models.CharField(max_length=17, blank=True, #null=True,
                                  verbose_name='hardware address',
                                  help_text="6 Octets, optionally delimited by \
                                  a space ' ', a hyphen '-', or a colon ':'.",
@@ -505,8 +508,7 @@ class Telephonenumber(ModelExtension):
     connection = models.ForeignKey(Connection, blank=False, null=False, related_name='telephone_numbers')
     areacode          = models.CharField(max_length=4) # because it can start with a zero
     subscriber_number = models.IntegerField(verbose_name='number', max_length=15)
-    # !!! TODO: type is a reserved name, so rename to numtype in a migration.... and make this a ChoiceField? !!!
-    type = models.CharField(max_length=1, choices=NUMBER_CHOICES)
+    number_type = models.CharField(max_length=1, choices=NUMBER_CHOICES)
 
     # !!! TODO: link to company / contact / etc... !!!
 
@@ -616,10 +618,9 @@ class WarrantyType(ModelExtension):
 
 class WarrantyContract(ModelExtension):
     """
-        A class which contains warranty information of (a collection of) hardware.
+        A class which contains warranty information of (a collection of) hardware. (SLA)
     """
-    # !!! TODO: type is a reserved name, so rename to vartype in a migration !!!
-    type = models.ForeignKey(WarrantyType, blank=True, null=True, related_name='contracts')
+    warranty_type = models.ForeignKey(WarrantyType, blank=True, null=True, related_name='contracts')
 
     label     = models.CharField(max_length=255, unique=True)
     date_from = models.DateField(verbose_name='valid from')
