@@ -42,6 +42,13 @@ class HardwareUnit(ModelExtension):
     """
         A specific piece of hardware.
     """
+    STATE_CHOICES = (
+        ('new', 'new'),
+        ('clean', 'clean'),
+        ('configured', 'configured'),
+        ('unknown', 'unknown'),
+        ('off', 'off'))
+        
     cluster      = models.ForeignKey('Cluster', related_name='hardware')
     role         = models.ManyToManyField('Role', related_name='hardware')
     network      = models.ManyToManyField('Network', related_name='hardware',
@@ -53,10 +60,13 @@ class HardwareUnit(ModelExtension):
                                      related_name='hardware', null=True,
                                      blank=True)
     rack         = models.ForeignKey('Rack', related_name='contents')
-    # should be a field of Specifications:
+    seller = models.ForeignKey('Connection', related_name='sold', null=True, blank=True)
+    owner = models.ForeignKey('Connection', related_name='owns', null=True, blank=True)
+    state = models.CharField(max_length=3, null=True, blank=True, choices=STATE_CHOICES, default='unknown')
     warranty_tag = models.CharField(max_length=255, blank=True, null=True,
-                                    help_text='Service tag or serialnumber',
+                                    help_text='Service tag',
                                     unique=True)
+    serial_number = models.CharField(max_length=255, blank=True, null=True, unique=True)
     first_slot   = models.PositiveIntegerField(blank=True, null=True)
     label        = models.CharField(max_length=255)
 
@@ -112,6 +122,8 @@ class HardwareUnit(ModelExtension):
         # http://stackoverflow.com/questions/454436/unique-fields-that-allow-nulls-in-django
         if not self.warranty_tag:
             self.warranty_tag = None
+        if not self.serial_number:
+            self.serial_number = None
         if not self.first_slot:
             self.first_slot = None
 
@@ -539,6 +551,7 @@ class HardwareModel(ModelExtension):
     vendor = models.ForeignKey(Company, related_name='model specifications')
 
     name       = models.CharField(max_length=255, unique=True)
+    vendorcode = models.CharField(max_length=255, blank=True, null=True, unique=True, help_text='example: CISCO7606-S')
     rackspace  = models.PositiveIntegerField(help_text='size in U for example')
     expansions = models.PositiveIntegerField(default=0, help_text='number of expansion slots')
 
@@ -622,6 +635,8 @@ class WarrantyContract(ModelExtension):
     """
     warranty_type = models.ForeignKey(WarrantyType, blank=True, null=True, related_name='contracts')
 
+    contract_number = models.CharField(max_length=255, blank=True, null=True, unique=True, help_text='NSEN420201')
+    annual_cost = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, help_text='433.61')
     label     = models.CharField(max_length=255, unique=True)
     date_from = models.DateField(verbose_name='valid from')
     date_to   = models.DateField(verbose_name='expires at')
