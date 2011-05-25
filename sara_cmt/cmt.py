@@ -187,8 +187,13 @@ def change(option, opt_str, value, parser, *args, **kwargs):
     objects = object_mgr.get_objects(query)
 
     if objects:
-        logger.info('Found %s entities matching query: %s'
-            % (len(objects), ', '.join([_object.label for _object in objects])))
+        # Temporary try-except. See subtrac.sara.nl/osd/interne-services/ticket/164
+        try:
+            logger.info('Found %s entities matching query: %s'
+                % (len(objects), ', '.join([_object.label for _object in objects])))
+        except AttributeError:
+            logger.info('Found %s entities matching query: %s'
+                % (len(objects), ', '.join([_object.__unicode__() for _object in objects])))
         confirmed = not parser.values.INTERACTIVE or \
             raw_input('Are you sure? [Yn] ')
         if confirmed in ['', 'y', 'Y', True]:

@@ -160,11 +160,11 @@ class Interface(ModelExtension):
                                  verbose_name='hardware address',
                                  help_text="6 Octets, optionally delimited by \
                                  a space ' ', a hyphen '-', or a colon ':'.",
-                                 unique=True, validators=[hwaddress_validator])
+                                 validators=[hwaddress_validator])
     ip        = models.IPAddressField(blank=True)
 
     class Meta:
-        unique_together = ('network', 'ip')
+        unique_together = (('network', 'ip'), ('network', 'hwaddress'))
         ordering = ('host__cluster__name', 'host__rack__label', 'host__first_slot')
 
     @property
