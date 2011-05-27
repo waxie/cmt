@@ -73,12 +73,13 @@ class ClusterAdmin(admin.ModelAdmin):
 
 class HardwareUnitAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Host info', {'fields': (('cluster', 'label', 'state', 'role'), )}),
-        ('Involved parties', {'fields': ('seller', 'owner')}),
+        ('Host info', {'fields': (('cluster', 'label'),)}),
+        ('Configuration', {'fields': (('state', 'role'),)}),
         ('Machine specifications', {'fields': ('specifications', 'warranty',
                                                'warranty_tag', 'serial_number')}
         ),
         ('Physical location', {'fields': (('rack', 'first_slot'),)}),
+        ('Involved parties', {'fields': ('seller', 'owner')}),
         GlobalAdmin.extra_fieldset)
 
     list_display = ('__unicode__', 'warranty_tag', 'cluster', 'address', 'room', 'rack',
@@ -87,8 +88,6 @@ class HardwareUnitAdmin(admin.ModelAdmin):
         GlobalAdmin.list_filter
     inlines = [InterfaceInline]
     search_fields = ('label', 'warranty_tag')
-
-    #filter_horizontal = ('role',)
 
 
 class CountryAdmin(admin.ModelAdmin):
@@ -100,7 +99,6 @@ class CountryAdmin(admin.ModelAdmin):
 
 
 class AddressAdmin(admin.ModelAdmin):
-    #date_hierarchy = 'created_on'
     fieldsets = (
         ('Location', {'fields': ('address', 'postalcode', 'city', 'country'),
                       'classes': ('wide',)}),
@@ -137,23 +135,23 @@ class RackAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {'fields': (('room', 'label', 'capacity'),)}),
         GlobalAdmin.extra_fieldset)
-    list_display = ('address', 'room', 'label')
+    list_display = ('label', 'address', 'room')
     list_filter  = ('room',) + GlobalAdmin.list_filter
 
 
 class InterfaceAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Physical', {'fields': (('iftype', 'host'), 'hwaddress', 'ip')}),
+        ('Physical', {'fields': (('iftype', 'host'), ('hwaddress', 'ip'))}),
         ('Network', {'fields': ('network', ('label', 'aliases'))}),
         GlobalAdmin.extra_fieldset)
-    list_display = ('__unicode__', 'hwaddress', 'ip', 'network', 'iftype')
+    list_display = ('__unicode__', 'network', 'hwaddress', 'ip', 'iftype')
     list_filter  = ('network', 'iftype') + GlobalAdmin.list_filter
     search_fields = ('label', 'aliases', 'hwaddress', 'ip', 'host__label')
 
 
 class InterfaceTypeAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Properties', {'fields': ('label', 'vendor')}),
+        ('Properties', {'fields': (('label', 'vendor'),)}),
         GlobalAdmin.extra_fieldset)
     list_display = ('label', 'vendor')
     list_filter  = ('vendor',) + GlobalAdmin.list_filter
@@ -169,7 +167,7 @@ class RoleAdmin(admin.ModelAdmin):
 class HardwareModelAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Vendor-specific', {'fields': ('vendor', 'name', 'vendorcode')}),
-        ('Dimensions', {'fields': ('expansions', 'rackspace')}),
+        ('Dimensions', {'fields': (('rackspace', 'expansions'),)}),
         GlobalAdmin.extra_fieldset)
 
     list_display = ('vendor', 'name', 'tags')
@@ -182,7 +180,7 @@ class NetworkAdmin(admin.ModelAdmin):
                            ('netaddress', 'netmask', 'gateway', 'vlan'))}),
         GlobalAdmin.extra_fieldset)
     list_display = ('name', 'vlan', 'cidr', 'gateway', 'domain', 'hostnames',
-                    '_max_hosts', 'count_ips_assigned', 'count_ips_free')
+                    'count_ips_assigned', 'count_ips_free')
     list_filter  = GlobalAdmin.list_filter
 
 
@@ -207,7 +205,7 @@ class TelephonenumberAdmin(admin.ModelAdmin):
 
 class WarrantyContractAdmin(admin.ModelAdmin):
     fieldsets = (
-        (None, {'fields': ('label', ('warranty_type', 'contract_number', 'annual_cost'))}),
+        (None, {'fields': (('label', 'warranty_type'), ('contract_number', 'annual_cost'))}),
         ('Period', {'fields': (('date_from', 'date_to'),)}),
         GlobalAdmin.extra_fieldset)
 
@@ -217,7 +215,7 @@ class WarrantyContractAdmin(admin.ModelAdmin):
 
 class WarrantyTypeAdmin(admin.ModelAdmin):
     fieldsets = (
-        (None, {'fields': ('label', 'contact')}),
+        (None, {'fields': (('label', 'contact'),)}),
         GlobalAdmin.extra_fieldset)
 
     list_display = ('label', 'contact')
