@@ -73,9 +73,10 @@ class ClusterAdmin(admin.ModelAdmin):
 
 class HardwareUnitAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Host info', {'fields': (('cluster', 'label', 'role'), )}),
+        ('Host info', {'fields': (('cluster', 'label', 'state', 'role'), )}),
+        ('Involved parties', {'fields': ('seller', 'owner')}),
         ('Machine specifications', {'fields': ('specifications', 'warranty',
-                                               'warranty_tag')}
+                                               'warranty_tag', 'serial_number')}
         ),
         ('Physical location', {'fields': (('rack', 'first_slot'),)}),
         GlobalAdmin.extra_fieldset)
@@ -167,7 +168,7 @@ class RoleAdmin(admin.ModelAdmin):
 
 class HardwareModelAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Vendor-specific', {'fields': ('vendor', 'name')}),
+        ('Vendor-specific', {'fields': ('vendor', 'name', 'vendorcode')}),
         ('Dimensions', {'fields': ('expansions', 'rackspace')}),
         GlobalAdmin.extra_fieldset)
 
@@ -206,8 +207,8 @@ class TelephonenumberAdmin(admin.ModelAdmin):
 
 class WarrantyContractAdmin(admin.ModelAdmin):
     fieldsets = (
-        (None, {'fields': ('label', 'warranty_type')}),
-        ('Period', {'fields': ('date_from', 'date_to')}),
+        (None, {'fields': ('label', ('warranty_type', 'contract_number', 'annual_cost'))}),
+        ('Period', {'fields': (('date_from', 'date_to'),)}),
         GlobalAdmin.extra_fieldset)
 
     list_display = ('label', 'date_from', 'date_to', 'expired')
