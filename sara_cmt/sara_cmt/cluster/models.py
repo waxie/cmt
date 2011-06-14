@@ -367,7 +367,7 @@ class Rack(ModelExtension):
 
     class Meta:
         unique_together = ('room', 'label')
-        ordering = ('room', 'label')
+        ordering = ('label',)
         verbose_name = 'rack'
         verbose_name_plural = 'racks'
 
