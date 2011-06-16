@@ -62,7 +62,7 @@ class HardwareUnit(ModelExtension):
     rack         = models.ForeignKey('Rack', related_name='contents')
     seller = models.ForeignKey('Connection', related_name='sold', null=True, blank=True)
     owner = models.ForeignKey('Connection', related_name='owns', null=True, blank=True)
-    state = models.CharField(max_length=3, null=True, blank=True, choices=STATE_CHOICES, default='unknown')
+    state = models.CharField(max_length=10, null=True, blank=True, choices=STATE_CHOICES, default='unknown')
     warranty_tag = models.CharField(max_length=255, blank=True, null=True,
                                     help_text='Service tag',
                                     unique=True)
