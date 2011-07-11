@@ -207,11 +207,13 @@ group { # Start Cua network
 
     {% noblanklines %}
     {% for iface in ifaces_cua %}
+    {% if iface.hwaddress != None %}
     host {{iface.fqdn}} {
         hardware ethernet {{iface.hwaddress}};
         fixed-address {{iface.ip}};
         option host-name "{{iface.fqdn}}";
     }
+    {% endif %}
     {% endfor %}
     {% endnoblanklines %}
 
@@ -223,12 +225,14 @@ group { # Start switches
 
     {% noblanklines %}
     {% for iface in ifaces_lisa_switches %}
+    {% if iface.hwaddress != None %}
     host {{iface.fqdn}} {
         filename "";
         hardware ethernet {{iface.hwaddress}};
         fixed-address {{iface.ip}};
         option host-name "{{iface.fqdn}}";
     }
+    {% endif %}
     {% endfor %}
     {% endnoblanklines %}
 } # End switches
@@ -240,6 +244,7 @@ group { # Start Admin network (boot) & not extern
 
     {% noblanklines %}
     {% for iface in ifaces_lisa_admin %}
+    {% if iface.hwaddress != None %}
         {% if 'externe service' not in iface.host.roles %}
     host {{iface.fqdn}} {
         hardware ethernet {{iface.hwaddress}};
@@ -247,6 +252,7 @@ group { # Start Admin network (boot) & not extern
         option host-name "{{iface.fqdn}}";
     }
         {% endif %}
+    {% endif %}
     {% endfor %}
     {% endnoblanklines %}
 } # End admin network (boot)
@@ -257,6 +263,7 @@ group { # Start Admin network (boot) & extern
 
     {% noblanklines %}
     {% for iface in ifaces_lisa_admin %}
+    {% if iface.hwaddress != None %}
         {% if 'externe service' in iface.host.roles %}
     host {{iface.fqdn}} {
         hardware ethernet {{iface.hwaddress}};
@@ -264,6 +271,7 @@ group { # Start Admin network (boot) & extern
         option host-name "{{iface.fqdn}}";
     }
         {% endif %}
+    {% endif %}
     {% endfor %}
     {% endnoblanklines %}
 } # End admin network (boot)
@@ -273,11 +281,13 @@ group { # Start Console/Drac network
 
     {% noblanklines %}
     {% for iface in ifaces_lisa_consoles %}
+    {% if iface.hwaddress != None %}
     host {{iface.fqdn}} {
         hardware ethernet {{iface.hwaddress}};
         fixed-address {{iface.ip}};
         option host-name "{{iface.fqdn}}";
     }
+    {% endif %}
     {% endfor %}
     {% endnoblanklines %}
 } # End Console/Drac network
@@ -287,12 +297,14 @@ group { # Start Console/icua network
 
     {% noblanklines %}
     {% for iface in ifaces_icua %}
+    {% if iface.hwaddress != None %}
     host {{iface.fqdn}} {
         filename "";
         hardware ethernet {{iface.hwaddress}};
         fixed-address {{iface.ip}};
         option host-name "{{iface.fqdn}}";
     }
+    {% endif %}
     {% endfor %}
     {% endnoblanklines %}
 } # End Console/icua network
