@@ -59,7 +59,7 @@ subnet {{net_gina_admin.netaddress}} netmask {{net_gina_admin.netmask}} {
         #option domain-name "int.gina.sara.nl";
         option domain-name "gina.sara.nl int.gina.sara.nl con.gina.sara.nl";
         option domain-name-servers 192.168.20.9, 192.168.20.11, 145.100.48.10, 145.100.48.11;
-#       option ntp-servers 192.168.20.10;
+#       option ntp-servers 192.168.20.9;
 }
 
 # DRAC
@@ -69,8 +69,8 @@ subnet {{net_gina_console.netaddress}} netmask {{net_gina_console.netmask}} {
         option routers 192.168.32.1;
         #option domain-name "con.gina.sara.nl";
         option domain-name "gina.sara.nl int.gina.sara.nl con.gina.sara.nl";
-        option domain-name-servers 192.168.32.250;
-        option ntp-servers 192.168.32.250;
+        option domain-name-servers 192.168.33.249;
+        option ntp-servers 192.168.33.249;
 }
 
 # Publiek / productie
@@ -81,7 +81,7 @@ subnet {{net_gina_productie.netaddress}} netmask {{net_gina_productie.netmask}} 
 #       option domain-name "gina.sara.nl";
         option domain-name "gina.sara.nl int.gina.sara.nl con.gina.sara.nl";
         option domain-name-servers 192.168.20.9, 192.168.20.11, 145.100.48.10, 145.100.48.11;
-#       option ntp-servers 192.168.20.10;
+#       option ntp-servers 192.168.20.9;
 
         # Wacht minstens 2 seconden na request
         # Beheer / intern netwerk moet eerder opkomen
