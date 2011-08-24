@@ -651,3 +651,12 @@ class WarrantyContract(ModelExtension):
 
     def __unicode__(self):
         return self.label
+
+    def save(self, force_insert=False, force_update=False):
+        """
+            The contract number is an optional field, but when filled in it
+            should have a unique value. When kept blank, it should be stored as
+            None.
+        """
+        if not self.contract_number:
+            self.contact_number = None
