@@ -660,3 +660,5 @@ class WarrantyContract(ModelExtension):
         """
         if not self.contract_number:
             self.contact_number = None
+
+        super(WarrantyContract, self).save(force_insert, force_update)
