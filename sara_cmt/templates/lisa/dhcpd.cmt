@@ -178,13 +178,9 @@ subnet {{net_cua.netaddress}} netmask {{net_cua.netmask}} {
   option domain-name-servers 145.100.5.30, 145.100.5.45;
   option routers 145.100.5.65;
 
-  # option-140 is the IP address of your SystemImager image server
-  option option-140 "145.100.5.66";
+  # The IP address of your SystemImager image server
+  option sali-imgsrv 145.100.5.66;
   next-server 145.100.5.66;
-
-  # option-143 specifies the Flamethrower directory port.
-  # The default is "9000".
-  #option option-143 "9000";
 
   # Uncomment one of the two following lines.  The first, if you need to
   # boot i386 clients, or the second for booting ia64 clients.
