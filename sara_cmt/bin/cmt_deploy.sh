@@ -4,7 +4,7 @@
 # Author: Dennis Stam
 # 
 # $Id$
-# $URL$
+# $URL: https://subtrac.sara.nl/osd/beowulf/svn/trunk/sara_cmt/bin/cmt_deploy.sh $
 
 # change te permissions
 perms(){
