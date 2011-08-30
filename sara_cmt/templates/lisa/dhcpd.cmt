@@ -14,10 +14,10 @@
 {% load cmts_extras %}
 {% noblanklines %}
 
-{% store /etc/dhcp3/dhcpd.conf as output %}
+{% store /etc/dhcp/dhcpd.conf as output %}
 
 {% epilogue %}
-/etc/init.d/dhcp3-server restart
+/etc/init.d/isc-dhcp-server restart
 {% endepilogue %}
 
 {% use network with 'name=lisa consoles' as net_lisa_consoles %}
@@ -111,9 +111,8 @@ subnet {{net_lisa_admin.netaddress}} netmask {{net_lisa_admin.netmask}} {
   option domain-name "irc.sara.nl";
 
   # option-140 is the IP address of your SystemImager image server
-  option sali-imgsrv 192.168.146.10;
-  option option-140 "192.168.146.10";
-  next-server 192.168.146.10;
+  option sali-imgsrv 192.168.144.50;
+  next-server 192.168.144.50;
 
   # option-143 specifies the Flamethrower directory port.
   # The default is "9000".
@@ -179,8 +178,8 @@ subnet {{net_cua.netaddress}} netmask {{net_cua.netmask}} {
   option routers 145.100.5.65;
 
   # The IP address of your SystemImager image server
-  option sali-imgsrv 145.100.5.66;
-  next-server 145.100.5.66;
+  option sali-imgsrv 145.100.5.67;
+  next-server 145.100.5.67;
 
   # Uncomment one of the two following lines.  The first, if you need to
   # boot i386 clients, or the second for booting ia64 clients.
