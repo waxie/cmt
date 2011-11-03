@@ -29,7 +29,6 @@
 {% use interface with 'network__name=lisa switches' as ifaces_lisa_switches %}
 {% use interface with 'network__name=lisa admin' as ifaces_lisa_admin %}
 {% use interface with 'network__name=lisa extern' as ifaces_lisa_extern %}
-{% use interface with 'network__name=hpcv projects' as ifaces_hpcv_projects %}
 {% use interface with 'network__name=lisa consoles' as ifaces_lisa_consoles %}
 {% use interface with 'network__name=icua' as ifaces_icua %}
 
