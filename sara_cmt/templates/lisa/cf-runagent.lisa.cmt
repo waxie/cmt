@@ -14,13 +14,12 @@
 {% load cmts_extras %}
 {% noblanklines %}
 
-{% store /usr/sara/etc/cfengine3/hosts.lisa as output %}
+{% store /data/cfengine3/cf-runagent/hosts.lisa as output %}
 {% use HardwareUnit with 'cluster__name=Lisa' as lisa_hosts %}
 
-{% epilogue %}
-/usr/bin/scp /usr/sara/etc/cfengine3/hosts.lisa cfengine3:/data/cfengine3/cf-runagent
-{% endepilogue %}
-
+#{% epilogue %}
+#/usr/bin/scp /usr/sara/etc/cfengine3/hosts.lisa cfengine3:/data/cfengine3/cf-runagent
+#{% endepilogue %}
 
 body runagent control
 {
@@ -39,7 +38,7 @@ body runagent control
 {% for hw in lisa_hosts %}
   {% for i in hw.interfaces.all %}
     {% if i.network.name == 'lisa admin' %}
-      {% if not "inactive" in hw.roles and not "administration" in hw.roles and not "fileserver" in hw.roles %} 
+      {% if "loginnode" in hw.roles or "computenode" in hw.roles or "software node" in hw.roles %} 
 
                          "{{ i.fqdn }}",
 
