@@ -23,29 +23,29 @@
 
 body runagent control
 {
-        any::
-                # Hack else we can not use it. Lisa cluster has the same keys for
-                # compute nodes.
-                #
-                trustkey         	=> "true";
-		max_children     	=> "40"; 
-		background_children 	=> "true";
+    any::
+        # Hack else we can not use it. Lisa cluster has the same keys for
+        # compute nodes.
+        #
+        trustkey         	=> "true";
+        max_children     	=> "40"; 
+        background_children 	=> "true";
 
-                output_to_file   	=> "true";
-                output_directory 	=> "/var/log/cf-runagent/lisa";
+        output_to_file   	=> "true";
+        output_directory 	=> "/var/log/cf-runagent/lisa";
 
-                hosts => {
+        hosts => {
 {% for hw in lisa_hosts %}
   {% for i in hw.interfaces.all %}
     {% if i.network.name == 'lisa admin' %}
-      {% if "loginnode" in hw.roles or "computenode" in hw.roles or "software node" in hw.roles %} 
+      {% if "computenode" in hw.roles "loginnode" in hw.roles or or "software node" in hw.roles or "batchsystem" in hw.roles %} 
 
-                         "{{ i.fqdn }}",
+             "{{ i.fqdn }}",
 
       {% endif %}
     {% endif %}
   {% endfor %}
 {% endfor %}
-                };
+        };
 }
 {% endnoblanklines %}
