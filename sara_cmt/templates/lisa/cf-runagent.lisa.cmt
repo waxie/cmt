@@ -38,9 +38,9 @@ body runagent control
 {% for hw in lisa_hosts %}
   {% for i in hw.interfaces.all %}
     {% if i.network.name == 'lisa admin' %}
-      {% if "computenode" in hw.roles "loginnode" in hw.roles or or "software node" in hw.roles or "batchsystem" in hw.roles %} 
+      {% if "computenode" in hw.roles or "loginnode" in hw.roles or "software node" in hw.roles or "batchsystem" in hw.roles %} 
 
-             "{{ i.fqdn }}",
+            "{{ i.fqdn }}",
 
       {% endif %}
     {% endif %}
