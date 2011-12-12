@@ -18,6 +18,7 @@
 
 {% epilogue %}
 /bin/cp --force /data/cfengine/data/co5/overlay/global/etc/ssh/shosts.equiv /data/cfengine/data/sl4/overlay/global/etc/ssh/shosts.equiv
+/bin/cp --force /data/cfengine/data/co5/overlay/global/etc/ssh/shosts.equiv /data/cfengine/data/co6/overlay/global/etc/ssh/shosts.equiv
 {% endepilogue %}
 
 {% use HardwareUnit with 'cluster__name=Gina' as gina_hosts %}
