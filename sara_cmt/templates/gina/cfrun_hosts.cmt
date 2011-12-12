@@ -17,7 +17,7 @@
 {% getracks 'Gina' as gina_racks %}
 
 {% for r in gina_racks %}
-  {% assign filename = '/var/tmp/hosts.' r.label '.in' %}
+  {% assign filename = '/usr/sara/etc/cfengine/hosts.' r.label '.in' %}
 
   {% store filename %}
   {% noblanklines %}
