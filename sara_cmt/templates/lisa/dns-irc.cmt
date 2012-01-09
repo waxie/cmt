@@ -27,7 +27,7 @@
 {% use interface with 'network__name=lisa switches' as ifaces_lisa_switches %}
 
 @       IN      SOA     ns.irc.sara.nl. root.ns.irc.sara.nl. (
-                                         {% now "YmjH" %}   ; Serial
+                                         {% now "ymdHi" %}   ; Serial
                                         7200            ; Refresh
                                         600             ; Retry
                                         604800          ; Expire
