@@ -84,7 +84,7 @@ class HardwareUnitAdmin(admin.ModelAdmin):
 
     list_display = ('__unicode__', 'warranty_tag', 'cluster', 'address', 'room', 'rack',
         'first_slot', 'specifications', 'roles', 'in_support')
-    list_filter  = ('cluster', 'rack', 'role', 'specifications') + \
+    list_filter  = ('cluster', 'rack', 'role', 'specifications', 'warranty') + \
         GlobalAdmin.list_filter
     inlines = [InterfaceInline]
     search_fields = ('label', 'warranty_tag')
