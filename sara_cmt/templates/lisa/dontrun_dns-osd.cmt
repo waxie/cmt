@@ -29,7 +29,7 @@
 ;
 
 @       IN      SOA     install2.lisa.sara.nl. root.install2.lisa.sara.nl. (
-                                         {% now "ymdHi" %}   ; Serial
+                                         {% now "ymdHi1" %}   ; Serial
                                         7200            ; Refresh
                                         600             ; Retry
                                         604800          ; Expire
