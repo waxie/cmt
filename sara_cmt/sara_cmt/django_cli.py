@@ -153,7 +153,7 @@ class ModelExtension(models.Model):
 
             # Leave M2Ms for later, because they need an object's id
             elif type(field) == ManyToManyField:
-                m2ms.append([field,arg_dict[arg]])
+                m2ms.append([field, arg_dict[arg]])
 
             self._setattr(field=arg, value=arg_dict[arg])
 
@@ -161,8 +161,8 @@ class ModelExtension(models.Model):
         if not parser.values.DRYRUN:
             try:
                 self.save()
-            except:
-                logger.warning('Not enough data provided')
+            except Exception as err:
+                logger.warning('%s: %s. Maybe not enough (unique) data provided?' % (type(err), err[-1] ))
 
         for m2m in m2ms:
             self._setm2m(m2m[0], m2m[1])
@@ -245,7 +245,7 @@ class ModelExtension(models.Model):
 
         if isinstance(value, StringTypes):
             value = [value]
-            logger.debug("Transformed value '%s' in list '%s'"%(value[0],value))
+            logger.debug("Transformed value '%s' in list '%s'"%(value[0], value))
 
         # determine which fields should be searched for
         if not subfields:
@@ -277,7 +277,6 @@ class ModelExtension(models.Model):
         object_count = len(objects)
         if object_count is 0:
             logger.warning('No matching object found; Change your query.')
-            pass
         elif object_count is 1:
             _object = objects[0]
             logger.debug('Found 1 match: %s' % _object)
@@ -287,7 +286,6 @@ class ModelExtension(models.Model):
             # !!! TODO: let the user refine the search !!!
             logger.warning('To many matching objects; Refine your query.')
             # Try the match with the highest number of matches, ...
-            pass
 
     def _setm2m(self, field, values, subfields=None):
         """
@@ -355,7 +353,6 @@ class ModelExtension(models.Model):
                 # !!! TODO: append values, instead of overwrite !!!
                 # like: for v in value: self.<append>(v)
                 logger.debug('Functionality to append values is still missing')
-                pass
 
 
 class ObjectManager():
