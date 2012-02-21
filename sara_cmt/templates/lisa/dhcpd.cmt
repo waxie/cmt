@@ -139,7 +139,8 @@ subnet {{net_lisa_admin.netaddress}} netmask {{net_lisa_admin.netmask}} {
   option option-156 "telnetd";
 }
 
-# Switches network
+# Switches network, Bas van der Vlies, 21-Feb-2012 (not needed anymore)
+# administration is done by Network engineers
 #
 subnet {{net_lisa_switches.netaddress}} netmask {{net_lisa_switches.netmask}} {
   option domain-name-servers 192.168.168.2 ;
