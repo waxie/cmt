@@ -8,8 +8,11 @@ import os
 
 SARACMT_BASE = os.path.normpath(os.path.dirname(__file__))
 PROJECT_BASE = os.path.normpath(os.path.join(SARACMT_BASE, os.path.pardir))
-CLIENT_ONLY = False
 
+# Set to True for CMT clients, or False for the CMT server
+CLIENT_ONLY = True
+
+# Whether or not to set logging to debug-level
 DEBUG = True
 
 ADMINS = (
