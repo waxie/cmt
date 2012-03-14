@@ -173,13 +173,13 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.databrowse',
     'django.contrib.webdesign',
-    'piston',
     'sara_cmt.cluster',
-    'sara_cmt.api',
     'django_extensions',
     'tagging',
-    'south',
     'debug_toolbar',
+
+    # Only serverside:
+    #'south',
 )
 
 # Append your IP to use the debug_toolbar
