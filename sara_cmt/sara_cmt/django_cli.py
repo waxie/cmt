@@ -20,9 +20,11 @@ from tagging.fields import TagField
 from django_extensions.db.fields import CreationDateTimeField, \
                                         ModificationDateTimeField
 
-# To be able to migrate fields of 3rd party app django-extensions
-from south.modelsinspector import add_introspection_rules
-add_introspection_rules([], ["^django_extensions\.db\.fields"])
+import settings
+if not settings.CLIENT_ONLY:
+    # To be able to migrate fields of 3rd party app django-extensions
+    from south.modelsinspector import add_introspection_rules
+    add_introspection_rules([], ["^django_extensions\.db\.fields"])
 
 
 class ModelExtension(models.Model):
