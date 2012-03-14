@@ -176,14 +176,14 @@ INSTALLED_APPS = (
     'sara_cmt.cluster',
     'django_extensions',
     'tagging',
-    'debug_toolbar',
 
     # Only serverside:
+    #'debug_toolbar',
     #'south',
 )
 
 # Append your IP to use the debug_toolbar
-#  '145.100.6.163',
 INTERNAL_IPS = (
+    #'145.100.6.163', # saralt0115
     '127.0.0.1',
 )
