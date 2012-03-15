@@ -13,7 +13,6 @@ logger = Logger().getLogger()
 
 register = template.Library()
 
-
 class NoBlankLinesNode(template.Node):
     """
         Renderer that'll remove all blank lines.
@@ -25,7 +24,6 @@ class NoBlankLinesNode(template.Node):
     def render(self, context):
         return re.sub('\n([\ \t]*\n)+', '\n', force_unicode(
             self.nodelist.render(context)))
-
 
 @register.tag
 def noblanklines(parser, token):
@@ -159,7 +157,6 @@ class resolveVariables(template.Node):
         #RB: Django render functions not supposed/allowed to raise Exception, I think
         return ''
 
-
 @register.tag(name='store')
 def do_save_meta(parser, token):
     """
@@ -212,7 +209,6 @@ class generateStoreOutput(template.Node):
         # RB: output generated into context dict, so we return nothing
         return ''
 
-
 class ScriptNode(template.Node):
     """
         Renderer, which executes the lines included in the script-tags.
@@ -230,7 +226,6 @@ class ScriptNode(template.Node):
         # All content between {% epilogue %} and {% endepilogue %} is parsed now
         return ''
 
-
 @register.tag(name='epilogue')
 def do_epilogue(parser, token):
     """
@@ -239,7 +234,6 @@ def do_epilogue(parser, token):
     nodelist = parser.parse(('endepilogue',))
     parser.delete_first_token()
     return ScriptNode(nodelist)
-
 
 from django.db.models import get_model
 
@@ -339,6 +333,7 @@ def do_use(parser, token):
         Usage: {% use <entity> with <attribute>=<value> as <list/var> <key> %}
     """
     tag = token.contents.split()[0]
+
     try:
         definition = token.split_contents()
         # definition should look like ['use', <entity>, 'with' <query>, 'as', '<key>']
@@ -350,14 +345,12 @@ def do_use(parser, token):
         raise template.TemplateSyntaxError, "second argument of %r tag has to be 'with'" % tag
     if definition[-2] != 'as':
         raise template.TemplateSyntaxError, "second last argument of %r tag has to be 'as'" % tag
+
     entity = definition[1]
     query = definition[-3]
-    #attr,val = query.split('=')
     key = definition[-1]
-    #queryset = get_model('cluster', entity).objects.filter(**{attr:val})
-    #return ObjectNode(definition[-1], definition[1])
-    return QuerySetNode(entity, query, key)
 
+    return QuerySetNode(entity, query, key)
 
 class QuerySetNode(template.Node):
     """
@@ -390,7 +383,6 @@ class QuerySetNode(template.Node):
         context[self.key] = queryset
         logger.debug('context = %s'%context)
         return ''
-
 
 # use <entity> with <attribute>=<value> as <key>
 
