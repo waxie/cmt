@@ -1,5 +1,4 @@
-import os
-import re
+import os, re, string
 
 # Inspired by Django tips on:
 #   http://www.b-list.org/weblog/2006/jun/07/django-tips-write-better-template-tags/
@@ -34,6 +33,67 @@ def noblanklines(parser, token):
     parser.delete_first_token()
     return NoBlankLinesNode(nodelist)
 
+@stringfilter
+def arpanize(value):
+    """
+        Converts a IP (range) to reversed DNS style arpa notation
+
+        Usage:
+            {{{ <variable>|arpanize }}}
+
+        I.e.:
+            {% assign broadcast = '192.168.1.0' %}
+            {{{ broastcast|arpanize }}}
+        Results in output:
+            1.168.192.in-addr.arpa
+    """
+    ip_blocks = value.split('.')
+
+    reverse_block = [ ip_blocks[2], ip_blocks[1], ip_blocks[0], 'in-addr.arpa' ]
+
+    return string.join( reverse_block, '.' )
+
+register.filter( 'arpanize', arpanize )
+
+@stringfilter
+def base_net(value):
+    """
+        Converts a IP (range) to it's first 3 octects
+
+        Usage:
+            {{{ <variable>|base_net }}}
+
+        I.e.:
+            {% assign broadcast = '192.168.1.0' %}
+            {{{ broastcast|base_net }}}
+        Results in output:
+            192.168.1
+    """
+    ip_blocks = value.split('.')
+
+    return string.join( ip_blocks[:3], '.' )
+
+register.filter( 'base_net', base_net )
+
+@stringfilter
+def ip_last_digit(value):
+    """
+        Converts a IP (range) to it's last octect
+
+        Usage:
+            {{{ <variable>|ip_last_digit }}}
+
+        I.e.:
+            {% assign myip = '192.168.1.123' %}
+            {{{ myip|ip_last_digit }}}
+        Results in output:
+            123
+    """
+    ip_blocks = value.split('.')
+
+    return ip_blocks[3]
+
+register.filter( 'ip_last_digit', ip_last_digit )
 
 class MetaNode(template.Node):
     """
