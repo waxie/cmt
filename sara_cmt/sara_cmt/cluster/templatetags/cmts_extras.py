@@ -366,11 +366,24 @@ class QuerySetNode(template.Node):
 
     def __init__(self, entity, query, key):
         self.entity = entity
-        self.query = query.strip("'").strip('"').__str__()
+        self.query = query
         self.key = key
 
     def render(self, context):
-        attr, val = self.query.split('=')
+
+        if (self.query[0] == self.query[-1] and self.query[0] in ('"', "'")):
+
+            myquery_str = str( self.query.strip("'").strip('"') )
+        else:
+            # RB: Not quoted: must be a variable: attempt to resolve to value
+            try:
+                queryvar = template.Variable( str(self.query) )
+                myquery_str = queryvar.resolve(context)
+            except template.VariableDoesNotExist:
+                #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
+                pass
+
+        attr, val = myquery_str.split('=')
         queryset = get_model('cluster', self.entity).objects.filter(**{attr:val})
         if len(queryset) == 1:
             queryset = queryset[0]
