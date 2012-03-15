@@ -242,7 +242,7 @@ class getRacks(template.Node):
 
         for u in cluster_units:
             if u.rack not in self.racks:
-            self.racks.append( u.rack )
+                self.racks.append( u.rack )
 
         context[ self.name ] = self.racks
         return ''
