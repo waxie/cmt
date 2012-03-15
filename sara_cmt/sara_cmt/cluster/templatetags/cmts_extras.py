@@ -159,38 +159,58 @@ class resolveVariables(template.Node):
         #RB: Django render functions not supposed/allowed to raise Exception, I think
         return ''
 
-class MetaNode(template.Node):
-    """
-        Renderer, which stores the save path to the context.
-    """
-
-    def __init__(self, tag, values):
-        self.tag = tag
-        self.values = values
-
-    def render(self, context):
-        # This is where the work actually happens
-        context[self.tag] = self.values
-        return ''
-
 
 @register.tag(name='store')
-#@stringfilter
 def do_save_meta(parser, token):
     """
         Compilation function to use for meta-info.
+
+        Usage: {% store '/path/to/file' %}
+               {% store variable %} # variable = '/path/to/file'
     """
-    tag = token.contents.split()[0]
     try:
-        meta_info = token.split_contents()
-        # meta_info should look like ['<tag>', '<path>', 'as', '<key>']
+        # RB: split_contents respects quoted 'strings containing spaces'
+        tag, path_str = token.split_contents()
     except ValueError:
-        raise template.TemplateSyntaxError, '%r tag requires at least 3 arguments' % tag
-    if len(meta_info) != 4:
-        raise template.TemplateSyntaxError, '%r tag requires at least 3 arguments' % tag
-    if meta_info[-2] != 'as':
-        raise template.TemplateSyntaxError, "second last argument of %r tag has to be 'as'" % tag
-    return MetaNode(meta_info[-1], meta_info[1])
+        raise template.TemplateSyntaxError, '%r tag requires at least 1 argument' % tag
+
+    # RB: parse the template thing until %endstore found
+    nodelist = parser.parse(('endstore',))
+    parser.delete_first_token()
+
+    # RB: Now lets start writing output files
+    return generateStoreOutput(tag, path_str, nodelist)
+
+class generateStoreOutput(template.Node):
+
+    def __init__(self, tag, path_str, nodelist):
+        self.tag = tag
+        self.nodelist = nodelist
+        self.path_str = path_str
+
+    def render(self, context):
+
+        if (self.path_str[0] == self.path_str[-1] and self.path_str[0] in ('"', "'")):
+
+            mypath_str = str(self.path_str)[1:-1]
+
+        else:
+            # RB: Not quoted: must be a variable: attempt to resolve to value
+            try:
+                pathvar = template.Variable( str(self.path_str) )
+                mypath_str = pathvar.resolve(context)
+            except template.VariableDoesNotExist:
+                #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
+                pass
+
+        # RB: render template between store tags
+        output = self.nodelist.render(context)
+
+        # RB: store output in context dict for later writing to file
+        context['stores'][ mypath_str ] = output
+
+        # RB: output generated into context dict, so we return nothing
+        return ''
 
 
 class ScriptNode(template.Node):
