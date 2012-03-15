@@ -159,6 +159,94 @@ def do_epilogue(parser, token):
 
 from django.db.models import get_model
 
+@register.tag(name='getbasenets')
+def do_getbasenets(parser, token):
+
+    try:
+        tag, network_name, kw_as, varname = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError, '%r tag requires exactly 4 arguments' % tag
+
+    return getBaseNets( varname, network_name )
+
+class getBaseNets(template.Node):
+
+    """
+        Get list of basenets in a network (name)
+
+        Usage: {% getbasenets <network name> as <listname> %}
+    """
+
+    def __init__(self, varname, network_name ):
+
+        self.varname = varname
+        self.network_name = network_name.strip("'").strip('"').__str__()
+        self.basenets = [ ]
+
+    def render(self, context):
+
+        if (self.network_name[0] == self.network_name[-1] and self.network_name[0] in ('"', "'")):
+
+            network_str = str( self.network_name.strip("'").strip('"') )
+        else:
+            # RB: Not quoted: must be a variable: attempt to resolve to value
+            try:
+                networkvar = template.Variable( str(self.network_name) )
+                network_str = networkvar.resolve(context)
+            except template.VariableDoesNotExist:
+                #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
+                pass
+
+        from IPy import IP
+
+        network_units = get_model('cluster', 'Network').objects.filter( name=str(network_str) )
+
+        for n in network_units:
+
+            for ipnum in IP( n.cidr ):
+                if not base_net( ipnum ) in self.basenets:
+                    self.basenets.append( str( base_net( ipnum ) ) )
+
+        context[ self.varname ] = self.basenets
+        self.basenets = [ ]
+
+        return ''
+
+@register.tag(name='getracks')
+def do_getracks(parser, token):
+
+    try:
+        tag, cluster, kw_as, name = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError, '%r tag requires exactly 4 arguments' % tag
+
+    return getRacks( name, cluster )
+
+class getRacks(template.Node):
+
+    """
+        Get list of racks in a cluster
+
+        Usage: {% getracks <cluster> as <listname> %}
+    """
+
+    def __init__(self, name, cluster):
+
+        self.name = name
+        self.cluster = cluster.strip("'").strip('"').__str__()
+        self.racks = [ ]
+
+    def render(self, context):
+
+        cluster_units = get_model('cluster', 'HardwareUnit').objects.filter( cluster__name=str(self.cluster) )
+
+        for u in cluster_units:
+            if u.rack not in self.racks:
+            self.racks.append( u.rack )
+
+        context[ self.name ] = self.racks
+        return ''
+
 @register.tag(name='use')
 def do_use(parser, token):
     """
