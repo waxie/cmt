@@ -165,11 +165,30 @@ def do_save_meta(parser, token):
         Usage: {% store '/path/to/file' %}
                {% store variable %} # variable = '/path/to/file'
     """
-    try:
-        # RB: split_contents respects quoted 'strings containing spaces'
-        tag, path_str = token.split_contents()
-    except ValueError:
-        raise template.TemplateSyntaxError, '%r tag requires at least 1 argument' % tag
+    definition = token.split_contents()
+
+    if len(definition) != 4 and len(definition) != 2:
+        raise template.TemplateSyntaxError, '%r tag requires at least 1 arguments' % tag
+
+    tag = definition[0]
+    path_arg = definition[1]
+    #kw_as = definition[2]
+    #kw_output = definition[3]
+
+    if len(definition) == 4:
+
+        #RB: 4 arguments means: {% store /path/filename as output %}
+        #RB: old style: DONT try to resolve variable
+        #RB: instead convert filename to quoted string
+
+        path_str = "'%s'" %path_arg
+
+    else:
+
+        #RB: 2 arguments can mean: {% store 'string' %}
+        #RB: 2 arguments can mean: {% store variable %}
+
+        path_str = path_arg
 
     # RB: parse the template thing until %endstore found
     nodelist = parser.parse(('endstore',))
