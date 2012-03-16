@@ -1,134 +1,22 @@
-
-================================================================================
-                    SARA CMT - SARA Cluster Management Tool
-================================================================================
+CMT is a Cluster Management Tool originally created at SARA Computing and
+Networking Services, which is based in Amsterdam and known as SARA nowadays.
 
 
-This is a release of the SARA package for Cluster Management, containing a
-utility that's being used by SARA Computing & Networking Services to manage
-their clusters.
+DEPENDENCIES
+
+CMT is dependent on the following packages:
+ * Django==1.2
+ * IPy==0.75
+ * django-extensions==0.4
+ * django-tagging==0.3.1
+ * psycopg2==2.4.4
+
+Besides these Python-packages, the following software should be installed on your system:
+ * Python>=2.6
+ * header files and a static library for Python
+ * header files for libpq (PostgreSQL library)
 
 
+CONTACT
 
---------------------------------------------------------------------------------
-                                    FEATURES
---------------------------------------------------------------------------------
-
-Some features of CMTSARA are:
- * Uses Django as a backend for a easy-to-use web-interface;
- * Has a CLI too, to use functionalities of SARA CMT from shellscripts, or
-   interactive from shell. (WIP)
- * Automagic generation of configuration files for the cluster. (WIP) 
- * Support for multiple clusters, networks, interfaces, etc...
-
-Wished features for future releases are:
- * Dynamically extendable data model
- * Tagging of models
- * Import as a Python-module
-
-For requests or suggestions, please mail to <sil.westerveld at sara.nl>.
-
-
-
---------------------------------------------------------------------------------
-                                 RELEASE NOTES
---------------------------------------------------------------------------------
-
-No releases yet.
-
-
-
---------------------------------------------------------------------------------
-                                  DEPENDENCIES
---------------------------------------------------------------------------------
-
-SARA CMT depends on the following packages:
- * django -- The Web framework for perfectionists with deadlines
- * django-evolution -- Schema Evolution for the Django Project
- * IPy -- class and tools for handling of IPv4 and IPv6 addresses and networks
-
-
-
---------------------------------------------------------------------------------
-        SOME USEFUL INFORMATION FOR WRITING YOUR OWN SARA CMT TEMPLATES
---------------------------------------------------------------------------------
-
-  * How to place comments in the template:
-
-    - To comment-out (a part of) a line use
-    
-        {# <COMMENT> #}
-
-    - For multiline commenting use
-        
-        {% comment %}
-          <COMMENT 1>
-          <COMMENT N>
-        {% endcomment %}
-
-
-  * Using variables:
-    
-    - The tags {{ and }} can be used for variables. The template engine
-      evaluates the variable and replaces it in place. For example:
-        
-        {{ <VAR> }}
-
-    - Use a dot to access attributes of a variable:
-    
-        {{ <VAR>.<ATTR> }}
-
-    - Variables can be modified by using filters. The notation of a filter is
-      like {{ var|filter }}. More about filters can be found at:
-
-        http://docs.djangoproject.com/en/dev/ref/templates/builtins/#ref-templates-builtins-filters
-    
-    - The variables which can be used in CMTSARA-templates are:
-      - <ModelName> : All the entities defined in the entity-dictionary
-      - version     : The current version of CMTSARA
-
-
-  * Building control structures:
-    
-    - For-loops are implemented like:
-        
-        {% for <ITEM> in <COLLECTION> %}
-          <BODY>
-        {% endfor %}
-
-    - If-statements are used to evaluate a variable. Contents of the block are
-      displayed if the variable is evaluated True. Syntax is like:
-
-        {% if <VAR> %}
-          <IF_BODY>
-        {% else %}
-          <ELSE_BODY>
-        {% endif %}
-
-      If-statements can be used to check values of a variable. In that case the
-      syntax is:
-      
-        {% ifequal <ARG1> <ARG2> %}
-          <BODY>
-        {% endifequal %}
-      
-      This evaluates to True if the values of <ARG1> and <ARG2> are equal.
-      
-      The opposite of ifequal is ifnotequal, which can be used as follows:
-        
-        {% ifnotequal <ARG1> <ARG2> %}
-          <BODY>
-        {% endifnotequal %}
-
-  * About empty lines:
-
-    Empty lines, and lines with only whitespace characters, are removed by
-    CMTSARA when generating files out of the templates. We've chosen for this
-    approach because the Django Template Engine outputs blank lines for each
-    evaluated line in the template it's parsing. In case of config-files this is
-    not handy, because that many blank lines make a config file hard to read.
-    
-    When you wish to insert a blank line, you have to force it by using the
-    following tag:
-      
-      { BLANKLINE }
+For bugs, requests or suggestions, please mail to cmt@sara.nl
