@@ -172,28 +172,28 @@ def do_save_meta(parser, token):
 
     tag = definition[0]
     path_arg = definition[1]
-    #kw_as = definition[2]
-    #kw_output = definition[3]
 
     if len(definition) == 4:
 
-	#RB: OLDSTYLE
+	    #RB: OLDSTYLE
         #RB: 4 arguments means: {% store /path/filename as output %}
         #RB: old style: DONT try to resolve variable
         #RB: instead convert filename to quoted string
+
+        kw_as = definition[2]
+        kw_output_name = definition[3]
 
         path_str = "'%s'" %path_arg
 
         # RB: parse the entire template for old-style
         nodelist = parser.parse()
 
-        # RB: set backwards compatibility for StoreOutput
-        bw_compat = True
-
     else:
-	#RB: NEWSTYLE
+    	#RB: NEWSTYLE
         #RB: 2 arguments can mean: {% store 'string' %}
         #RB: 2 arguments can mean: {% store variable %}
+
+        kw_output_name = None
 
         path_str = path_arg
 
@@ -202,19 +202,16 @@ def do_save_meta(parser, token):
         # RB: throw away %endstore tag
         parser.delete_first_token()
 
-        # RB: no backwards compatibility for StoreOutput
-        bw_compat = False
-
     # RB: Now lets start writing output files
-    return generateStoreOutput(tag, path_str, nodelist, bw_compat)
+    return generateStoreOutput(tag, path_str, nodelist, kw_output_name)
 
 class generateStoreOutput(template.Node):
 
-    def __init__(self, tag, path_str, nodelist, bw_compat=False):
+    def __init__(self, tag, path_str, nodelist, kw_output_name=None):
         self.tag = tag
         self.nodelist = nodelist
         self.path_str = path_str
-        self.bw_compat = bw_compat
+        self.kw_output_name = kw_output_name
 
     def render(self, context):
 
@@ -231,10 +228,10 @@ class generateStoreOutput(template.Node):
                 #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
                 pass
 
-        if self.bw_compat:
+        if self.kw_output_name:
             # RB: store 'output' variable filename for BW compat
 
-            context[ 'output' ] = mypath_str
+            context[ self.kw_output_name ] = mypath_str
 
         # RB: render template between store tags
         output = self.nodelist.render(context)
