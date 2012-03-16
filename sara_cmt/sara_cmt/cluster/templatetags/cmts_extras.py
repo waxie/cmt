@@ -177,32 +177,44 @@ def do_save_meta(parser, token):
 
     if len(definition) == 4:
 
+	#RB: OLDSTYLE
         #RB: 4 arguments means: {% store /path/filename as output %}
         #RB: old style: DONT try to resolve variable
         #RB: instead convert filename to quoted string
 
         path_str = "'%s'" %path_arg
 
-    else:
+        # RB: parse the entire template for old-style
+        nodelist = parser.parse()
 
+        # RB: set backwards compatibility for StoreOutput
+        bw_compat = True
+
+    else:
+	#RB: NEWSTYLE
         #RB: 2 arguments can mean: {% store 'string' %}
         #RB: 2 arguments can mean: {% store variable %}
 
         path_str = path_arg
 
-    # RB: parse the template thing until %endstore found
-    nodelist = parser.parse(('endstore',))
-    parser.delete_first_token()
+        # RB: parse the template thing until %endstore found
+        nodelist = parser.parse(('endstore',))
+        # RB: throw away %endstore tag
+        parser.delete_first_token()
+
+        # RB: no backwards compatibility for StoreOutput
+        bw_compat = False
 
     # RB: Now lets start writing output files
-    return generateStoreOutput(tag, path_str, nodelist)
+    return generateStoreOutput(tag, path_str, nodelist, bw_compat)
 
 class generateStoreOutput(template.Node):
 
-    def __init__(self, tag, path_str, nodelist):
+    def __init__(self, tag, path_str, nodelist, bw_compat=False):
         self.tag = tag
         self.nodelist = nodelist
         self.path_str = path_str
+        self.bw_compat = bw_compat
 
     def render(self, context):
 
@@ -218,6 +230,11 @@ class generateStoreOutput(template.Node):
             except template.VariableDoesNotExist:
                 #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
                 pass
+
+        if self.bw_compat:
+            # RB: store 'output' variable filename for BW compat
+
+            context[ 'output' ] = mypath_str
 
         # RB: render template between store tags
         output = self.nodelist.render(context)
