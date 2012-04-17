@@ -23,14 +23,25 @@ MANAGERS = ADMINS
 
 
 # The database settings are imported, due to confidential data which should be
-# excluded from the SVN repository. An example of the needed info for database
-# configuration is commented out.
-# DATABASE_ENGINE    = 'postgresql_psycopg2'
-# DATABASE_NAME      = 'my_database'
-# DATABASE_USER      = 'db_user'
-# DATABASE_PASSWORD  = 'secret'
-# DATABASE_HOST      = 'database.example.com'
-from settings_db import *
+# excluded from the SVN repository.
+try:
+    from settings_db import *
+except ImportError:
+    print '''\
+Settings for database are missing. Be sure to have `settings_db.py` with:
+
+DATABASES = {
+    'default': {
+        'ENGINE': '<engine>',
+        'NAME': '<name>',
+        'USER': '<user>',
+        'PASSWORD': '<password>',
+        'HOST': '<host>'
+    }
+}
+
+See https://docs.djangoproject.com/en/1.2/ref/settings/#databases'''
+    exit(1)
 
 
 
