@@ -1,4 +1,4 @@
-#!/data/virtualenvs/cmtdev/bin/python
+#!/usr/bin/python
 
 #####
 #
