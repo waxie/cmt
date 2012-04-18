@@ -1,26 +1,23 @@
-#!/usr/bin/env python
-
-#from distutils.core import setup
-from setuptools import setup
-from sara_cmt import settings
-
+from distutils.core import setup
 setup(
-    name = 'saracmt',
-    version = '0.9',
+    name = 'CMT',
+    version = '1.0',
+    description = 'Cluster Management Tool',
+    url = 'http://subtrac.sara.nl/oss/cmt/',
+    #download_url = ''
     author = 'Sil Westerveld',
     author_email = 'sil.westerveld@sara.nl',
-    #maintainer = ''
-    #maintainer_email = ''
-    url = 'cmt.hpcv.sara.nl/doc',
-    description = 'SARA Cluster Management Tool',
-    long_description = '''SARA CMT is a Cluster Management Tool, developed and used \
-      at SARA Computing & Networking Services. Main purpose is to automagicaly \
-      generate and save config-files based on Django-like templates.''',
-    #download_url = ''
+    license = 'GPL',
+    long_description = '''\
+CMT is a Cluster Management Tool originally created at SARA Computing and \
+Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
+
+    platforms = ['linux-x86_64'],
 
     # see: http://pypi.python.org/pypi?:action=list_classifiers
     classifiers = [
-        'Development Status :: 4 - Beta',
+        #'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
         'Environment :: Web Environment',
         'Framework :: Django',
@@ -29,18 +26,31 @@ setup(
         'Natural Language :: English',
         'Operating System :: POSIX :: Linux',
         'Programming Language :: Python :: 2.6',
+        'Topic :: Database :: Front-Ends',
+        'Topic :: System :: Clustering',
         'Topic :: System :: System Administration',
+        'Topic :: Utilities',
     ],
 
-    #platforms
-    license = 'GPL',
 
+
+# The packages option tells the Distutils to process (build, distribute, install, etc.) all pure Python modules found in each package mentioned in the packages list. In order to do this, of course, there has to be a correspondence between package names and directories in the filesystem. The default correspondence is the most obvious one, i.e. package distutils is found in the directory distutils relative to the distribution root. Thus, when you say packages = ['foo'] in your setup script, you are promising that the Distutils will find a file foo/__init__.py (which might be spelled differently on your system, but you get the idea) relative to the directory where your setup script lives.
+#
     packages = ['sara_cmt', 'sara_cmt.cluster', 'sara_cmt.cluster.templatetags'],
-    #packages = ['django', 'config', 'sara_cmt', 'sara_cmt.cluster', 'sara_cmt.cluster.templatetags'],
-    #package_data = {'config': ['*']},
-    #package_dir = {'django': '/home/sil/etc/alternatives/django/*'},
-    #package_data = {'sara_cmt': ['*']},
-    scripts = ['cmt'],
-    data_files = [('config', ['config/cmt.cfg'])],
-    requires = ['django', 'django_extensions', 'south', 'debug_toolbar', 'IPy'],
+
+# This describes two modules, one of them in the "root" package, the other in the pkg package. Again, the default package/directory layout implies that these two modules can be found in mod1.py and pkg/mod2.py, and that pkg/__init__.py exists as well.
+#
+#    py_modules = ['mod1', 'pkg.mod2'],
+
+# Dependencies on other Python modules and packages can be specified by supplying the requires keyword argument to setup(). The value must be a list of strings. Each string specifies a package that is required, and optionally what versions are sufficient.
+#
+    requires = ['Django (>=1.2)', 'IPy (>=0.75)', 'django_extensions (>=0.4)', 'django_tagging (>=0.3.1)', 'psycopg2 (>=2.4.4)', 'Python (>=2.6)'],
+
 )
+#setup(
+#    #maintainer = ''
+#    #maintainer_email = ''
+#
+#    scripts = ['cmt'],
+#    data_files = [('config', ['config/cmt.cfg'])],
+#)
