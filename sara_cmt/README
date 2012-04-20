@@ -1,22 +1,36 @@
+===
+CMT
+===
+
 CMT is a Cluster Management Tool originally created at SARA Computing and
 Networking Services, which is based in Amsterdam and known as SARA nowadays.
 
 
 DEPENDENCIES
+============
 
 CMT is dependent on the following packages:
- * Django==1.2
- * IPy==0.75
- * django-extensions==0.4
- * django-tagging==0.3.1
- * psycopg2==2.4.4
+
+* Django==1.2
+
+* IPy==0.75
+
+* django-extensions==0.4
+
+* django-tagging==0.3.1
+
+* psycopg2==2.4.4
 
 Besides these Python-packages, the following software should be installed on your system:
- * Python>=2.6
- * header files and a static library for Python
- * header files for libpq (PostgreSQL library)
+
+* Python>=2.6
+
+* header files and a static library for Python
+
+* header files for libpq (PostgreSQL library)
 
 
 CONTACT
+=======
 
-For bugs, requests or suggestions, please mail to cmt@sara.nl
+For bugs, requests or suggestions, please `mail us <cmt@sara.nl>`_.
