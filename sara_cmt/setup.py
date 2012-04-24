@@ -86,9 +86,18 @@ Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
     # data_files specifies a sequence of (directory, files) pairs in the following way:
     #     data_files=[('bitmaps', ['bm/b1.gif', 'bm/b2.gif']),
     #             ('/etc/init.d', ['init-script'])]
+    #
+    # NOTE: wildcards aren't accepted here
     data_files = [
         ('/etc/cmt/', ['etc/cmt.conf']),
-        ('/etc/cmt/templates/examples', ['templates/examples/*']),
+        ('/etc/cmt/templates', [
+            'templates/examples/base_allnodes.cmt',
+            'templates/examples/cnames.cmt',
+            'templates/examples/first_test.cmt',
+            'templates/examples/gina_allnodes.cmt',
+            'templates/examples/header',
+            'templates/examples/lisa_allnodes.cmt'
+        ]),
         ('/usr/local/bin/', ['bin/cmt.py']),
     ]
 )
