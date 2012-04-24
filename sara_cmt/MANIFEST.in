@@ -1,8 +1,8 @@
 #include AUTHORS
 ##include cmt.py
-##recursive-include config *
-#include config/cmt.cfg
-#include sara_cmt/logging.conf
+recursive-include etc *
+#include config/cmt.conf
+include sara_cmt/logging.conf
 #include sara_cmt/apache/django.wsgi
-##recursive-include templates/examples header *.cmt
+recursive-include templates/examples header *.cmt
 #exclude sara_cmt/settings_db.py

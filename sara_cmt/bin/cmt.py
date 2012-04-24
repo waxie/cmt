@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 #####
 #
@@ -48,7 +48,7 @@ def search_model(value):
 
 #####
 #
-# <Decorators>
+# <Decorators/etc/cmt/>
 #
 
 
@@ -78,7 +78,7 @@ def crud_validate(func):
 #
 
 # Instantiate ConfigParser
-configfile = os.path.join(settings.PROJECT_BASE, 'config/cmt.cfg')
+configfile = os.path.join(settings.PROJECT_BASE, '/etc/cmt/cmt.conf')
 config_parser = ConfigParser.ConfigParser()
 config_parser.optionxform = lambda x: x
 # ^^ Hack for case-insensitivity, reference:
