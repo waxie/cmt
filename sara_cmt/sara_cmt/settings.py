@@ -6,9 +6,6 @@ import os
 #
 #   http://docs.djangoproject.com/en/dev/ref/settings/
 
-SARACMT_BASE = os.path.normpath(os.path.dirname(__file__))
-PROJECT_BASE = os.path.normpath(os.path.join(SARACMT_BASE, os.path.pardir))
-
 # Only set CLIENT_ONLY to False on the central CMT-server
 CLIENT_ONLY = True
 

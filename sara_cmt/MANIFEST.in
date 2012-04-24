@@ -1,8 +1,6 @@
-#include AUTHORS
-##include cmt.py
+include AUTHORS CHANGES README
+include bin/cmt
 recursive-include etc *
-#include config/cmt.conf
-include sara_cmt/logging.conf
 #include sara_cmt/apache/django.wsgi
 recursive-include templates/examples header *.cmt
-#exclude sara_cmt/settings_db.py
+#exclude sara_cmt/settings_db.py # only comment out during testing

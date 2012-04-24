@@ -13,8 +13,8 @@ class Logger:
 
     # Check for existence of a global logging object, otherwise make one
     if 'logger' not in __shared_state.keys():
-        logging.config.fileConfig(
-                os.path.join(os.path.dirname(__file__), 'logging.conf'))
+        #TODO: make this dynamic
+        logging.config.fileConfig('/etc/cmt/logging.conf')
         __shared_state['logger'] = logging.getLogger('cli')
 
     def __init__(self):

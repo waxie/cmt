@@ -45,7 +45,7 @@ Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
 # This describes two modules, one of them in the "root" package, the other in the pkg package. Again, the default package/directory layout implies that these two modules can be found in mod1.py and pkg/mod2.py, and that pkg/__init__.py exists as well.
 #
 #    py_modules = ['mod1', 'pkg.mod2'],
-    py_modules = ['bin.cmt'],
+    #py_modules = ['bin.cmt'],
 
 # http://docs.python.org/distutils/setupscript.html#relationships-between-distributions-and-packages
 # Dependencies on other Python modules and packages can be specified by supplying the requires keyword argument to setup(). The value must be a list of strings. Each string specifies a package that is required, and optionally what versions are sufficient.
@@ -89,7 +89,10 @@ Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
     #
     # NOTE: wildcards aren't accepted here
     data_files = [
-        ('/etc/cmt/', ['etc/cmt.conf']),
+        ('/etc/cmt/', [
+            'etc/cmt.conf',
+            'etc/logging.conf'
+        ]),
         ('/etc/cmt/templates', [
             'templates/examples/base_allnodes.cmt',
             'templates/examples/cnames.cmt',
@@ -98,6 +101,6 @@ Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
             'templates/examples/header',
             'templates/examples/lisa_allnodes.cmt'
         ]),
-        ('/usr/local/bin/', ['bin/cmt.py']),
+        ('/usr/local/bin/', ['bin/cmt']),
     ]
 )
