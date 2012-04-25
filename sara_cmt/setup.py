@@ -61,7 +61,7 @@ Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
     #    'Python (>=2.6)'
     #],
     install_requires = [
-        'Django>=1.2',
+        'Django>=1.2, <1.3',
         'IPy>=0.75',
         'django_extensions>=0.4',
         'django_tagging>=0.3.1',
@@ -74,7 +74,7 @@ Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
     # http://docs.python.org/distutils/setupscript.html#installing-scripts
     #
     #scripts = ['sara_cmt/cmt.py'],
-    #scripts = ['cmt', 'cmt.py'],
+    scripts = ['bin/cmt'],
 
     # http://docs.python.org/distutils/setupscript.html#installing-package-data
     # Often, additional files need to be installed into a package. These files are often data that's closely related to the package's implementation, or text files containing documentation that might be of interest to programmers using the package. These files are called package data.
@@ -89,11 +89,14 @@ Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
     #
     # NOTE: wildcards aren't accepted here
     data_files = [
-        ('/etc/cmt/', [
+        # config-files
+        ('etc/cmt/', [
             'etc/cmt.conf',
             'etc/logging.conf'
         ]),
-        ('/etc/cmt/templates', [
+        ('etc/cmt/templates', []),
+        # examples of CMT-templates
+        ('share/doc/cmt/templates/examples', [
             'templates/examples/base_allnodes.cmt',
             'templates/examples/cnames.cmt',
             'templates/examples/first_test.cmt',
@@ -101,6 +104,7 @@ Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
             'templates/examples/header',
             'templates/examples/lisa_allnodes.cmt'
         ]),
-        ('/usr/local/bin/', ['bin/cmt']),
+        # executable
+        ('bin/', ['bin/cmt']),
     ]
 )

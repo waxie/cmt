@@ -78,8 +78,9 @@ def crud_validate(func):
 #
 
 # Instantiate ConfigParser
-#TODO: make this dynamic
-configfile = '/etc/cmt/cmt.conf'
+#TODO: think about a (better) way to make this dynamic:
+import site
+configfile = '%s/etc/cmt/cmt.conf' % site.sys.prefix
 config_parser = ConfigParser.ConfigParser()
 config_parser.optionxform = lambda x: x
 # ^^ Hack for case-insensitivity, reference:

@@ -1,6 +1,5 @@
 import logging
 import logging.config
-import os
 
 
 class Logger:
@@ -13,8 +12,9 @@ class Logger:
 
     # Check for existence of a global logging object, otherwise make one
     if 'logger' not in __shared_state.keys():
-        #TODO: make this dynamic
-        logging.config.fileConfig('/etc/cmt/logging.conf')
+        #TODO: think about a (better) way to make this dynamic:
+        import site
+        logging.config.fileConfig('%s/etc/cmt/logging.conf'%site.sys.prefix)
         __shared_state['logger'] = logging.getLogger('cli')
 
     def __init__(self):

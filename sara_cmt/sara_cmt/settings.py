@@ -155,7 +155,10 @@ ROOT_URLCONF = 'sara_cmt.urls'
 
 # Templates for the CMT command line interface.
 # (thus, the templates for our configfiles, etc)
-CMT_TEMPLATES_DIR = '/etc/sara_cmt/templates'
+#TODO: think about a (better) way to make this dynamic:
+#TODO: get this out of the settings.py, since it should be in the client config
+import site
+CMT_TEMPLATES_DIR = '%s/etc/templates' % site.sys.prefix
 
 # Templates for the CMT web-frontend.
 TEMPLATE_DIRS = (
