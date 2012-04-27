@@ -1,10 +1,12 @@
 
-import os, sys, ConfigParser
+import os, sys, ConfigParser, site
 
 from socket import gethostbyname_ex
 
+configfile = '%s/etc/cmt/cmt.conf' % site.sys.prefix
+
 config = ConfigParser.RawConfigParser()
-config.read('/etc/cmt/cmt.conf')
+config.read( configfile )
 
 try:
 	DATABASE_USER = config.get('database', 'USER')
@@ -13,7 +15,7 @@ try:
 	DATABASE_ENGINE = config.get('database', 'ENGINE')
 	DATABASE_NAME = config.get('database', 'NAME')
 
-except ConfigParser.NoOptionError, details:
+except (ConfigParser.NoOptionError, ConfigParser.NoSectionError), details:
 
 	print 'Config file error: %s' %str(details)
 	sys.exit(1)
