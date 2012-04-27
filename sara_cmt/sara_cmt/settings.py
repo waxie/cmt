@@ -20,19 +20,17 @@ except ConfigParser.NoOptionError, details:
 
 try: # Optional
 	DATABASE_PORT = config.get('database', 'PORT')
+
+except ConfigParser.NoOptionError, details:
+
+	pass
+
+try: # Optional
 	TEST_DATABASE_NAME = config.get('database', 'TEST_NAME')
 
 except ConfigParser.NoOptionError, details:
 
-	#whatever: optional arguments: unset
-	try:
-		del DATABASE_PORT
-		del TEST_DATABASE_NAME
-
-	except NameError:
-
-		# care more
-		pass
+	pass
 
 try:
 	gethostbyname_ex( DATABASE_HOST )
