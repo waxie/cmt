@@ -1,6 +1,45 @@
 
-import os
+import os, sys, ConfigParser
 
+from socket import gethostbyname_ex
+
+config = ConfigParser.RawConfigParser()
+config.read('/etc/cmt/cmt.conf')
+
+try:
+	DATABASE_USER = config.get('database', 'USER')
+	DATABASE_PASSWORD = config.get('database', 'PASSWORD')
+	DATABASE_HOST = config.get('database', 'HOST')
+	DATABASE_ENGINE = config.get('database', 'ENGINE')
+	DATABASE_NAME = config.get('database', 'NAME')
+
+except ConfigParser.NoOptionError, details:
+
+	print 'Config file error: %s' %str(details)
+	sys.exit(1)
+
+try: # Optional
+	DATABASE_PORT = config.get('database', 'PORT')
+	TEST_DATABASE_NAME = config.get('database', 'TEST_NAME')
+
+except ConfigParser.NoOptionError, details:
+
+	#whatever: optional arguments: unset
+	try:
+		del DATABASE_PORT
+		del TEST_DATABASE_NAME
+
+	except NameError:
+
+		# care more
+		pass
+
+try:
+	gethostbyname_ex( DATABASE_HOST )
+except socket.gaierror, details:
+	print 'Unable to resolv database host: %s' %DATABASE_HOST
+	print 'Exiting.'
+	sys.exit(1)
 
 # Documentation of settings can be found on:
 #
@@ -17,30 +56,6 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
-
-
-# The database settings are imported, due to confidential data which should be
-# excluded from the SVN repository.
-try:
-    from settings_db import *
-except ImportError:
-    print '''\
-Settings for database are missing. Be sure to have `settings_db.py` with:
-
-DATABASES = {
-    'default': {
-        'ENGINE': '<engine>',
-        'NAME': '<name>',
-        'USER': '<user>',
-        'PASSWORD': '<password>',
-        'HOST': '<host>'
-    }
-}
-
-See https://docs.djangoproject.com/en/1.2/ref/settings/#databases'''
-    exit(1)
-
-
 
 #####
 #
