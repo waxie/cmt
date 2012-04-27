@@ -37,7 +37,7 @@ except ConfigParser.NoOptionError, details:
 try:
 	gethostbyname_ex( DATABASE_HOST )
 except socket.gaierror, details:
-	print 'Unable to resolv database host: %s' %DATABASE_HOST
+	print 'Unable to resolve database host: %s' %DATABASE_HOST
 	print 'Exiting.'
 	sys.exit(1)
 
@@ -172,8 +172,7 @@ ROOT_URLCONF = 'sara_cmt.urls'
 # (thus, the templates for our configfiles, etc)
 #TODO: think about a (better) way to make this dynamic:
 #TODO: get this out of the settings.py, since it should be in the client config
-import site
-CMT_TEMPLATES_DIR = '%s/etc/templates' % site.sys.prefix
+CMT_TEMPLATES_DIR = '%s/etc/cmt/templates' % site.sys.prefix
 
 # Templates for the CMT web-frontend.
 TEMPLATE_DIRS = (
