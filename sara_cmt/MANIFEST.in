@@ -1,7 +1,7 @@
 # Client only:
 include AUTHORS CHANGES README
 include bin/cmt
-recursive-include etc *.conf
+recursive-include etc *.conf*
 #include templates/
 recursive-include templates/examples header *.cmt
 #exclude sara_cmt/settings_db.py # only comment out during testing
