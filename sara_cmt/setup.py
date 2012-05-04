@@ -91,7 +91,7 @@ Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
     data_files = [
         # config-files
         ('etc/cmt/', [
-            'etc/cmt.conf',
+            'etc/cmt.conf.sample',
             'etc/logging.conf'
         ]),
         ('etc/cmt/templates', []),
