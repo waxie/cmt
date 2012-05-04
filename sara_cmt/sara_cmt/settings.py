@@ -69,10 +69,6 @@ if os.path.exists( sample_configfile ):
 			print 'Please update your original config(%s) to incorporate the new config options from sample config(%s)' %( configfile, sample_configfile )
 			print ''
 
-		else:
-			# Config is good but mtime is older, weird.. Just print hint
-			print 'Hint: Remove sample config file(%s) to get rid of this warning..' %sample_configfile
-
 		# Give them some time to think about warnings and generally annoy them just enough to fix it
 		time.sleep(2)
 
