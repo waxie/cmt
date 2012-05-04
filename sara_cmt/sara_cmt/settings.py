@@ -51,7 +51,7 @@ if not os.path.exists( configfile ):
 	sys.exit(1)
 
 # We are still here: both configfile AND sample_configfile found
-if exists( sample_configfile ):
+if os.path.exists( sample_configfile ):
 
 	# Is the sample configfile newer?
 	if os.path.getmtime( sample_configfile ) > os.path.getmtime( configfile ):
