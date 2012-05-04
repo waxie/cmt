@@ -31,15 +31,17 @@ def count_configlines( filename ):
 
 if not os.path.exists( configfile ):
 
-	print 'Unable to find confilefile: %s' %configfile
+	print 'Unable to find config file: %s' %configfile
 
 	if os.path.exists( sample_configfile ):
 
+		print ''
 		print 'Please modify the sample config file: %s to reflect your settings' %sample_configfile
 		print 'and then rename it to: %s' %configfile
 
 	else:
 
+		print ''
 		print 'Also no sample config file was found: %s' %sample_configfile
 		print 'Something is terribly wrong here ;)'
 
