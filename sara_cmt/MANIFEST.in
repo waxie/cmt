@@ -1,5 +1,5 @@
 # Client only:
-include AUTHORS CHANGES README
+include AUTHORS CHANGES README LICENSE
 include bin/cmt
 recursive-include etc *.conf*
 #include templates/
