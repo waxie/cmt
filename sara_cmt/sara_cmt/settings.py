@@ -1,23 +1,97 @@
 
-import os, sys, ConfigParser, site
+import os, os.path, sys, ConfigParser, site, string, time
 
 from socket import gethostbyname_ex
 
+# Path's customizable through virtualenv
+sample_configfile = '%s/etc/cmt/cmt.conf.sample' % site.sys.prefix
 configfile = '%s/etc/cmt/cmt.conf' % site.sys.prefix
+
+def count_configlines( filename ):
+
+	line_count	= 0
+	cfg_fp		= open( filename )
+
+	for line in cfg_fp.readlines():
+
+		line = line.strip()
+
+		if len( line ) == 0:
+			continue
+
+		# RB: ConfigParser considers lines starting with # or ; as comments
+		if line[0] == '#' or line[0] == ';':
+			continue
+
+		line_count += 1
+
+	cfg_fp.close()
+
+	return line_count
+
+if not os.path.exists( configfile ):
+
+	print 'Unable to find confilefile: %s' %configfile
+
+	if os.path.exists( sample_configfile ):
+
+		print 'Please modify the sample config file: %s to reflect your settings' %sample_configfile
+		print 'and then rename it to: %s' %configfile
+
+	else:
+
+		print 'Also no sample config file was found: %s' %sample_configfile
+		print 'Something is terribly wrong here ;)'
+
+	print ''
+	print 'Fatal: Giving up and exiting now..'
+
+	sys.exit(1)
+
+# We are still here: both configfile AND sample_configfile found
+if exists( sample_configfile ):
+
+	# Is the sample configfile newer?
+	if os.path.getmtime( sample_configfile ) > os.path.getmtime( configfile ):
+
+		# Well this is weird, but not fatal
+		print 'Warning: sample config file(%s) is newer than original config(%s)' %(configfile, sample_configfile)
+
+		# Does the sample config file contain more options?
+		if count_configlines( sample_configfile ) > count_configlines( configfile ):
+
+			print 'Warning: sample config file contains MORE OPTIONS than original config!'
+			print ''
+			print 'This happens for example if you upgraded CMT and the new release incorporates new configuration options!'
+			print ''
+			print 'Please update your original config(%s) to incorporate the new config options from sample config(%s)' %( configfile, sample_configfile )
+			print ''
+
+		else:
+			# Config is good but mtime is older, weird.. Just print hint
+			print 'Hint: Remove sample config file(%s) to get rid of this warning..' %sample_configfile
+
+		# Give them some time to think about warnings and generally annoy them just enough to fix it
+		time.sleep(2)
+
+		# Moving right along; print empty line for cosmetic reasons
+		print ''
 
 config = ConfigParser.RawConfigParser()
 config.read( configfile )
 
 try:
-	DATABASE_USER = config.get('database', 'USER')
-	DATABASE_PASSWORD = config.get('database', 'PASSWORD')
-	DATABASE_HOST = config.get('database', 'HOST')
-	DATABASE_ENGINE = config.get('database', 'ENGINE')
-	DATABASE_NAME = config.get('database', 'NAME')
+	DATABASE_USER		= config.get('database', 'USER')
+	DATABASE_PASSWORD	= config.get('database', 'PASSWORD')
+	DATABASE_HOST		= config.get('database', 'HOST')
+	DATABASE_ENGINE		= config.get('database', 'ENGINE')
+	DATABASE_NAME		= config.get('database', 'NAME')
 
 except (ConfigParser.NoOptionError, ConfigParser.NoSectionError), details:
 
 	print 'Config file error: %s' %str(details)
+	print ''
+	print 'Giving up and exiting now..'
 	sys.exit(1)
 
 try: # Optional
@@ -36,9 +110,12 @@ except ConfigParser.NoOptionError, details:
 
 try:
 	gethostbyname_ex( DATABASE_HOST )
+
 except socket.gaierror, details:
+
 	print 'Unable to resolve database host: %s' %DATABASE_HOST
-	print 'Exiting.'
+	print ''
+	print 'Giving up and exiting now..'
 	sys.exit(1)
 
 # Documentation of settings can be found on:
