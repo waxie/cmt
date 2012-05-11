@@ -7,8 +7,6 @@ setup(
     #download_url = ''
     author = 'Sil Westerveld',
     author_email = 'sil.westerveld@sara.nl',
-    #maintainer = 'Sil Westerveld',
-    #maintainer_email = 'sil.westerveld@sara.nl',
     license = 'GPL',
     #long_description = open('README').read(),
     long_description = '''\
@@ -19,7 +17,6 @@ Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
 
     # see: http://pypi.python.org/pypi?:action=list_classifiers
     classifiers = [
-        #'Development Status :: 4 - Beta',
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
         'Environment :: Web Environment',
@@ -53,7 +50,7 @@ Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
     #
     # Somehow 'requires' doesn't work; dependencies won't be installed
     #requires = [
-    #    'Django (>=1.2)',
+    #    'Django (>=1.2, <1.3)',
     #    'IPy (>=0.75)',
     #    'django_extensions (>=0.4)',
     #    'django_tagging (>=0.3.1)',
@@ -94,6 +91,7 @@ Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
             'etc/cmt.conf.sample',
             'etc/logging.conf'
         ]),
+        # empty directory for CMT-templates
         ('etc/cmt/templates', []),
         # examples of CMT-templates
         ('share/doc/cmt/templates/examples', [
