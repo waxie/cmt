@@ -14,7 +14,13 @@ class Logger:
     if 'logger' not in __shared_state.keys():
         #TODO: think about a (better) way to make this dynamic:
         import site
-        logging.config.fileConfig('%s/etc/cmt/logging.conf'%site.sys.prefix)
+
+        if site.sys.prefix in [ '/usr', '/' ]:
+            ETC_PREPEND = ''
+        else:
+            ETC_PREPEND = site.sys.prefix
+
+        logging.config.fileConfig('%s/etc/cmt/logging.conf'%ETC_PREPEND)
         __shared_state['logger'] = logging.getLogger('cli')
 
     def __init__(self):

@@ -3,9 +3,14 @@ import os, os.path, sys, ConfigParser, site, string, time
 
 from socket import gethostbyname_ex
 
+if site.sys.prefix in [ '/usr', '/' ]:
+    ETC_PREPEND = ''
+else:
+    ETC_PREPEND = site.sys.prefix
+
 # Path's customizable through virtualenv
-sample_configfile = '%s/etc/cmt/cmt.conf.sample' % site.sys.prefix
-configfile = '%s/etc/cmt/cmt.conf' % site.sys.prefix
+sample_configfile = '%s/etc/cmt/cmt.conf.sample' % ETC_PREPEND
+configfile = '%s/etc/cmt/cmt.conf' % ETC_PREPEND
 
 def count_configlines( filename ):
 
@@ -247,7 +252,7 @@ ROOT_URLCONF = 'sara_cmt.urls'
 # (thus, the templates for our configfiles, etc)
 #TODO: think about a (better) way to make this dynamic:
 #TODO: get this out of the settings.py, since it should be in the client config
-CMT_TEMPLATES_DIR = '%s/etc/cmt/templates' % site.sys.prefix
+CMT_TEMPLATES_DIR = '%s/etc/cmt/templates' % ETC_PREPEND
 
 # Templates for the CMT web-frontend.
 TEMPLATE_DIRS = (
