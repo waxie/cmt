@@ -1,4 +1,11 @@
 from distutils.core import setup
+import site
+
+ETC_PREPEND = ''
+
+if site.sys.prefix in [ '/usr', '/' ]:
+    ETC_PREPEND = '/'
+
 setup(
     name = 'CMT',
     version = '1.0',
@@ -87,12 +94,12 @@ Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
     # NOTE: wildcards aren't accepted here
     data_files = [
         # config-files
-        ('etc/cmt/', [
+        (ETC_PREPEND + 'etc/cmt/', [
             'etc/cmt.conf.sample',
             'etc/logging.conf'
         ]),
         # empty directory for CMT-templates
-        ('etc/cmt/templates', []),
+        (ETC_PREPEND + 'etc/cmt/templates', []),
         # examples of CMT-templates
         ('share/doc/cmt/templates/examples', [
             'templates/examples/base_allnodes.cmt',
