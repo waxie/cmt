@@ -1,1 +1,11 @@
-v1.0, 19 Apr 2012 -- Initial release.
+v1.0, 16 May 2012 -- Initial packaged release.
+
+* From now on the config is distributed as a sample config file, which differs
+  from previous config files.
+  Users have to modify the sample config file to reflect their settings and
+  rename it to activate the settings.   
+* All extra templatetags are in a single file now, and some of them have been
+  changed a little.
+  Users have to check their current templates to be sure they are still working
+  as expected.
+* CMT is now distributed as a package, installable with pip.
