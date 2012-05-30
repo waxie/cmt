@@ -398,7 +398,7 @@ def main():
         action='store_true',
         dest='DRYRUN',
         default=config_parser.getboolean('defaults', 'DRYRUN'),
-        help="""This flag has to be given before -[aclmr]""")
+        help='This flag has to be given before -[aclmr]')
     parser.add_option('--script',
         action='store_false',
         dest='INTERACTIVE',
@@ -409,51 +409,46 @@ def main():
         type='string',
         metavar='ENTITY',
         nargs=1,
-        help="""Add an object of given ENTITY.
-
-            arguments:   set <ASSIGNMENTS>
-
-            The object will get values according to the given assignments. 
-            Assignments could be formed like [<FK>__]<attr>=<value>""")
+        help='Add an object of the given ENTITY. '\
+            'Extra arguments should be given like `set ASSIGNMENTS`, '\
+            'where ASSIGNMENTS are formatted like `ATTR=VAL`')
     parser.add_option('-c', '--change',
         action='callback',
         callback=change,
         type='string',
         metavar='ENTITY',
         nargs=1,
-        help="""Change value(s) of object(s) of given ENTITY.
-
-            arguments:   get <QUERY> set <ASSIGNMENTS>
-
-            The query, which consists out of one or more terms, is used to make
-            a selection of objects to change. These objects will be changed
-            according to the given assignments.""")
+        help='Change value(s) of object(s) of the given ENTITY. '\
+            'Arguments should be given like `get QUERY set ASSIGNMENTS`, '\
+            'where both QUERY and ASSIGNMENTS consist out of one or more '\
+            'terms formatted like `ATTR=VAL`. Only objects matching QUERY '\
+            'will be changed according to the given ASSIGNMENTS')
     parser.add_option('-g', '--generate',
         action='callback',
         callback=generate,
         type='string',
         metavar='TEMPLATE',
         nargs=1,
-        help='Render the given template')
+        help='Render the given TEMPLATE, and store the result if specified')
     parser.add_option('-l', '--list',
         action='callback',
         callback=show,
         type='string',
-        metavar='ENTITY [ATTRIBUTE=VALUE]',
+        metavar='ENTITY',
         nargs=1,
-        help="""List object(s) of the given ENTITY.
-
-            arguments:   get <QUERY>
-
-            The query, which consists out of one or more terms, is used to make
-            a selection of objects to list.""")
+        help='List object(s) of the given ENTITY. Arguments should be given '\
+            'like `get QUERY`, where QUERY consists out of one or more terms '\
+            'formatted like `ATTR=VAL`')
     parser.add_option('-r', '--remove',
         action='callback',
         callback=remove,
         type='string',
-        metavar='ENTITY [ATTRIBUTE=VALUE]',
+        metavar='ENTITY',
         nargs=1,
-        help='Remove objects which reflect the given query')
+        help='Remove object(s) of the given ENTITY. '\
+            'Arguments should be given like `get QUERY`, where QUERY '\
+            'consists out of one or more terms formatted like `ATTR=VAL`. '\
+            'Only objects matching QUERY will be listed')
 
     # TODO: implement the following option(s)
     parser.add_option('-v', '--verbose',
