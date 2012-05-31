@@ -62,7 +62,7 @@ if os.path.exists( sample_configfile ):
 	if os.path.getmtime( sample_configfile ) > os.path.getmtime( configfile ):
 
 		# Well this is weird, but not fatal
-		print 'Warning: sample config file(%s) is newer than original config(%s)' %(configfile, sample_configfile)
+		print 'Warning: sample config file(%s) is newer than original config(%s)' %(sample_configfile, configfile)
 
 		# Does the sample config file contain more options?
 		if count_configlines( sample_configfile ) > count_configlines( configfile ):
