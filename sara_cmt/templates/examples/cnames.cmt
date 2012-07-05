@@ -11,7 +11,7 @@
 #       {{ svn_id }}
 #       {{ svn_url }}
 #
-{% load cmts_extras %}
+{% load cmt_client %}
 
 {% use hardwareunit with 'rack=31' as machines %}
 
