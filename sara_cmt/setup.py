@@ -82,12 +82,12 @@ Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
     #    'Python (>=2.6)'
     #],
     install_requires = [
+        'Python>=2.6',
         'Django>=1.2, <1.3',
         'IPy>=0.75',
         'django_extensions>=0.4',
         'django_tagging>=0.3.1',
-        'psycopg2>=2.4.4',
-        'Python>=2.6'
+        'psycopg2>=2.4.4'
     ],
     #provides =
     #obsoletes =
