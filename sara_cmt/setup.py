@@ -29,15 +29,15 @@ setup(
     description = 'Cluster Management Tool',
     url = 'http://subtrac.sara.nl/oss/cmt/',
     #download_url = ''
-    author = 'Sil Westerveld',
-    author_email = 'sil.westerveld@sara.nl',
+    author = 'CMT Development team',
+    author_email = 'cmt-users@lists.osd.sara.nl',
     license = 'GPL',
     #long_description = open('README').read(),
     long_description = '''\
 CMT is a Cluster Management Tool originally created at SARA Computing and \
 Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
 
-    platforms = ['linux-x86_64'],
+    platforms = ['linux-x86_64', 'linux-i386' ],
 
     # see: http://pypi.python.org/pypi?:action=list_classifiers
     classifiers = [
@@ -119,12 +119,10 @@ Networking Services, which is based in Amsterdam and known as SARA nowadays.''',
         (ETC_PREPEND + 'etc/cmt/templates', []),
         # examples of CMT-templates
         ('share/doc/cmt/templates/examples', [
-            'templates/examples/base_allnodes.cmt',
-            'templates/examples/cnames.cmt',
-            'templates/examples/first_test.cmt',
-            'templates/examples/gina_allnodes.cmt',
-            'templates/examples/header',
-            'templates/examples/lisa_allnodes.cmt'
+            'templates/examples/simple_cnames.cmt',
+            'templates/examples/simple_hostnames.cmt',
+            'templates/examples/simple_dhcpd.conf.cmt',
+            'templates/examples/complex_dns.cmt'
         ]),
         # executable
         ('bin/', ['bin/cmt']),
