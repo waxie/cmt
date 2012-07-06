@@ -323,6 +323,7 @@ def generate(option, opt_str, value, parser, *args, **kwargs):
         template_data['svn_url'] = '$URL:$'
         template_data['input'] = template_fullpath
         template_data['__template_outputfiles__'] = {} # reserved for data to write to files
+        template_data['epilogue'] = []
         context = Context(template_data)
 
         template_data['stores'] = template_data['__template_outputfiles__'] # to stay bw compatible with ramon's code (temporary)
