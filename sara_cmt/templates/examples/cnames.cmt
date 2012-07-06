@@ -13,6 +13,8 @@
 #
 {% load cmt_client %}
 
+{% store '/tmp/simple_cnames_example.txt' %}
+
 {% use hardwareunit with 'rack=31' as machines %}
 
 {% noblanklines %}
@@ -21,9 +23,11 @@
 {{ iface }}
 {% if iface.cnames != None %}
 {% for cname in iface.cnames %}
---{{ iface }}:{{cname}}
+--> {{ iface }} :CNAME: {{cname}}
 {% endfor %}
 {% endif %}
 {% endfor %}
 {% endfor %}
 {% endnoblanklines %}
+
+{% endstore %}
