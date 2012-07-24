@@ -269,6 +269,8 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
 #
 #####
 
+def batch_file(option, opt_str, value, parser, *args, **kwargs):
+    pass
 
 def generate(option, opt_str, value, parser, *args, **kwargs):
     from django.template import Context
