@@ -457,6 +457,14 @@ def main():
         help='List object(s) of the given ENTITY. Arguments should be given '\
             'like `get QUERY`, where QUERY consists out of one or more terms '\
             'formatted like `ATTR=VAL`')
+    parser.add_option('-f', '--file',
+        action='callback',
+        callback=batch_file,
+        type='string',
+        metavar='FILE',
+        nargs=1,
+        help='Process all mutations from FILE in an unattended batch. '\
+            'Useful for performing many operations in 1 go, i.e.: adding many new systems.')
     parser.add_option('-r', '--remove',
         action='callback',
         callback=remove,
