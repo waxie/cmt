@@ -28,6 +28,8 @@ else:
 sample_configfile = '%s/etc/cmt/cmt.conf.sample' % ETC_PREPEND
 configfile = '%s/etc/cmt/cmt.conf' % ETC_PREPEND
 
+prompt_settings = []
+
 def count_configlines( filename ):
 
 	line_count	= 0
@@ -100,8 +102,6 @@ config = ConfigParser.RawConfigParser()
 config.read( configfile )
 
 try:
-	DATABASE_USER		= config.get('database', 'USER')
-	DATABASE_PASSWORD	= config.get('database', 'PASSWORD')
 	DATABASE_HOST		= config.get('database', 'HOST')
 	DATABASE_ENGINE		= config.get('database', 'ENGINE')
 	DATABASE_NAME		= config.get('database', 'NAME')
@@ -136,6 +136,36 @@ except socket.gaierror, details:
 	print ''
 	print 'Giving up and exiting now..'
 	sys.exit(1)
+
+try:
+	DATABASE_USER		= config.get('database', 'USER')
+
+
+except ConfigParser.NoOptionError, details:
+
+	prompt_settings.append( ('DATABASE_USER', 'Username: ', False) )
+
+try:
+	DATABASE_PASSWORD	= config.get('database', 'PASSWORD')
+
+except ConfigParser.NoOptionError, details:
+
+	prompt_settings.append( ('DATABASE_PASSWORD', 'Password: ', True) )
+
+for prompt_list in prompt_settings:
+
+	from getpass import getpass
+
+	( prompt_value, input_text, input_hidden ) = prompt_list
+	temp_val = ''
+
+	if not input_hidden:
+
+		temp_val = raw_input( input_text )
+	else:
+		temp_val = getpass( input_text )
+
+	globals()[prompt_value] = temp_val
 
 # Documentation of settings can be found on:
 #
