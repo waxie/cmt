@@ -271,6 +271,10 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
 
 def batch_file(option, opt_str, value, parser, *args, **kwargs):
 
+    """
+        Read arguments from file, instead of the command line
+    """
+
     batch_filename = value
 
     if not os.path.isfile( batch_filename ):
@@ -496,7 +500,7 @@ def main( process_args=sys.argv[1:] ):
             type='string',
             metavar='FILE',
             nargs=1,
-            help='Process all mutations from FILE in an unattended batch. '\
+            help='Process arguments from FILE in stead of command line. '\
                 'Useful for performing many operations in 1 go, i.e.: adding many new systems.')
     if not parser.has_option( '-r' ):
         parser.add_option('-r', '--remove',
