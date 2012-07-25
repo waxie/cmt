@@ -270,7 +270,21 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
 #####
 
 def batch_file(option, opt_str, value, parser, *args, **kwargs):
-    pass
+
+    batch_filename = value
+
+    if not os.path.isfile( batch_filename ):
+
+        logger.error('ERROR: %s does not exist. Exiting..' %batch_filename )
+        return 1
+
+    b_fp = open( batch_filename, 'r' )
+
+    # Doe dingen
+
+    b_fp.close()
+
+    return 0
 
 def generate(option, opt_str, value, parser, *args, **kwargs):
     from django.template import Context
