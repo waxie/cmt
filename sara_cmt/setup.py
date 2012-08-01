@@ -76,6 +76,7 @@ setup(
     #    'psycopg2 (>=2.4.4)',
     #],
     install_requires = [
+        'djangorestframework',
         'Python>=2.6',
         'Django>=1.2, <1.3',
         'IPy>=0.75',
