@@ -25,7 +25,7 @@ if site.sys.prefix in [ '/usr', '/' ]:
 
 setup(
     name = 'CMT',
-    version = '1.0',
+    version = '1.0.1',
     description = 'Cluster Management Tool',
     url = 'http://subtrac.sara.nl/oss/cmt/',
     #download_url = ''
@@ -112,6 +112,6 @@ setup(
             'templates/examples/complex_dns.cmt'
         ]),
         # executable
-        ('bin/', ['bin/cmt']),
+        (ETC_PREPEND + 'bin/', ['bin/cmt']),
     ]
 )

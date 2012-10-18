@@ -302,7 +302,7 @@ class Network(ModelExtension):
 
             Returns an integer.
         """
-        return len(self._ips_assigned())
+        return Interface.objects.filter(network=self).filter(ip__isnull=False).count()
 
     def count_ips_free(self):
         """
