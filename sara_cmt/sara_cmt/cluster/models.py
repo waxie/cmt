@@ -579,6 +579,15 @@ class HardwareModel(ModelExtension):
     def __unicode__(self):
         return '%s (%s)' % (self.name, self.vendor)
 
+    def save(self, force_insert=False, force_update=False):
+        """
+            Be sure to save vendorcode as None, when kept blank.
+        """
+        if not self.vendorcode:
+            self.vendorcode = None
+
+        super(HardwareModel, self).save(force_insert, force_update)
+
 
 class Role(ModelExtension):
     """
