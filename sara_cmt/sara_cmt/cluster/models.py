@@ -162,7 +162,10 @@ class Interface(ModelExtension):
     """
     re_valid_mac = re.compile(r'([A-Fa-f\d]{2}[:-]?){5}[A-Fa-f\d]{2}')
     re_mac_octets = re.compile(r'[A-Fa-f\d]{2}')
+    re_valid_cnames = re.compile(r'^[a-z\d\-]+([,]{1}[a-z\d\-]+)*$')
+
     hwaddress_validator = RegexValidator(re_valid_mac,'Enter a valid hardware address.', 'invalid')
+    cnames_validator = RegexValidator(re_valid_cnames,'Enter a valid comma seperated CNAME list (no spaces).', 'invalid')
 
     network   = models.ForeignKey('Network', related_name='interfaces')
     host      = models.ForeignKey('HardwareUnit', related_name='interfaces',
@@ -171,7 +174,7 @@ class Interface(ModelExtension):
                                   verbose_name='type')
     label     = models.CharField(max_length=255, help_text='Automagically \
                                  generated if kept empty')
-    aliases   = models.CharField(max_length=255, help_text='Cnames comma-seperated', blank=True, null=True)
+    aliases   = models.CharField(max_length=255, help_text='Cnames comma-seperated', blank=True, null=True, validators=[cnames_validator])
 
     hwaddress = models.CharField(max_length=17, blank=True, null=True,
                                  verbose_name='hardware address',
