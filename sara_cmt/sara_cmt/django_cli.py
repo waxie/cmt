@@ -15,11 +15,12 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+from django.core.exceptions import ValidationError
 from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ForeignKey, ManyToManyField, \
     OneToOneField, RelatedField
 
-from types import StringTypes
+from types import *
 
 import sqlite3
 from sqlite3 import IntegrityError
@@ -161,6 +162,43 @@ class ModelExtension(models.Model):
 
         for arg in arg_dict:
             field = self._meta.get_field(arg)
+
+            field_name = arg
+
+            def cmt_validate( f_object, f_name, v_str ):
+
+                if not f_object or not v_str:
+
+                    return
+
+                for v in field.validators:
+                        try:
+                                v( value )
+
+                        except ValidationError, e:
+
+                                #FIXME: get exception message to display without looking like: [u'message']
+                                print 'ERROR: Value "%s" is not valid for %s: %s' %( value, arg, str( e ) )
+                                print 'Aborting (value not saved)..'
+
+                                import sys
+                                sys.exit( 1 )
+
+            if len( field.validators ) > 0:
+
+                if type( arg_dict[arg] ) in ( ListType, TupleType ):
+
+                    for value in arg_dict[arg]:
+
+                        cmt_validate( field, field_name, value )
+
+                elif type( arg_dict[arg] ) in ( IntType, FloatType, StringType ):
+
+                    cmt_validate( field, field_name, arg_dict[arg] )
+
+                else:
+                    logger.debug("Unknown value type '%s' to validate for field: %s" % (str( type(arg_dict[arg]) ), field_name ))
+
             logger.debug("Have to assign %s to attribute '%s' (%s)" \
                 % (arg_dict[arg], arg, field.__class__.__name__))
 
