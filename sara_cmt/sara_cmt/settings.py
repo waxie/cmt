@@ -24,9 +24,17 @@ if site.sys.prefix in [ '/usr', '/' ]:
 else:
     ETC_PREPEND = site.sys.prefix
 
+where_am_i = os.path.dirname( __file__ )
+
+if os.path.exists( where_am_i + '.DEVELOPMENT' ):
+
+    # Don't use system wide (production) config, but local development config
+    configfile = where_am_i + '/cmt.conf-DEVEL'
+else:
+    configfile = '%s/etc/cmt/cmt.conf' % ETC_PREPEND
+
 # Path's customizable through virtualenv
 sample_configfile = '%s/etc/cmt/cmt.conf.sample' % ETC_PREPEND
-configfile = '%s/etc/cmt/cmt.conf' % ETC_PREPEND
 
 def count_configlines( filename ):
 
