@@ -29,9 +29,11 @@ where_am_i = os.path.dirname( __file__ )
 if os.path.exists( where_am_i + '.DEVELOPMENT' ):
 
     # Don't use system wide (production) config, but local development config
-    configfile = where_am_i + '/cmt.conf-DEVEL'
+    CONFIG_FILE = where_am_i + '/cmt.conf-DEVEL'
+    DEVELOPMENT_ENVIRONMENT = True
 else:
-    configfile = '%s/etc/cmt/cmt.conf' % ETC_PREPEND
+    DEVELOPMENT_ENVIRONMENT = False
+    CONFIG_FILE = '%s/etc/cmt/cmt.conf' % ETC_PREPEND
 
 # Path's customizable through virtualenv
 sample_configfile = '%s/etc/cmt/cmt.conf.sample' % ETC_PREPEND
