@@ -18,10 +18,11 @@
 from distutils.core import setup
 import site
 
-ETC_PREPEND = ''
+INSTALL_PATH = ''
 
 if site.sys.prefix in [ '/usr', '/' ]:
-    ETC_PREPEND = '/'
+    #INSTALL_PATH = site.sys.prefix + '/'
+    INSTALL_PATH = '/'
 
 setup(
     name = 'CMT',
@@ -59,7 +60,6 @@ setup(
 
 
 # http://docs.python.org/distutils/setupscript.html#listing-whole-packages
-    #packages = ['sara_cmt', 'sara_cmt/sara_cmt', 'sara_cmt/sara_cmt.cluster', 'sara_cmt/sara_cmt.cluster.templatetags'],
     packages = ['sara_cmt', 'sara_cmt.cluster', 'sara_cmt.cluster.templatetags'],
 
 # http://docs.python.org/distutils/setupscript.html#relationships-between-distributions-and-packages
@@ -76,8 +76,9 @@ setup(
     #    'psycopg2 (>=2.4.4)',
     #],
     install_requires = [
+        'djangorestframework',
         'Python>=2.6',
-        'Django>=1.2, <1.3',
+        'Django>=1.3',
         'IPy>=0.75',
         'django_extensions>=0.4',
         'django_tagging>=0.3.1',
@@ -86,7 +87,6 @@ setup(
 
     # http://docs.python.org/distutils/setupscript.html#installing-scripts
     #
-    #scripts = ['sara_cmt/cmt.py'],
     scripts = ['bin/cmt'],
 
     # http://docs.python.org/distutils/setupscript.html#installing-additional-files
@@ -98,20 +98,20 @@ setup(
     # NOTE: wildcards aren't accepted here
     data_files = [
         # config-files
-        (ETC_PREPEND + 'etc/cmt/', [
+        (INSTALL_PATH + 'etc/cmt/', [
             'etc/cmt.conf.sample',
             'etc/logging.conf'
         ]),
         # empty directory for CMT-templates
-        (ETC_PREPEND + 'etc/cmt/templates', []),
+        (INSTALL_PATH + 'etc/cmt/templates', []),
         # examples of CMT-templates
-        ('share/doc/cmt/templates/examples', [
+        (INSTALL_PATH + 'share/doc/cmt/templates/examples', [
             'templates/examples/simple_cnames.cmt',
             'templates/examples/simple_hostnames.cmt',
             'templates/examples/simple_dhcpd.conf.cmt',
             'templates/examples/complex_dns.cmt'
         ]),
         # executable
-        (ETC_PREPEND + 'bin/', ['bin/cmt']),
+        (INSTALL_PATH + 'bin/', ['bin/cmt']),
     ]
 )
