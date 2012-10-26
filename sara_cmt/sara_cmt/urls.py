@@ -20,7 +20,6 @@ from django.contrib import databrowse
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
-import sara_cmt.api.urls
 admin.autodiscover()
 
 urlpatterns = patterns('',
