@@ -26,13 +26,17 @@ else:
 
 where_am_i = os.path.dirname( __file__ )
 
-if os.path.exists( where_am_i + '.DEVELOPMENT' ):
+devel_file = os.path.normpath(os.path.join( where_am_i, '.DEVELOPMENT' ) )
+
+if os.path.exists( devel_file ):
 
     # Don't use system wide (production) config, but local development config
-    CONFIG_FILE = where_am_i + '/cmt.conf-DEVEL'
+    CONFIG_FILE = os.path.normpath(os.path.join( where_am_i, 'cmt.conf') )
+    CONFIG_DIR = where_am_i
     DEVELOPMENT_ENVIRONMENT = True
 else:
     DEVELOPMENT_ENVIRONMENT = False
+    CONFIG_DIR = '%s/etc/cmt' %ETC_PREPEND
     CONFIG_FILE = '%s/etc/cmt/cmt.conf' % ETC_PREPEND
 
 # Path's customizable through virtualenv
