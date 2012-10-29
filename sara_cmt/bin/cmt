@@ -258,36 +258,6 @@ def remove(option, opt_str, value, parser, *args, **kwargs):
 #
 #####
 
-def batch_file(option, opt_str, value, parser, *args, **kwargs):
-
-    """
-        Read arguments from file, instead of the command line
-    """
-
-    batch_filename = value
-
-    if not os.path.isfile( batch_filename ):
-
-        logger.error('ERROR: %s does not exist. Exiting..' %batch_filename )
-        return 1
-
-    b_fp = open( batch_filename, 'r' )
-
-    b_lines = b_fp.readlines()
-
-    b_fp.close()
-
-    for line in b_lines:
-
-        line = line.strip()
-
-        logger.debug('line: %s'%line )
-
-        line = line.split(' ')
-
-        main( process_args=line )
-
-    return 0
 
 def generate(option, opt_str, value, parser, *args, **kwargs):
     from django.template import Context
@@ -427,90 +397,73 @@ def collect_args(option, parser):
     return collected
 
 
-def main( process_args=sys.argv[1:] ):
+def main():
     parser.version = CMTSARA_VERSION
     parser.description = CMTSARA_DESCRIPTION
 
-    if not parser.has_option( '-n' ):
-        parser.add_option('-n', '--dry-run',
-            action='store_true',
-            dest='DRYRUN',
-            default=config_parser.getboolean('defaults', 'DRYRUN'),
-            help='This flag has to be given before -[aclmr]')
-    if not parser.has_option( '--script' ):
-        parser.add_option('--script',
-            action='store_false',
-            dest='INTERACTIVE',
-            default=config_parser.getboolean('defaults', 'INTERACTIVE'))
-    if not parser.has_option( '-a' ):
-        parser.add_option('-a', '--add',
-            action='callback',
-            callback=add,
-            type='string',
-            metavar='ENTITY',
-            nargs=1,
-            help='Add an object of the given ENTITY. '\
-                'Extra arguments should be given like `set ASSIGNMENTS`, '\
-                'where ASSIGNMENTS are formatted like `ATTR=VAL`')
-    if not parser.has_option( '-c' ):
-        parser.add_option('-c', '--change',
-            action='callback',
-            callback=change,
-            type='string',
-            metavar='ENTITY',
-            nargs=1,
-            help='Change value(s) of object(s) of the given ENTITY. '\
-                'Arguments should be given like `get QUERY set ASSIGNMENTS`, '\
-                'where both QUERY and ASSIGNMENTS consist out of one or more '\
-                'terms formatted like `ATTR=VAL`. Only objects matching QUERY '\
-                'will be changed according to the given ASSIGNMENTS')
-    if not parser.has_option( '-g' ):
-        parser.add_option('-g', '--generate',
-            action='callback',
-            callback=generate,
-            type='string',
-            metavar='TEMPLATE',
-            nargs=1,
-            help='Render the given TEMPLATE, and store the result if specified')
-    if not parser.has_option( '-l' ):
-        parser.add_option('-l', '--list',
-            action='callback',
-            callback=show,
-            type='string',
-            metavar='ENTITY',
-            nargs=1,
-            help='List object(s) of the given ENTITY. Arguments should be given '\
-                'like `get QUERY`, where QUERY consists out of one or more terms '\
-                'formatted like `ATTR=VAL`')
-    if not parser.has_option( '-f' ):
-        parser.add_option('-f', '--file',
-            action='callback',
-            callback=batch_file,
-            type='string',
-            metavar='FILE',
-            nargs=1,
-            help='Process arguments from FILE in stead of command line. '\
-                'Useful for performing many operations in 1 go, i.e.: adding many new systems.')
-    if not parser.has_option( '-r' ):
-        parser.add_option('-r', '--remove',
-            action='callback',
-            callback=remove,
-            type='string',
-            metavar='ENTITY',
-            nargs=1,
-            help='Remove object(s) of the given ENTITY. '\
-                'Arguments should be given like `get QUERY`, where QUERY '\
-                'consists out of one or more terms formatted like `ATTR=VAL`. '\
-                'Only objects matching QUERY will be listed')
+    parser.add_option('-n', '--dry-run',
+        action='store_true',
+        dest='DRYRUN',
+        default=config_parser.getboolean('defaults', 'DRYRUN'),
+        help='This flag has to be given before -[aclmr]')
+    parser.add_option('--script',
+        action='store_false',
+        dest='INTERACTIVE',
+        default=config_parser.getboolean('defaults', 'INTERACTIVE'))
+    parser.add_option('-a', '--add',
+        action='callback',
+        callback=add,
+        type='string',
+        metavar='ENTITY',
+        nargs=1,
+        help='Add an object of the given ENTITY. '\
+            'Extra arguments should be given like `set ASSIGNMENTS`, '\
+            'where ASSIGNMENTS are formatted like `ATTR=VAL`')
+    parser.add_option('-c', '--change',
+        action='callback',
+        callback=change,
+        type='string',
+        metavar='ENTITY',
+        nargs=1,
+        help='Change value(s) of object(s) of the given ENTITY. '\
+            'Arguments should be given like `get QUERY set ASSIGNMENTS`, '\
+            'where both QUERY and ASSIGNMENTS consist out of one or more '\
+            'terms formatted like `ATTR=VAL`. Only objects matching QUERY '\
+            'will be changed according to the given ASSIGNMENTS')
+    parser.add_option('-g', '--generate',
+        action='callback',
+        callback=generate,
+        type='string',
+        metavar='TEMPLATE',
+        nargs=1,
+        help='Render the given TEMPLATE, and store the result if specified')
+    parser.add_option('-l', '--list',
+        action='callback',
+        callback=show,
+        type='string',
+        metavar='ENTITY',
+        nargs=1,
+        help='List object(s) of the given ENTITY. Arguments should be given '\
+            'like `get QUERY`, where QUERY consists out of one or more terms '\
+            'formatted like `ATTR=VAL`')
+    parser.add_option('-r', '--remove',
+        action='callback',
+        callback=remove,
+        type='string',
+        metavar='ENTITY',
+        nargs=1,
+        help='Remove object(s) of the given ENTITY. '\
+            'Arguments should be given like `get QUERY`, where QUERY '\
+            'consists out of one or more terms formatted like `ATTR=VAL`. '\
+            'Only objects matching QUERY will be listed')
 
     # TODO: implement the following option(s)
-    if not parser.has_option( '-v' ):
-        parser.add_option('-v', '--verbose',
-            action='store_true',
-            dest='VERBOSE',
-            default=config_parser.getboolean('defaults', 'VERBOSE'))
+    parser.add_option('-v', '--verbose',
+        action='store_true',
+        dest='VERBOSE',
+        default=config_parser.getboolean('defaults', 'VERBOSE'))
 
-    (options, args) = parser.parse_args( args=process_args )
+    (options, args) = parser.parse_args()
     logger.debug('(options, args) = (%s, %s)' % (options, args))
 
     if len(sys.argv) == 1:
