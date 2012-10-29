@@ -24,23 +24,9 @@ if site.sys.prefix in [ '/usr', '/' ]:
 else:
     ETC_PREPEND = site.sys.prefix
 
-where_am_i = os.path.dirname( __file__ )
-
-devel_file = os.path.normpath(os.path.join( where_am_i, '.DEVELOPMENT' ) )
-
-if os.path.exists( devel_file ):
-
-    # Don't use system wide (production) config, but local development config
-    CONFIG_FILE = os.path.normpath(os.path.join( where_am_i, 'cmt.conf') )
-    CONFIG_DIR = where_am_i
-    DEVELOPMENT_ENVIRONMENT = True
-else:
-    DEVELOPMENT_ENVIRONMENT = False
-    CONFIG_DIR = '%s/etc/cmt' %ETC_PREPEND
-    CONFIG_FILE = '%s/etc/cmt/cmt.conf' % ETC_PREPEND
-
 # Path's customizable through virtualenv
 sample_configfile = '%s/etc/cmt/cmt.conf.sample' % ETC_PREPEND
+configfile = '%s/etc/cmt/cmt.conf' % ETC_PREPEND
 
 prompt_settings = []
 
@@ -66,15 +52,15 @@ def count_configlines( filename ):
 
 	return line_count
 
-if not os.path.exists( CONFIG_FILE ):
+if not os.path.exists( configfile ):
 
-	print 'Unable to find config file: %s' %CONFIG_FILE
+	print 'Unable to find config file: %s' %configfile
 
-	if os.path.exists( sample_configfile ) and not DEVELOPMENT_ENVIRONMENT:
+	if os.path.exists( sample_configfile ):
 
 		print ''
 		print 'Please modify the sample config file: %s to reflect your settings' %sample_configfile
-		print 'and then rename it to: %s' %CONFIG_FILE
+		print 'and then rename it to: %s' %configfile
 
 	else:
 
@@ -88,22 +74,22 @@ if not os.path.exists( CONFIG_FILE ):
 	sys.exit(1)
 
 # We are still here: both configfile AND sample_configfile found
-if os.path.exists( sample_configfile ) and not DEVELOPMENT_ENVIRONMENT:
+if os.path.exists( sample_configfile ):
 
 	# Is the sample configfile newer?
-	if os.path.getmtime( sample_configfile ) > os.path.getmtime( CONFIG_FILE ):
+	if os.path.getmtime( sample_configfile ) > os.path.getmtime( configfile ):
 
 		# Well this is weird, but not fatal
-		print 'Warning: sample config file(%s) is newer than original config(%s)' %(sample_configfile, CONFIG_FILE )
+		print 'Warning: sample config file(%s) is newer than original config(%s)' %(sample_configfile, configfile)
 
 		# Does the sample config file contain more options?
-		if count_configlines( sample_configfile ) > count_configlines( CONFIG_FILE ):
+		if count_configlines( sample_configfile ) > count_configlines( configfile ):
 
 			print 'Warning: sample config file contains MORE OPTIONS than original config!'
 			print ''
 			print 'This happens for example if you upgraded CMT and the new release incorporates new configuration options!'
 			print ''
-			print 'Please update your original config(%s) to incorporate the new config options from sample config(%s)' %( CONFIG_FILE, sample_configfile )
+			print 'Please update your original config(%s) to incorporate the new config options from sample config(%s)' %( configfile, sample_configfile )
 			print ''
 
 		# Give them some time to think about warnings and generally annoy them just enough to fix it
@@ -113,7 +99,7 @@ if os.path.exists( sample_configfile ) and not DEVELOPMENT_ENVIRONMENT:
 		print ''
 
 config = ConfigParser.RawConfigParser()
-config.read( CONFIG_FILE )
+config.read( configfile )
 
 try:
 	DATABASE_HOST		= config.get('database', 'HOST')

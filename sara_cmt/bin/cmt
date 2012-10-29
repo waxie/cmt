@@ -21,12 +21,10 @@
 #
 # <Setup environment for Django's DB API>
 #
-import sys, os, re, datetime, ConfigParser
-
 from sara_cmt import settings
 from django.core.management import setup_environ
-
 setup_environ(settings)
+import os
 os.environ['DJANGO_SETTINGS_MODULE'] = settings.__name__
 #
 # </Setup environment for Django's DB API>
@@ -39,6 +37,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = settings.__name__
 #
 from django.template.loader import render_to_string
 from django.template import TemplateDoesNotExist
+import re
 #
 # </Some imports for our Django-template related action>
 #
@@ -46,10 +45,16 @@ from django.template import TemplateDoesNotExist
 
 from types import ListType, StringTypes
 
+import datetime
+
+import ConfigParser
+import sys
+
 from sara_cmt.django_cli import ModelExtension, ObjectManager, QueryManager, \
     logger, parser
 
 import sara_cmt.cluster.models
+
 
 from django.db.models import get_model
 
@@ -91,8 +96,14 @@ def crud_validate(func):
 
 # Instantiate ConfigParser
 #TODO: think about a (better) way to make this dynamic:
+import site
 
-configfile = settings.CONFIG_FILE
+if site.sys.prefix in [ '/usr', '/' ]:
+    ETC_PREPEND = ''
+else:
+    ETC_PREPEND = site.sys.prefix
+
+configfile = '%s/etc/cmt/cmt.conf' % ETC_PREPEND
 config_parser = ConfigParser.ConfigParser()
 config_parser.optionxform = lambda x: x
 # ^^ Hack for case-insensitivity, reference:
