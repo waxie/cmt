@@ -108,7 +108,8 @@ setup(
             'templates/examples/simple_cnames.cmt',
             'templates/examples/simple_hostnames.cmt',
             'templates/examples/simple_dhcpd.conf.cmt',
-            'templates/examples/complex_dns.cmt'
+            'templates/examples/complex_dns.cmt',
+            'templates/examples/README'
         ]),
         # executable
         (INSTALL_PATH + 'bin/', ['bin/cmt']),
