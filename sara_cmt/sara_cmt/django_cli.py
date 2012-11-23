@@ -15,6 +15,7 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import sys
 from django.core.exceptions import ValidationError
 from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ForeignKey, ManyToManyField, \
@@ -447,6 +448,7 @@ class ObjectManager():
                 kwargs['%s__in' % attr] = val
             except FieldDoesNotExist, err:
                 logger.error(err)
+                sys.exit(1)
 
         objects = query['ent'].objects.filter(**kwargs)
         return objects.distinct()
