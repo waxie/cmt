@@ -108,7 +108,7 @@ else:
 
 
 # Collect package information
-CMTSARA_VERSION = config_parser.get('info', 'version').strip("'")
+CMTSARA_VERSION = sara_cmt.__version__
 CMTSARA_DESCRIPTION = config_parser.get('info', 'description').strip("'")
 
 #

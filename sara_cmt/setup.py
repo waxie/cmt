@@ -16,6 +16,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 from distutils.core import setup
+from sara_cmt import __version__
 import site
 
 INSTALL_PATH = ''
@@ -26,7 +27,7 @@ if site.sys.prefix in [ '/usr', '/' ]:
 
 setup(
     name = 'CMT',
-    version = '1.0.1',
+    version = __version__,
     description = 'Cluster Management Tool',
     url = 'http://subtrac.sara.nl/oss/cmt/',
     #download_url = ''
