@@ -16,7 +16,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import optparse
-
+from sara_cmt import __version__
 
 class Parser:
     """
@@ -26,7 +26,7 @@ class Parser:
 
     # Check for existence of a global parser object, otherwise make one
     if 'parser' not in __shared_state.keys():
-        __shared_state['parser'] = optparse.OptionParser()
+        __shared_state['parser'] = optparse.OptionParser( version="%prog " + __version__ )
 
     def __init__(self):
         self.__dict__ = self.__shared_state
