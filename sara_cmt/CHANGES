@@ -1,4 +1,20 @@
-v1.0, 16 May 2012 -- Initial packaged release.
+v1.0.1
+
+Bugfixes:
+* Cleaned up and fixed server side code.
+  Removed some unnecessary dependancies : #30
+* Fixed slow Network admin page; changed intensive database operation : #32
+* Fixed bug, so that vendor code is no longer mandatory : #23
+* If CLI query fails, no longer entire database is printed to shell : #35
+* Removed old database migrations : #33
+* Fixed PIP package install path inconsistency : #31
+
+Added:
+* The CLI now also utilizes validators to check for (in)valid values : #27
+* README in templates/examples : #28
+* CLI now has a --version argument : #36
+
+v1.0 -- Initial packaged release.
 
 * From now on the config is distributed as a sample config file, which differs
   from previous config files.
