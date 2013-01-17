@@ -17,29 +17,18 @@
 
 from distutils.core import setup
 from sara_cmt import __version__
-import site
-
-INSTALL_PATH = ''
-
-if site.sys.prefix in [ '/usr', '/' ]:
-    #INSTALL_PATH = site.sys.prefix + '/'
-    INSTALL_PATH = '/'
 
 setup(
     name = 'CMT',
     version = __version__,
     description = 'Cluster Management Tool',
-    url = 'http://subtrac.sara.nl/oss/cmt/',
-    #download_url = ''
+    url = 'http://oss.trac.sara.nl/cmt/',
     author = 'CMT Development team',
     author_email = 'cmt-users@lists.osd.sara.nl',
     license = 'GPL',
-    #long_description = open('README').read(),
-    long_description = 'CMT is a Cluster Management Tool originally created '\
-        'at SARA Computing and Networking Services, which is based in'\
-        'Amsterdam and known as SARA nowadays.',
+    long_description = 'CMT is a Cluster Management Tool originally created at SURFsara.',
 
-    platforms = ['linux-x86_64', 'linux-i386' ],
+    platforms = [ 'linux-x86_64', 'linux-i386' ],
 
     # see: http://pypi.python.org/pypi?:action=list_classifiers
     classifiers = [
@@ -58,24 +47,8 @@ setup(
         'Topic :: Utilities',
     ],
 
-
-
-# http://docs.python.org/distutils/setupscript.html#listing-whole-packages
     packages = ['sara_cmt', 'sara_cmt.cluster', 'sara_cmt.cluster.templatetags'],
 
-# http://docs.python.org/distutils/setupscript.html#relationships-between-distributions-and-packages
-# Dependencies on other Python modules and packages can be specified by supplying the requires keyword argument to setup(). The value must be a list of strings. Each string specifies a package that is required, and optionally what versions are sufficient.
-#
-    #
-    # Somehow 'requires' doesn't work; dependencies won't be installed
-    #requires = [
-    #    'Python (>=2.6)'
-    #    'Django (>=1.2, <1.3)',
-    #    'IPy (>=0.75)',
-    #    'django_extensions (>=0.4)',
-    #    'django_tagging (>=0.3.1)',
-    #    'psycopg2 (>=2.4.4)',
-    #],
     install_requires = [
         'Python>=2.6',
         'Django>=1.2, <1.3',
@@ -85,34 +58,30 @@ setup(
         'psycopg2>=2.4.4'
     ],
 
-    # http://docs.python.org/distutils/setupscript.html#installing-scripts
-    #
-    scripts = ['bin/cmt'],
+    # Only way to get something installed with mode 755 ...
+    scripts = [ 'bin/cmt' ],
 
-    # http://docs.python.org/distutils/setupscript.html#installing-additional-files
-    # The data_files option can be used to specify additional files needed by the module distribution: configuration files, message catalogs, data files, anything which doesn't fit in the previous categories.
-    # data_files specifies a sequence of (directory, files) pairs in the following way:
-    #     data_files=[('bitmaps', ['bm/b1.gif', 'bm/b2.gif']),
-    #             ('/etc/init.d', ['init-script'])]
-    #
-    # NOTE: wildcards aren't accepted here
+    # data_files = ( target_dir, source_files )
+    # if target_dir is not absolute, will use site.sys.prefix
     data_files = [
+
         # config-files
-        (INSTALL_PATH + 'etc/cmt/', [
+        ( 'etc/cmt', [
             'etc/cmt.conf.sample',
             'etc/logging.conf'
         ]),
-        # empty directory for CMT-templates
-        (INSTALL_PATH + 'etc/cmt/templates', []),
+
+        # templates
+        ( 'etc/cmt/templates', [
+            'templates/examples/README'
+        ]),
+
         # examples of CMT-templates
-        (INSTALL_PATH + 'share/doc/cmt/templates/examples', [
+        ( 'etc/cmt/templates/examples', [
             'templates/examples/simple_cnames.cmt',
             'templates/examples/simple_hostnames.cmt',
             'templates/examples/simple_dhcpd.conf.cmt',
-            'templates/examples/complex_dns.cmt',
-            'templates/examples/README'
-        ]),
-        # executable
-        (INSTALL_PATH + 'bin/', ['bin/cmt']),
+            'templates/examples/complex_dns.cmt'
+        ])
     ]
 )

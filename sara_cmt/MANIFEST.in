@@ -1,10 +1,7 @@
 # Client only:
-include AUTHORS CHANGES README LICENSE
-include bin/cmt
+include AUTHORS CHANGES README LICENSE bin/cmt
 recursive-include etc *.conf*
-#include templates/
-recursive-include templates/examples header *.cmt
-#exclude sara_cmt/settings_db.py # only comment out during testing
+recursive-include templates/examples *.cmt README
 
 # Server only:
 #include sara_cmt/apache/django.wsgi
