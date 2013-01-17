@@ -19,13 +19,27 @@ import os, os.path, sys, ConfigParser, site, string, time
 
 from socket import gethostbyname_ex
 
-if site.sys.prefix in [ '/usr', '/' ]:
-    ETC_PREPEND = ''
-else:
-    ETC_PREPEND = site.sys.prefix
+CONFIG_DIR = None
+
+# RB: config location finding logic due to stupid distutils
+for config_dir_guess in [ 'etc/cmt', 'local/etc/cmt' ]:
+
+    if os.path.exists( os.path.join( site.sys.prefix, config_dir_guess ) ):
+
+         CONFIG_DIR = os.path.join( site.sys.prefix, config_dir_guess )
+
+if not CONFIG_DIR:
+
+    print "Unable to find config dir. Tried these path's:"
+
+    for config_dir_guess in [ 'etc/cmt', 'local/etc/cmt' ]:
+
+        print '- %s' %( os.path.join( site.sys.prefix, config_dir_guess ) )
+
+    print 'Exiting..'
+    sys.exit( 1 )
 
 where_am_i = os.path.dirname( __file__ )
-
 devel_file = os.path.normpath(os.path.join( where_am_i, '.DEVELOPMENT' ) )
 
 if os.path.exists( devel_file ):
@@ -36,11 +50,10 @@ if os.path.exists( devel_file ):
     DEVELOPMENT_ENVIRONMENT = True
 else:
     DEVELOPMENT_ENVIRONMENT = False
-    CONFIG_DIR = '%s/etc/cmt' %ETC_PREPEND
-    CONFIG_FILE = '%s/etc/cmt/cmt.conf' % ETC_PREPEND
+    CONFIG_FILE = '%s/cmt.conf' % CONFIG_DIR
 
 # Path's customizable through virtualenv
-sample_configfile = '%s/etc/cmt/cmt.conf.sample' % ETC_PREPEND
+sample_configfile = '%s/cmt.conf.sample' % CONFIG_DIR
 
 prompt_settings = []
 
@@ -312,7 +325,7 @@ ROOT_URLCONF = 'sara_cmt.urls'
 # (thus, the templates for our configfiles, etc)
 #TODO: think about a (better) way to make this dynamic:
 #TODO: get this out of the settings.py, since it should be in the client config
-CMT_TEMPLATES_DIR = '%s/etc/cmt/templates' % ETC_PREPEND
+CMT_TEMPLATES_DIR = '%s/templates' % CONFIG_DIR
 
 # Templates for the CMT web-frontend.
 TEMPLATE_DIRS = (
