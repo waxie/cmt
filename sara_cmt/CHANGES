@@ -8,7 +8,7 @@ Bugfixes:
   Thanks to: Bas van der Vlies, for reporting this.
 * If CLI query fails, no longer entire database is printed to shell : #35
 * Removed old database migrations : #33
-* Fixed PIP package install path inconsistency : #31
+* Fixed PIP package install path inconsistency : #31, #40
   Thanks to: Bas van der Vlies, for reporting this.
 
 Added:
