@@ -21,12 +21,25 @@ from socket import gethostbyname_ex
 
 CONFIG_DIR = None
 
-# RB: config location finding logic due to stupid distutils
-for config_dir_guess in [ 'etc/cmt', 'local/etc/cmt' ]:
+where_am_i = os.path.dirname( __file__ )
+devel_file = os.path.normpath(os.path.join( where_am_i, '.DEVELOPMENT' ) )
 
-    if os.path.exists( os.path.join( site.sys.prefix, config_dir_guess ) ):
+if os.path.exists( devel_file ):
 
-         CONFIG_DIR = os.path.join( site.sys.prefix, config_dir_guess )
+    # Don't use system wide (production) config, but local development config
+    CONFIG_FILE = os.path.normpath(os.path.join( where_am_i, 'cmt.conf') )
+    CONFIG_DIR = where_am_i
+    DEVELOPMENT_ENVIRONMENT = True
+else:
+    DEVELOPMENT_ENVIRONMENT = False
+
+    # RB: config location finding logic due to stupid distutils
+    for config_dir_guess in [ 'etc/cmt', 'local/etc/cmt' ]:
+
+         if os.path.exists( os.path.join( site.sys.prefix, config_dir_guess ) ):
+
+              CONFIG_DIR = os.path.join( site.sys.prefix, config_dir_guess )
+              CONFIG_FILE = '%s/cmt.conf' % CONFIG_DIR
 
 if not CONFIG_DIR:
 
@@ -39,18 +52,6 @@ if not CONFIG_DIR:
     print 'Exiting..'
     sys.exit( 1 )
 
-where_am_i = os.path.dirname( __file__ )
-devel_file = os.path.normpath(os.path.join( where_am_i, '.DEVELOPMENT' ) )
-
-if os.path.exists( devel_file ):
-
-    # Don't use system wide (production) config, but local development config
-    CONFIG_FILE = os.path.normpath(os.path.join( where_am_i, 'cmt.conf') )
-    CONFIG_DIR = where_am_i
-    DEVELOPMENT_ENVIRONMENT = True
-else:
-    DEVELOPMENT_ENVIRONMENT = False
-    CONFIG_FILE = '%s/cmt.conf' % CONFIG_DIR
 
 # Path's customizable through virtualenv
 sample_configfile = '%s/cmt.conf.sample' % CONFIG_DIR
