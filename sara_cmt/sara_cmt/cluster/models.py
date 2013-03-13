@@ -251,10 +251,11 @@ class Network(ModelExtension):
         Class with information about a network. Networks are connected with
         Interfaces (and HardwareUnits as equipment through Interface).
     """
-    #re_valid_domain   = re.compile(r'^(([0-9a-z]{1,2})$|^([a-z0-9]{1})([a-z0-9\-]{1,61})([a-z0-9]{1}))(\.([0-9a-z]{1,2})$|^([a-z0-9]{1})([a-z0-9\-]{1,61})([a-z0-9]{1}))*$')
-    #re_valid_domain   = re.compile(r'^([a-z0-9]{1}[a-z0-9\-]{1,61}[a-z0-9]{1}\.){1,}[a-z]{2,}$')
     re_valid_domain   = re.compile(r'^(^(?:[a-z0-9]{1}[a-z0-9\-]{1,61}[a-z0-9]{1}\.?)+(?:[a-z]{2,})$)')
     domain_validator  = RegexValidator(re_valid_domain,'Enter a valid domain.','invalid')
+
+    re_valid_hosts    = re.compile(r'^([0-9a-z]{1,2})$|^([a-z0-9\{]{1})([a-z0-9\-\{\}]{1,61})([a-z0-9\}]{1})$')
+    hosts_validator   = RegexValidator(re_valid_hosts,'Enter a valid hostnames stringformat.','invalid')
 
     name       = models.CharField(max_length=255, help_text='example: \
                                   infiniband')
@@ -267,7 +268,7 @@ class Network(ModelExtension):
                                              blank=True)
     hostnames  = models.CharField(max_length=255, help_text='''stringformat \
                                   of hostnames in the network, example: \
-                                  'ib-{machine}''')
+                                  'ib-{machine}''', validators=[hosts_validator])
 
     class Meta:
         ordering = ('name', 'domain')
