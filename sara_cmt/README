@@ -1,10 +1,10 @@
 CMT is a Cluster Management Tool originally created at SARA Computing and
-Networking Services, which is based in Amsterdam and known as SARA nowadays.
+Networking Services, which is based in Amsterdam and known as SURFsara nowadays.
 
 The main reason behind CMT's existence is that we needed a tool that's capable
 of generating configuration-files for certain software running on our clusters.
 CMT has a database, where we store information about our hardware, which is
-used to (let CMT) generate configuration-files, based on templates. At SARA
+used to (let CMT) generate configuration-files, based on templates. At SURFsara
 it's used in production, to generate configuration-files for services like for
 example dhcpd and bind.
 
@@ -26,9 +26,9 @@ Besides these Python-packages, the following software should be installed on you
 
 MORE INFO
 
-For more information can be found at http://subtrac.sara.nl/oss/cmt/
+For more information can be found at https://oss.trac.surfsara.nl/cmt
 
 
 CONTACT
 
-For bugs, requests or suggestions, please mail to cmt@sara.nl
+For bugs, requests or suggestions, please mail to cmt@surfsara.nl

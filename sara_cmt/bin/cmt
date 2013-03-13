@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-#    This file is part of CMT, a Cluster Management Tool made at SARA.
-#    Copyright (C) 2012  Sil Westerveld
+#    This file is part of CMT, a Cluster Management Tool made at SURFsara.
+#    Copyright (C) 2012, 2013  Sil Westerveld, Ramon Bastiaans
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
