@@ -1,5 +1,5 @@
 [info]
-description   : 'This is the commandline interface of the SARA package SARA CMT.'
+description   : 'This is the commandline interface of the SURFsara package CMT.'
 
 [loglevels]
 # Only messages with level of LOGLEVEL or higher will be logged
