@@ -1,5 +1,3 @@
-import os, re, string
-
 #    This file is part of CMT, a Cluster Management Tool made at SURFsara.
 #    Copyright (C) 2012, 2013  Sil Westerveld, Ramon Bastiaans
 #
@@ -16,6 +14,8 @@ import os, re, string
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+import os, re, string
 
 # Inspired by Django tips on:
 #   http://www.b-list.org/weblog/2006/jun/07/django-tips-write-better-template-tags/
@@ -426,8 +426,20 @@ class QuerySetNode(template.Node):
                 #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
                 pass
 
-        attr, val = myquery_str.split('=')
-        queryset = get_model('cluster', self.entity).objects.filter(**{attr:val})
+        if myquery_str.count( '=' ) > 1 and myquery_str.count( ',' ) > 0:
+
+            myfilters_list = myquery_str.split( ',' )
+        else:
+            myfilters_list = [ myquery_str ]
+
+        filter_dict = { }
+
+        for myfilter in myfilters_list:
+
+            attr, val = myfilter.split('=')
+            filter_dict[ attr ] = val
+
+        queryset = get_model('cluster', self.entity).objects.filter(**filter_dict)
         if len(queryset) == 1:
             queryset = queryset[0]
         context[self.key] = queryset
@@ -435,6 +447,3 @@ class QuerySetNode(template.Node):
         return ''
 
 # use <entity> with <attribute>=<value> as <key>
-
-
-        
