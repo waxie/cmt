@@ -251,13 +251,18 @@ class Network(ModelExtension):
         Class with information about a network. Networks are connected with
         Interfaces (and HardwareUnits as equipment through Interface).
     """
+    #re_valid_domain   = re.compile(r'^(([0-9a-z]{1,2})$|^([a-z0-9]{1})([a-z0-9\-]{1,61})([a-z0-9]{1}))(\.([0-9a-z]{1,2})$|^([a-z0-9]{1})([a-z0-9\-]{1,61})([a-z0-9]{1}))*$')
+    #re_valid_domain   = re.compile(r'^([a-z0-9]{1}[a-z0-9\-]{1,61}[a-z0-9]{1}\.){1,}[a-z]{2,}$')
+    re_valid_domain   = re.compile(r'^(^(?:[a-z0-9]{1}[a-z0-9\-]{1,61}[a-z0-9]{1}\.?)+(?:[a-z]{2,})$)')
+    domain_validator  = RegexValidator(re_valid_domain,'Enter a valid domain.','invalid')
+
     name       = models.CharField(max_length=255, help_text='example: \
                                   infiniband')
     netaddress = models.IPAddressField(help_text='example: 192.168.1.0')
     netmask    = models.IPAddressField(help_text='example: 255.255.255.0')
     gateway    = models.IPAddressField(blank=True, help_text='Automagically generated if kept empty')
     domain     = models.CharField(max_length=255, help_text='example: \
-                                  irc.sara.nl')
+                                  irc.sara.nl', validators=[domain_validator])
     vlan       = models.PositiveIntegerField(max_length=3, null=True,
                                              blank=True)
     hostnames  = models.CharField(max_length=255, help_text='''stringformat \
