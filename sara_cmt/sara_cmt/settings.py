@@ -202,7 +202,7 @@ for prompt_list in prompt_settings:
 # Only set CLIENT_ONLY to False on the central CMT-server
 CLIENT_ONLY = True
 
-DEBUG = True
+DEBUG = False
 
 ADMINS = (
     ('Sil Westerveld', 'sil.westerveld@sara.nl'),
@@ -355,11 +355,12 @@ INSTALLED_APPS = (
     'sara_cmt.cluster',
     'django_extensions',
     'tagging',
-
-    # Only serverside:
-    #'debug_toolbar',
-    #'south',
 )
+
+if not CLIENT_ONLY:
+    INSTALLED_APPS = INSTALLED_APPS + (
+    'debug_toolbar',
+    'south' )
 
 # Append your IP to use the debug_toolbar
 INTERNAL_IPS = (
