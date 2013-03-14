@@ -46,7 +46,7 @@ class Cluster(ModelExtension):
     """
         A labeled group of hardware pieces.
     """
-    re_valid_machines    = re.compile(r'^([0-9a-z]{1,2})$|^([a-z0-9\{]{1})([a-z0-9\-\{\}]{1,61})([a-z0-9\}]{1})$')
+    re_valid_machines    = re.compile(r'^([0-9a-z]{1,2})$|^([a-z0-9\{]{1})([a-z0-9\_\-\{\}]{1,61})([a-z0-9\}]{1})$')
     machines_validator   = RegexValidator(re_valid_machines,'Enter a valid machinenames stringformat.','invalid')
 
     name         = models.CharField(max_length=255, unique=True)
@@ -153,14 +153,22 @@ class HardwareUnit(ModelExtension):
         super(HardwareUnit, self).save(force_insert, force_update)
 
     def default_label(self):
-        # TODO: make dynamic for different types of clusters
         try:
             assert self.rack.label is not None and self.first_slot is not \
                 None, 'not able to generate a label'
-            return 'r%sn%s' % (self.rack.label, self.first_slot)
+
+            if self.cluster.machinenames is not None and self.cluster.machinenames != '':
+                machine_label = self.cluster.machinenames.format( rack=self.rack.label, first_slot=self.first_slot )
+            else:
+                #RB: fail back to previous default behaviour
+                machine_label = 'r%sn%s' %(self.rack.label, self.first_slot)
+
+            assert machine_label.find( '{' ) == -1, \
+                'unable to format cluster machine name: %s' %machine_label
+
+            return machine_label
         except:
             pass
-
 
 class Interface(ModelExtension):
     """
