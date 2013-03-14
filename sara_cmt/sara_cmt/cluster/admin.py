@@ -83,7 +83,7 @@ class RoomInline(admin.TabularInline):
 
 
 class ClusterAdmin(admin.ModelAdmin):
-    fields       = ('name',) + GlobalAdmin.fields
+    fields       = ('name','machinenames') + GlobalAdmin.fields
     list_display = GlobalAdmin.list_display
     list_filter  = GlobalAdmin.list_filter
 

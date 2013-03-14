@@ -46,7 +46,13 @@ class Cluster(ModelExtension):
     """
         A labeled group of hardware pieces.
     """
-    name = models.CharField(max_length=255, unique=True)
+    re_valid_machines    = re.compile(r'^([0-9a-z]{1,2})$|^([a-z0-9\{]{1})([a-z0-9\-\{\}]{1,61})([a-z0-9\}]{1})$')
+    machines_validator   = RegexValidator(re_valid_machines,'Enter a valid machinenames stringformat.','invalid')
+
+    name         = models.CharField(max_length=255, unique=True)
+    machinenames = models.CharField(max_length=255, null=True, blank=True, help_text='''stringformat \
+                                  of machine names in the cluster, example: \
+                                  'r{rack}n{first_slot}''', validators=[machines_validator])
 
     class Meta:
         ordering = ('name',)
