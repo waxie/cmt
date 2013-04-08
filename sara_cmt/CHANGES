@@ -1,3 +1,21 @@
+v1.1.0
+======
+Added:
+
+* (batch) input file processing : #21
+* interactive user/password authentication : #16
+* more validators implemented : #41
+  * added DNS validator to: interface.label, network.hostnames, network.domain
+* hardwareunit.label generation is now configurable : #42
+  * new database/model field: cluster.machinenames (migration required)
+* updated SARA -> SURFsara everywhere : #43
+  Thanks to: Jaap Dijkshoorn, for reporting this.
+
+Bugfixes:
+
+* Multiple queries in template tag "use" now works : #44
+  Thanks to: Dennis Stam, for reporting this
+
 v1.0.1
 ======
 Bugfixes:
