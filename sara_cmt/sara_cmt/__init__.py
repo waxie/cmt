@@ -1,1 +1,1 @@
-__version__ = 'master+GIT'
+__version__ = '1.1.0'
