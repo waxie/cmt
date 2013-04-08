@@ -50,9 +50,8 @@ setup(
     packages = ['sara_cmt', 'sara_cmt.cluster', 'sara_cmt.cluster.templatetags'],
 
     install_requires = [
-        'djangorestframework',
         'Python>=2.6',
-        'Django>=1.3',
+        'Django>=1.2, <1.3',
         'IPy>=0.75',
         'django_extensions>=0.4',
         'django_tagging>=0.3.1',
