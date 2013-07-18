@@ -503,13 +503,6 @@ def main( process_args=sys.argv[1:] ):
                 'consists out of one or more terms formatted like `ATTR=VAL`. '\
                 'Only objects matching QUERY will be listed')
 
-    # TODO: implement the following option(s)
-    if not parser.has_option( '-v' ):
-        parser.add_option('-v', '--verbose',
-            action='store_true',
-            dest='VERBOSE',
-            default=config_parser.getboolean('defaults', 'VERBOSE'))
-
     (options, args) = parser.parse_args( args=process_args )
     logger.debug('(options, args) = (%s, %s)' % (options, args))
 
