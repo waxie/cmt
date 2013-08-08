@@ -1,3 +1,14 @@
+v1.1.1
+======
+Removed:
+
+* verbose mode : #6
+
+Bugfixes:
+
+* it is no longer possible to have multiple hardwareunit's with the same label
+  within the same cluster : #66
+
 v1.1.0
 ======
 Added:
