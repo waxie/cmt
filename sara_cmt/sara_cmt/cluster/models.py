@@ -98,7 +98,7 @@ class HardwareUnit(ModelExtension):
         verbose_name_plural = "hardware"
         #ordering = ('cluster__name', 'rack__label', 'first_slot')
         ordering = ('rack__label', 'first_slot')
-        unique_together = ('rack', 'first_slot')
+        unique_together = (('rack', 'first_slot'), ('cluster', 'label'))
 
     @property
     def address(self):
