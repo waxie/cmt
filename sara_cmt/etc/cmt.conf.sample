@@ -17,10 +17,10 @@ LOGLEVEL    : INFO
 VERBOSE     : False
 
 [database]
-ENGINE    : postgresql_psycopg2
+ENGINE    : django.db.backends.postgresql_psycopg2
 NAME      : sara_cmt
 USER      : cmt
 #PASSWORD  : <set_me>
-HOST      : cmt.osd.sara.nl
+HOST      : cmt.osd.surfsara.nl
 #PORT      : <optional>
 TEST_NAME : sara_cmt_test

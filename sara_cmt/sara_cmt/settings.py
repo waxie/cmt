@@ -133,6 +133,9 @@ try:
 	DATABASE_HOST		= config.get('database', 'HOST')
 	DATABASE_ENGINE		= config.get('database', 'ENGINE')
 	DATABASE_NAME		= config.get('database', 'NAME')
+	
+	print 'DATABASE SETTINGS:'
+	print 'host: %s | engine: %s | name: %s\n'%(DATABASE_HOST,DATABASE_ENGINE,DATABASE_NAME)
 
 except (ConfigParser.NoOptionError, ConfigParser.NoSectionError), details:
 
@@ -194,6 +197,17 @@ for prompt_list in prompt_settings:
 		temp_val = getpass( input_text )
 
 	globals()[prompt_value] = temp_val
+
+DATABASES = {
+    'default': {
+        'ENGINE': DATABASE_ENGINE,
+        'NAME': DATABASE_NAME,
+        'USER': DATABASE_USER,
+        'PASSWORD': DATABASE_PASSWORD,
+        'HOST': DATABASE_HOST,
+        #'PORT': DATABASE_PORT,
+    }
+}
 
 # Documentation of settings can be found on:
 #
@@ -289,38 +303,45 @@ SITE_ID = 1
 # to load the internationalization machinery.
 USE_I18N = True
 
-# Absolute path to the directory that holds media.
-# Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = ''
+## Absolute path to the directory that holds media.
+## Example: "/home/media/media.lawrence.com/"
+#MEDIA_ROOT = ''
+#
+## URL that handles the media served from MEDIA_ROOT. Make sure to use a
+## trailing slash if there is a path component (optional in other cases).
+## Examples: "http://media.lawrence.com", "http://example.com/media/"
+#MEDIA_URL = ''
 
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash if there is a path component (optional in other cases).
-# Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = ''
+# Static files (replaces adminmedia from Django 1.3)
+STATIC_ROOT = ''
+STATIC_PATH = ''
+STATIC_URL = '/media/'
 
-# URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
-# trailing slash.
-# Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/admin_media/'
+## URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
+## trailing slash.
+## Examples: "http://foo.com/media/", "/media/".
+#ADMIN_MEDIA_PREFIX = '/admin_media/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'uygv6wrel4o2%x8s4dk2%i6=dp!2bt32$0ne-%_7&j=ez*u$1b'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source',
+    #'django.template.loaders.filesystem.load_template_source',
+    #'django.template.loaders.app_directories.load_template_source',
     #'django.template.loaders.eggs.load_template_source',
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
-ROOT_URLCONF = 'sara_cmt.urls'
+ROOT_URLCONF = 'urls'
+#ROOT_URLCONF = 'sara_cmt.urls'
 
 # Templates for the CMT command line interface.
 # (thus, the templates for our configfiles, etc)
@@ -350,7 +371,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.admin',
-    'django.contrib.databrowse',
+    'django.contrib.staticfiles',
     'django.contrib.webdesign',
     'sara_cmt.cluster',
     'django_extensions',
@@ -359,11 +380,12 @@ INSTALLED_APPS = (
 
 if not CLIENT_ONLY:
     INSTALLED_APPS = INSTALLED_APPS + (
-    'debug_toolbar',
-    'south' )
+    'south', )
+
+    SOUTH_DATABASE_ADAPTERS = {'default':'south.db.postgresql_psycopg2'}
 
 # Append your IP to use the debug_toolbar
 INTERNAL_IPS = (
-    #'145.100.6.163', # saralt0115
+    #'145.100.6.163',
     '127.0.0.1',
 )
