@@ -17,7 +17,8 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-from django.core.management import execute_manager
+import os, sys
+
 try:
     import settings # Assumed to be in the same directory.
 except ImportError:
@@ -26,4 +27,9 @@ except ImportError:
     sys.exit(1)
 
 if __name__ == "__main__":
-    execute_manager(settings)
+
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "sara_cmt.settings")
+
+    from django.core.management import execute_from_command_line
+
+    execute_from_command_line(sys.argv)
