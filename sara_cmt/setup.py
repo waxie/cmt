@@ -48,6 +48,8 @@ setup(
     ],
 
     packages = ['sara_cmt', 'sara_cmt.cluster', 'sara_cmt.cluster.templatetags'],
+    package_dir  = { 'sara_cmt.cluster': 'sara_cmt/cluster' },
+    package_data = { 'sara_cmt.cluster': ['templates/admin/*'] },
 
 
     # for server also: django_auth_ldap, South
