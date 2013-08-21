@@ -24,10 +24,8 @@
 import sys, os, re, datetime, ConfigParser
 
 from sara_cmt import settings
-from django.core.management import setup_environ
 
-setup_environ(settings)
-os.environ['DJANGO_SETTINGS_MODULE'] = settings.__name__
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "sara_cmt.settings")
 #
 # </Setup environment for Django's DB API>
 #
