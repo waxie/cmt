@@ -134,9 +134,6 @@ try:
 	DATABASE_ENGINE		= config.get('database', 'ENGINE')
 	DATABASE_NAME		= config.get('database', 'NAME')
 	
-	print 'DATABASE SETTINGS:'
-	print 'host: %s | engine: %s | name: %s\n'%(DATABASE_HOST,DATABASE_ENGINE,DATABASE_NAME)
-
 except (ConfigParser.NoOptionError, ConfigParser.NoSectionError), details:
 
 	print 'Config file error: %s' %str(details)
