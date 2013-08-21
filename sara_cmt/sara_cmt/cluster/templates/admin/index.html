@@ -67,6 +67,7 @@
             <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
                 <span class="mini quiet">On {{ entry.action_time }}</span>
                 <br/>
+                {{ entry.user }}
                 {% if entry.is_deletion or not entry.get_admin_url %}
                     deleted {{ entry.object_repr }}
                 {% else %}
