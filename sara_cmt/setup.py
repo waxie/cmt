@@ -49,6 +49,8 @@ setup(
 
     packages = ['sara_cmt', 'sara_cmt.cluster', 'sara_cmt.cluster.templatetags'],
 
+
+    # for server also: django_auth_ldap, South
     install_requires = [
         'djangorestframework',
         'Python>=2.6',
