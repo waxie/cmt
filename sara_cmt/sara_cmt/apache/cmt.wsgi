@@ -19,12 +19,11 @@
 #
 # Add this to apache config:
 #
-#  WSGIScriptAlias / /path/to/virtualenvs/cmt/cmt.wsgi
-#  SetEnv VIRTUALENV /path/to/virtualenvs/cmt
+#  SetEnv VIRTUALENV /path/to/virtualenv/
+#  WSGIScriptAlias / /path/to/virtualenv/cmt.wsgi
+#  Alias /media /path/to/virtualenv/lib/python2.6/site-packages/django/contrib/admin/static
 
-import os
-import sys
-import re
+import os, sys, re
 
 def application(environ, start_response):
     ## Try to activate a virtualenv environment when the
@@ -35,16 +34,14 @@ def application(environ, start_response):
         if os.path.exists(activate_this):
             execfile(activate_this, dict(__file__=activate_this))
 
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'sara_cmt.settings'
+    #os.environ['DJANGO_SETTINGS_MODULE'] = 'sara_cmt.settings'
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "sara_cmt.settings")
 
-    # Django 1.4+
-    #from django.core.wsgi import get_wsgi_application
-    #return get_wsgi_application()(environ, start_respone)
-    
     try:
-        # DJango 1.2
-        import django.core.handlers.wsgi
-        return django.core.handlers.wsgi.WSGIHandler()(environ, start_response)
+        # Django 1.4+
+        from django.core.wsgi import get_wsgi_application
+        return get_wsgi_application()(environ, start_response)
+
     except ImportError:
         start_response('200 OK',[('Content-type','text/html')])
         return ['<html><body><h1>Unable to load CMT/Django environment!</h1></body></html>']
