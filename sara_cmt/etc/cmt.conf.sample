@@ -24,3 +24,6 @@ USER      : cmt
 HOST      : cmt.osd.surfsara.nl
 #PORT      : <optional>
 TEST_NAME : sara_cmt_test
+
+[web]
+DOMAIN   : my-cmt-website.com
