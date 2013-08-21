@@ -337,8 +337,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
 
-ROOT_URLCONF = 'urls'
-#ROOT_URLCONF = 'sara_cmt.urls'
+ROOT_URLCONF = 'sara_cmt.urls'
 
 # Templates for the CMT command line interface.
 # (thus, the templates for our configfiles, etc)
