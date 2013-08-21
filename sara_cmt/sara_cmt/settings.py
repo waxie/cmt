@@ -131,7 +131,7 @@ config.read( CONFIG_FILE )
 
 try:
 	DATABASE_HOST		= config.get('database', 'HOST')
-	DATABASE_ENGINE		= config.get('database', 'ENGINE')
+	DATABASE_ENGINE		= 'django.db.backends.' + config.get('database', 'ENGINE')
 	DATABASE_NAME		= config.get('database', 'NAME')
 	
 except (ConfigParser.NoOptionError, ConfigParser.NoSectionError), details:
