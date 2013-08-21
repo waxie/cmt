@@ -274,6 +274,8 @@ if not CLIENT_ONLY:
         'django_auth_ldap.backend.LDAPBackend',
         'django.contrib.auth.backends.ModelBackend',
     )
+
+    ALLOWED_HOSTS = [ '.' + config.get('web', 'DOMAIN') ]
 #
 # </AUTH AGAINST LDAP>
 #
@@ -385,3 +387,4 @@ INTERNAL_IPS = (
     #'145.100.6.163',
     '127.0.0.1',
 )
+
