@@ -319,8 +319,11 @@ class Network(ModelExtension):
 
             Returns a set.
         """
-        return set([interface.ip for interface in
+        ips_char = set([interface.ip for interface in
             Interface.objects.filter(network=self).filter(ip__isnull=False)])
+        
+        #normalize IPv6 addressen through IPy: fill zeros, etc
+        return map(lambda x: IP(x).strNormal(), ips_char)
 
     @property
     def netaddress(self):
