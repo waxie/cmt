@@ -331,7 +331,7 @@ class Network(ModelExtension):
     def netmask(self):
         network = IP("%s" % (self.cidr))
         netmask = network.netmask()
-        return netaddress.strNormal()
+        return netmask.strNormal()
 
     def count_ips_assigned(self):
         """
