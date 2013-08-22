@@ -235,7 +235,7 @@ class Interface(ModelExtension):
 
             try:
                 if self.network:
-                    network = IP('%s' % (self.network.cidr)
+                    network = IP('%s' % (self.network.cidr) )
 
             except ValueError, e:
                 print ValueError, e
@@ -381,7 +381,7 @@ class Network(ModelExtension):
         """
             Return the first available ip address as the default gateway.
         """
-        network = IP("%s" % (self.cidr)
+        network = IP("%s" % (self.cidr) )
         return IP(network.ip+1).strNormal()
 
     def construct_interface_label(self, machine):
