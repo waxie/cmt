@@ -199,7 +199,7 @@ class Interface(ModelExtension):
                                  help_text="6 Octets, optionally delimited by \
                                  a space ' ', a hyphen '-', or a colon ':'.",
                                  validators=[hwaddress_validator])
-    ip        = models.IPAddressField(blank=True)
+    ip        = models.GenericIPAddressField(blank=True, protocol='both')
 
     class Meta:
         unique_together = ('network', 'hwaddress')
@@ -273,9 +273,9 @@ class Network(ModelExtension):
 
     name       = models.CharField(max_length=255, help_text='example: \
                                   infiniband')
-    netaddress = models.IPAddressField(help_text='example: 192.168.1.0')
-    netmask    = models.IPAddressField(help_text='example: 255.255.255.0')
-    gateway    = models.IPAddressField(blank=True, help_text='Automagically generated if kept empty')
+    netaddress = models.GenericIPAddressField(help_text='example: 192.168.1.0 or fd47:e249:06b2:0385::')
+    netmask    = models.GenericIPAddressField(help_text='example: 255.255.255.0 (for IPv4) or leave empty (for IPv6)', null=True, blank=True)
+    gateway    = models.GenericIPAddressField(blank=True, help_text='Automagically generated if kept empty')
     domain     = models.CharField(max_length=255, help_text='example: \
                                   irc.sara.nl', validators=[domain_validator])
     vlan       = models.PositiveIntegerField(max_length=3, null=True,
