@@ -273,8 +273,7 @@ class Network(ModelExtension):
 
     name       = models.CharField(max_length=255, help_text='example: \
                                   infiniband')
-    netaddress = models.GenericIPAddressField(help_text='example: 192.168.1.0 or fd47:e249:06b2:0385::')
-    netmask    = models.GenericIPAddressField(help_text='example: 255.255.255.0 (for IPv4) or leave empty (for IPv6)', null=True, blank=True)
+    cidr       = models.GenericIPAddressField(help_text='example: 192.168.1.0/24 or fd47:e249:06b2:0385::/64')
     gateway    = models.GenericIPAddressField(blank=True, help_text='Automagically generated if kept empty')
     domain     = models.CharField(max_length=255, help_text='example: \
                                   irc.sara.nl', validators=[domain_validator])
@@ -294,13 +293,13 @@ class Network(ModelExtension):
 
     #
     def _rev_name(self):
-        network = IP("%s/%s" % (self.netaddress, self.netmask))
+        network = IP("%s" % (self.cidr))
         reverse_name = network.reverseName()
         return reverse_name
 
     #
     def _rev_names(self):
-        network = IP("%s/%s" % (self.netaddress, self.netmask))
+        network = IP("%s" % (self.cidr))
         reverse_names = network.reverseNames()
         return reverse_names
 
@@ -311,7 +310,7 @@ class Network(ModelExtension):
 
             Returns an integer.
         """
-        network = IP("%s/%s" % (self.netaddress, self.netmask))
+        network = IP("%s" % (self.cidr))
         return int(network.len()-2)
 
     def _ips_assigned(self):
@@ -322,6 +321,18 @@ class Network(ModelExtension):
         """
         return set([interface.ip for interface in
             Interface.objects.filter(network=self).filter(ip__isnull=False)])
+
+    @property
+    def netaddress(self):
+        network = IP("%s" % (self.cidr))
+        netaddress = network.net()
+        return netaddress.strNormal()
+
+    @property
+    def netmask(self):
+        network = IP("%s" % (self.cidr))
+        netmask = network.netmask()
+        return netaddress.strNormal()
 
     def count_ips_assigned(self):
         """
@@ -346,7 +357,7 @@ class Network(ModelExtension):
             Returns a string.
         """
         assigned = self._ips_assigned()
-        network = IP("%s/%s" % (self.netaddress, self.netmask))
+        network = IP("%s" % (self.cidr))
         netaddress = network.net().ip
         broadcast = network.broadcast().ip
         poll_ip = netaddress + 1 # netaddress is in use already
@@ -360,7 +371,6 @@ class Network(ModelExtension):
             found = True
 
         if found:
-            #ip = IP(poll_ip).strNormal()
             ip = poll_ip_str
         else:
             logger.warning("No more IP's available in network '%s'"%self)
@@ -372,7 +382,7 @@ class Network(ModelExtension):
         """
             Return the first available ip address as the default gateway.
         """
-        network = IP("%s/%s" % (self.netaddress, self.netmask))
+        network = IP("%s" % (self.cidr)
         return IP(network.ip+1).strNormal()
 
     def construct_interface_label(self, machine):
@@ -383,11 +393,6 @@ class Network(ModelExtension):
         interface_label = self.hostnames.format(machine=machine)
         return interface_label
 
-    @property
-    def cidr(self):
-        network = IP("%s/%s" % (self.netaddress, self.netmask))
-        return network.strNormal()
-
     def save(self, force_insert=False, force_update=False):
         if not self.gateway:
             self.gateway = self.default_gateway() 
@@ -395,8 +400,6 @@ class Network(ModelExtension):
             super(Network, self).save(force_insert, force_update)
         except IntegrityError, e:
             logger.error(e)
-
-
 
 class Rack(ModelExtension):
     """
