@@ -47,16 +47,16 @@ setup(
         'Topic :: Utilities',
     ],
 
-    packages = ['sara_cmt', 'sara_cmt.cluster', 'sara_cmt.cluster.templatetags'],
+    packages = ['sara_cmt', 'sara_cmt.cluster', 'sara_cmt.cluster.templatetags', 'cmt_server', 'cmt_server.apps', 'cmt_server.apps.api', 'cmt_client'],
 
     install_requires = [
-        'djangorestframework',
+        'djangorestframework>=2.3.6',
         'Python>=2.6',
-        'Django>=1.3',
-        'IPy>=0.75',
-        'django_extensions>=0.4',
+        'Django>=1.5.2',
+        'IPy>=0.80',
+        'django_extensions>=1.1.1',
         'django_tagging>=0.3.1',
-        'psycopg2>=2.4.4'
+        'psycopg2>=2.4.6'
     ],
 
     # Only way to get something installed with mode 755 ...

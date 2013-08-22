@@ -22,6 +22,7 @@ from socket import gethostbyname_ex
 CONFIG_DIR = None
 
 where_am_i = os.path.dirname( __file__ )
+print 'I AM IN: %s' % where_am_i
 devel_file = os.path.normpath(os.path.join( where_am_i, '.DEVELOPMENT' ) )
 
 if os.path.exists( devel_file ):
@@ -339,6 +340,19 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
+
+#REST_FRAMEWORK = {  
+#    # User hyperlinked styles by default.
+#    # Only used if the `serializer_class` attribute is not set on a view.
+#    'DEFAULT_MODEL_SERIALIZER_CLASS':
+#        'rest_framework.serializers.HyperlinkedModelSerializer',
+#
+#    # Use Django's standard `django.contrib.auth` permissions,
+#    # or allow read-only access for unauthenticated users.
+#    'DEFAULT_PERMISSION_CLASSES': [
+#        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+#    ]
+#}
 
 ROOT_URLCONF = 'urls'
 #ROOT_URLCONF = 'sara_cmt.urls'
