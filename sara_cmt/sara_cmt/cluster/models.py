@@ -218,7 +218,6 @@ class Interface(ModelExtension):
         #return self.fqdn
         return self.label or 'anonymous'
 
-
     def save(self, force_insert=False, force_update=False):
         """
             First check for a correct IP address before saving the object.
@@ -236,8 +235,8 @@ class Interface(ModelExtension):
 
             try:
                 if self.network:
-                    network = IP('%s/%s' % (self.network.netaddress,
-                                            self.network.netmask))
+                    network = IP('%s' % (self.network.cidr)
+
             except ValueError, e:
                 print ValueError, e
             except Exception, e:
