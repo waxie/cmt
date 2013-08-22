@@ -13,7 +13,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Network.cidr'
         db.add_column(u'cluster_network', 'cidr',
-                      self.gf('django.db.models.fields.GenericIPAddressField')(default='127.0.0.1/32', max_length=39),
+                      self.gf('django.db.models.fields.CharField')(default='127.0.0.1/32', max_length=50),
                       keep_default=False)
 
 

@@ -272,7 +272,8 @@ class Network(ModelExtension):
 
     name       = models.CharField(max_length=255, help_text='example: \
                                   infiniband')
-    cidr       = models.GenericIPAddressField(help_text='example: 192.168.1.0/24 or fd47:e249:06b2:0385::/64')
+    cidr       = models.CharField(max_length=100, help_text='example: 192.168.1.0/24 or fd47:e249:06b2:0385::/64')
+
     gateway    = models.GenericIPAddressField(blank=True, help_text='Automagically generated if kept empty')
     domain     = models.CharField(max_length=255, help_text='example: \
                                   irc.sara.nl', validators=[domain_validator])

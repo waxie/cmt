@@ -18,12 +18,12 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Adding field 'Network.netaddress'
         db.add_column(u'cluster_network', 'netaddress',
-                      self.gf('django.db.models.fields.IPAddressField')(default='', max_length=15),
+                      self.gf('django.db.models.fields.IPAddressField')(default='127.0.0.1', max_length=15),
                       keep_default=False)
 
         # Adding field 'Network.netmask'
         db.add_column(u'cluster_network', 'netmask',
-                      self.gf('django.db.models.fields.IPAddressField')(default='', max_length=15),
+                      self.gf('django.db.models.fields.IPAddressField')(default='127.0.0.1', max_length=15),
                       keep_default=False)
 
 
