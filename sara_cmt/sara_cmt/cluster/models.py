@@ -364,7 +364,7 @@ class Network(ModelExtension):
         found = False
         while not found and poll_ip < broadcast:
             poll_ip_str = IP(poll_ip).strNormal()
-            if poll_ip_str in assigned or poll_ip_str == self.gateway:
+            if poll_ip_str in assigned or poll_ip_str == IP(self.gateway).strNormal():
                 poll_ip += 1
                 continue
             found = True
