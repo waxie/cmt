@@ -16,6 +16,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os, re, string, sys
+from IPy import IP
 
 # Inspired by Django tips on:
 #   http://www.b-list.org/weblog/2006/jun/07/django-tips-write-better-template-tags/
@@ -51,7 +52,7 @@ def noblanklines(parser, token):
 @stringfilter
 def arpanize(value):
     """
-        Converts a IP (range) to reversed DNS style arpa notation
+        Converts a IPv4 (range) to reversed DNS style arpa notation
 
         Usage:
             {{{ <variable>|arpanize }}}
@@ -62,9 +63,20 @@ def arpanize(value):
         Results in output:
             1.168.192.in-addr.arpa
     """
-    ip_blocks = value.split('.')
+    # deprecate me: use cidr2arpa
 
-    reverse_block = [ ip_blocks[2], ip_blocks[1], ip_blocks[0], 'in-addr.arpa' ]
+    ip = IP( value )
+
+    if ip.version() == 4:
+
+        ip_blocks = value.split('.')
+
+        reverse_block = [ ip_blocks[2], ip_blocks[1], ip_blocks[0], 'in-addr.arpa' ]
+
+    elif ip.version() == 6:
+
+        print 'FATAL ERROR: base_net: does not support IPv6 address(es): %s' %( value )
+        sys.exit(1)
 
     return string.join( reverse_block, '.' )
 
@@ -73,7 +85,7 @@ register.filter( 'arpanize', arpanize )
 @stringfilter
 def base_net(value):
     """
-        Converts a IP (range) to it's first 3 octects
+        Converts a IPv4 (range) to it's first 3 octects
 
         Usage:
             {{{ <variable>|base_net }}}
@@ -84,7 +96,19 @@ def base_net(value):
         Results in output:
             192.168.1
     """
-    ip_blocks = value.split('.')
+    # deprecate me: use cidr2net, or something
+
+    ip = IP( value )
+
+    if ip.version() == 4:
+
+        ip_blocks = IP( value ).net().strNormal().split('.') 
+        base_net  = string.join( ip_blocks[:3], '.' )    
+
+    elif ip.version() == 6:
+
+        print 'FATAL ERROR: base_net: does not support IPv6 address(es): %s' %( value )
+        sys.exit(1)
 
     return string.join( ip_blocks[:3], '.' )
 
@@ -93,20 +117,33 @@ register.filter( 'base_net', base_net )
 @stringfilter
 def ip_last_digit(value):
     """
-        Converts a IP (range) to it's last octect
+        Return's a IP's last digit
 
         Usage:
             {{{ <variable>|ip_last_digit }}}
 
         I.e.:
-            {% assign myip = '192.168.1.123' %}
-            {{{ myip|ip_last_digit }}}
+            {% assign myip4 = '192.168.1.123' %}
+            {% assign myip6 = 'fd6b:be97:63d8:749f::123' %}
+            {{{ myip4|ip_last_digit }}}
+            {{{ myip6|ip_last_digit }}}
         Results in output:
             123
+            123
     """
-    ip_blocks = value.split('.')
+    ip = IP( value )
 
-    return ip_blocks[3]
+    if ip.version() == 4:
+
+        split_char = '.'
+
+    elif ip.version() == 6:
+
+        split_char = ':'
+
+    ip_blocks = IP( value ).strNormal().split( split_char ) 
+
+    return ip_blocks[-1]
 
 register.filter( 'ip_last_digit', ip_last_digit )
 
@@ -121,10 +158,14 @@ def do_assign(parser,token):
     """
     definition = token.split_contents()
 
-    if len(definition) < 4:
-        raise template.TemplateSyntaxError, '%r tag requires at least 4 arguments' % tag
-
     tag = definition[0]
+
+    if len(definition) < 4:
+
+        #raise template.TemplateSyntaxError, '%r tag requires at least 4 arguments' % tag
+        print 'FATAL ERROR: %s: requires at least 4 arguments' %tag
+        sys.exit( 1 )
+
     new_var = definition[1]
     is_teken = definition[2]
     assignees = definition[3:]
@@ -303,7 +344,7 @@ def do_getbasenets(parser, token):
 class getBaseNets(template.Node):
 
     """
-        Get list of basenets in a network (name)
+        Get list of basenets in a IPv4 network (name)
 
         Usage: {% getbasenets <network name> as <listname> %}
     """
@@ -330,14 +371,21 @@ class getBaseNets(template.Node):
                 print 'FATAL ERROR: %s: %s is not a variable' %( self.tag, self.network_name )
                 sys.exit(1)
 
-        from IPy import IP
-
         network_units = get_model('cluster', 'Network').objects.filter( name=str(network_str) )
 
         for n in network_units:
 
+            network_range = IP( n.cidr )
+
+            if network_range.version() == 6:
+
+                print 'ERROR: %s %s: IPv6 skipped: %s' %( self.tag, self.network_name, n.cidr )
+                continue
+
             for ipnum in IP( n.cidr ):
+
                 if not base_net( ipnum ) in self.basenets:
+
                     self.basenets.append( str( base_net( ipnum ) ) )
 
         context[ self.varname ] = self.basenets
