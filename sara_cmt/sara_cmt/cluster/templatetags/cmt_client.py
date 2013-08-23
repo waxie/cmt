@@ -75,7 +75,7 @@ def arpanize(value):
 
     elif ip.version() == 6:
 
-        print 'FATAL ERROR: base_net: does not support IPv6 address(es): %s' %( value )
+        print 'FATAL ERROR: arpanize: does not support IPv6 address(es): %s' %( value )
         sys.exit(1)
 
     return string.join( reverse_block, '.' )
