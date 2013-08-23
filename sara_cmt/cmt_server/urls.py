@@ -3,8 +3,8 @@ from django.contrib.auth.models import User, Group
 from rest_framework import viewsets, routers
 
 from django.core.urlresolvers import reverse
-from sara_cmt.cluster.models import HardwareUnit, Cluster
-from cmt_server.apps.api.serializers import UserSerializer, GroupSerializer, HardwareSerializer, ClusterSerializer
+from sara_cmt.cluster.models import HardwareUnit, Cluster, Rack
+from cmt_server.apps.api.serializers import UserSerializer, GroupSerializer, HardwareSerializer, ClusterSerializer, RackSerializer
 
 
 # ViewSets define the view behavior.
@@ -32,12 +32,19 @@ class ClusterViewSet(viewsets.ModelViewSet):
     serializer_class = ClusterSerializer
 
 
+class RackViewSet(viewsets.ModelViewSet):
+    model = Rack
+    queryset = Rack.objects.all()
+    serializer_class = RackSerializer
+
+
 # Routers provide an easy way of automatically determining the URL conf
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'groups', GroupViewSet)
 router.register(r'hardware', HardwareViewSet)
 router.register(r'clusters', ClusterViewSet)
+router.register(r'racks', RackViewSet)
 
 
 # Wire up our API using automatic URL routing.
@@ -55,15 +62,4 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
-
-    # Django REST framework:
-    #(r'^api/cluster/$', ListOrCreateModelView.as_view(resource=ClusterResource)),
-    #(r'^api/cluster/(?P<name>[A-Za-z0-9]+)/$', InstanceModelView.as_view(resource=ClusterResource)),
-    #(r'^api/contract/$', ListOrCreateModelView.as_view(resource=ContractResource)),
-    #(r'^api/contract/(?P<label>[A-Za-z0-9]+)/$', InstanceModelView.as_view(resource=ContractResource)),
-    #(r'^api/equipment/$', ListOrCreateModelView.as_view(resource=EquipmentResource)),
-    #(r'^api/equipment/(?P<label>[A-Za-z0-9]+)/$', InstanceModelView.as_view(resource=EquipmentResource)),
-    #(r'^api/network/$', ListOrCreateModelView.as_view(resource=NetworkResource)),
-    #(r'^api/network/(?P<name>[A-Za-z0-9]+)/$', InstanceModelView.as_view(resource=NetworkResource)),
-    #url(r'^$', ExampleView.as_view(), name='mixin-view'),
 )
