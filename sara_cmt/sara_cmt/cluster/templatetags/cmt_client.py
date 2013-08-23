@@ -129,12 +129,13 @@ def do_assign(parser,token):
     is_teken = definition[2]
     assignees = definition[3:]
 
-    return resolveVariables( new_var, assignees )
+    return resolveVariables( tag, new_var, assignees )
 
 class resolveVariables(template.Node):
 
-    def __init__(self, varname, varlist ):
+    def __init__(self, tag, varname, varlist ):
 
+        self.tag = tag
         self.varname = varname
         self.varlist = varlist
 
@@ -157,7 +158,8 @@ class resolveVariables(template.Node):
                     #RB: still think not allowed to raise exceptions from render function
                     #
                     #raise template.TemplateSyntaxError, 'cannot resolve variable %r' %(  str( self.path ) )
-                    pass
+                    print 'FATAL ERROR: %s %s: %s is not a variable' %( self.tag, self.varname, a )
+                    sys.exit( 1 )
 
                 resvars.append( str(var_str) )
 
@@ -243,7 +245,8 @@ class generateStoreOutput(template.Node):
                 mypath_str = pathvar.resolve(context)
             except template.VariableDoesNotExist:
                 #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
-                pass
+                print 'FATAL ERROR: %s: %s is not a variable' %( self.tag, self.path_str )
+                sys.exit(1)
 
         if self.kw_output_name:
             # RB: store 'output' variable filename for BW compat
@@ -324,7 +327,7 @@ class getBaseNets(template.Node):
                 network_str = networkvar.resolve(context)
             except template.VariableDoesNotExist:
                 #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
-                print 'FATAL ERROR: tag %s: %s is not a variable' %( self.tag, self.network_name )
+                print 'FATAL ERROR: %s: %s is not a variable' %( self.tag, self.network_name )
                 sys.exit(1)
 
         from IPy import IP
@@ -402,14 +405,15 @@ def do_use(parser, token):
     query = definition[-3]
     key = definition[-1]
 
-    return QuerySetNode(entity, query, key)
+    return QuerySetNode( tag, entity, query, key)
 
 class QuerySetNode(template.Node):
     """
         Renderer, which fetches objects from the database.
     """
 
-    def __init__(self, entity, query, key):
+    def __init__(self, tag, entity, query, key):
+        self.tag = tag
         self.entity = entity
         self.query = query
         self.key = key
@@ -426,7 +430,8 @@ class QuerySetNode(template.Node):
                 myquery_str = queryvar.resolve(context)
             except template.VariableDoesNotExist:
                 #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
-                pass
+                print 'FATAL ERROR: %s %s: %s is not a variable' %( self.tag, self.key, self.query )
+                sys.exit(1)
 
         if myquery_str.count( '=' ) > 1 and myquery_str.count( ',' ) > 0:
 
