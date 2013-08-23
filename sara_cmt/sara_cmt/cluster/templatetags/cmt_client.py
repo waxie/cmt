@@ -15,7 +15,7 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os, re, string
+import os, re, string, sys
 
 # Inspired by Django tips on:
 #   http://www.b-list.org/weblog/2006/jun/07/django-tips-write-better-template-tags/
@@ -295,7 +295,7 @@ def do_getbasenets(parser, token):
     except ValueError:
         raise template.TemplateSyntaxError, '%r tag requires exactly 4 arguments' % tag
 
-    return getBaseNets( varname, network_name )
+    return getBaseNets( tag, varname, network_name )
 
 class getBaseNets(template.Node):
 
@@ -305,8 +305,9 @@ class getBaseNets(template.Node):
         Usage: {% getbasenets <network name> as <listname> %}
     """
 
-    def __init__(self, varname, network_name ):
+    def __init__(self, tag, varname, network_name ):
 
+        self.tag = tag
         self.varname = varname
         self.network_name = network_name.strip("'").strip('"').__str__()
         self.basenets = [ ]
@@ -323,7 +324,8 @@ class getBaseNets(template.Node):
                 network_str = networkvar.resolve(context)
             except template.VariableDoesNotExist:
                 #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
-                pass
+                print 'FATAL ERROR: tag %s: %s is not a variable' %( self.tag, self.network_name )
+                sys.exit(1)
 
         from IPy import IP
 
