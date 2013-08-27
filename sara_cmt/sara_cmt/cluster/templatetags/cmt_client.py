@@ -78,8 +78,6 @@ def arpanize(value):
         print 'FATAL ERROR: arpanize: does not support IPv6 address(es): %s' %( value )
         sys.exit(1)
 
-    print 'WARNING: arpanize is deprecated: please use reverse_name'
-
     return string.join( reverse_block, '.' )
 
 register.filter( 'arpanize', arpanize )
@@ -110,8 +108,6 @@ def base_net(value):
 
         print 'FATAL ERROR: base_net: does not support IPv6 address(es): %s' %( value )
         sys.exit(1)
-
-    print 'WARNING: base_net is deprecated'
 
     return string.join( ip_blocks[:3], '.' )
 
