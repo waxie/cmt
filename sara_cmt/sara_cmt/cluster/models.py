@@ -46,8 +46,8 @@ class Cluster(ModelExtension):
     """
         A labeled group of hardware pieces.
     """
-    re_valid_machines    = re.compile(r'^([0-9a-z]{1,2})$|^([a-z0-9\{]{1})([a-z0-9\_\-\{\}]{1,61})([a-z0-9\}]{1})$')
-    machines_validator   = RegexValidator(re_valid_machines,'Enter a valid machinenames stringformat.','invalid')
+    re_valid_machines    = re.compile(r'^([0-9a-z]{1,2})$|^([a-z0-9\{]{1})([a-z0-9\-\{\}]{1,61})([a-z0-9\}]{1})$')
+    machines_validator   = RegexValidator(re_valid_machines,'Enter a valid machinenames stringformat. Example: r{rack}n{first_slot}. Valid characters: [0-9], [a-z], "{", "}" and "-"','invalid')
 
     name         = models.CharField(max_length=255, unique=True)
     machinenames = models.CharField(max_length=255, null=True, blank=True, help_text='''stringformat \
@@ -265,10 +265,10 @@ class Network(ModelExtension):
         Interfaces (and HardwareUnits as equipment through Interface).
     """
     re_valid_domain   = re.compile(r'^(^(?:[a-z0-9]{1}[a-z0-9\-]{1,61}[a-z0-9]{1}\.?)+(?:[a-z]{2,})$)')
-    domain_validator  = RegexValidator(re_valid_domain,'Enter a valid domain.','invalid')
+    domain_validator  = RegexValidator(re_valid_domain,'Enter a valid domain. Example: admin1.my-domain.com. Valid characters: [a-z], [0-9], "." and "-"','invalid')
 
     re_valid_hosts    = re.compile(r'^([0-9a-z]{1,2})$|^([a-z0-9\{]{1})([a-z0-9\-\{\}]{1,61})([a-z0-9\}]{1})$')
-    hosts_validator   = RegexValidator(re_valid_hosts,'Enter a valid hostnames stringformat.','invalid')
+    hosts_validator   = RegexValidator(re_valid_hosts,'Enter a valid hostnames stringformat. Example: ib-{machine}. Valid characters: [a-z], [0-9], "{", "}" and "-"','invalid')
 
     name       = models.CharField(max_length=255, help_text='example: \
                                   infiniband')
