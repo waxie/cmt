@@ -63,7 +63,7 @@ def arpanize(value):
         Results in output:
             1.168.192.in-addr.arpa
     """
-    # deprecate me: use cidr2arpa
+    # deprecate me: use reverse_name
 
     ip = IP( value )
 
@@ -77,6 +77,8 @@ def arpanize(value):
 
         print 'FATAL ERROR: arpanize: does not support IPv6 address(es): %s' %( value )
         sys.exit(1)
+
+    print 'WARNING: arpanize is deprecated: please use reverse_name'
 
     return string.join( reverse_block, '.' )
 
@@ -96,7 +98,6 @@ def base_net(value):
         Results in output:
             192.168.1
     """
-    # deprecate me: use cidr2net, or something
 
     ip = IP( value )
 
@@ -109,6 +110,8 @@ def base_net(value):
 
         print 'FATAL ERROR: base_net: does not support IPv6 address(es): %s' %( value )
         sys.exit(1)
+
+    print 'WARNING: base_net is deprecated'
 
     return string.join( ip_blocks[:3], '.' )
 
@@ -125,11 +128,11 @@ def ip_last_digit(value):
         I.e.:
             {% assign myip4 = '192.168.1.123' %}
             {% assign myip6 = 'fd6b:be97:63d8:749f::123' %}
-            {{{ myip4|ip_last_digit }}}
-            {{{ myip6|ip_last_digit }}}
+            ip4 last digit = {{{ myip4|ip_last_digit }}}
+            ip6 last digit {{{ myip6|ip_last_digit }}}
         Results in output:
-            123
-            123
+            ip4 last digit = 123
+            ip6 last digit = 123
     """
     ip = IP( value )
 
@@ -146,6 +149,104 @@ def ip_last_digit(value):
     return ip_blocks[-1]
 
 register.filter( 'ip_last_digit', ip_last_digit )
+
+@stringfilter
+def reverse_name(value):
+    """
+        Return's a IP or CIDR reverse (arpa) name
+
+        Usage:
+            {{{ <variable>|reverse_name}}}
+
+        I.e.:
+            {% assign ip4cidr24 = '192.168.1.0/24' %}
+            ip4cidr/24 = {{{ ip4cidr24 }}}
+            ip4cidr/24 reverse name = {{{ ip4cidr24|reverse_name }}}
+
+            {% assign ip4cidr30 = '192.168.1.0/28' %}
+            ip4cidr/30 = {{{ ip4cidr30 }}}
+            ip4cidr/30 reverse name = {{{ ip4cidr30|reverse_name }}}
+
+            {% assign ip4 = '192.168.1.123' %}
+            ip4 = {{{ ip4 }}}
+            ip4 reverse name = {{{ ip4|reverse_name }}}
+
+            {% assign ip6cidr64 = 'fd93:59ef:8ce1:aac8::/64' %}
+            ip6cidr/64 = {{{ ip6cidr64 }}}
+            ip6cidr/64 reverse name  = {{{ ip6cidr64|reverse_name }}}
+
+            {% assign ip6cidr76 = 'fd93:59ef:8ce1:aac8::/76' %}
+            ip6cidr/76 = {{{ ip6cidr76 }}}
+            ip6cidr/76 reverse name  = {{{ ip6cidr76|reverse_name }}}
+
+            {% assign ip6 = 'fd93:59ef:8ce1:aac8::123' %}
+            ip6 = {{{ ip6 }}}
+            ip6 reverse name  = {{{ ip6|reverse_name }}}
+
+        Results in output:
+            ip4cidr/24 = 192.168.1.0/24
+            ip4cidr/24 reverse name = 1.168.192.in-addr.arpa.
+
+            ip4cidr/30 = 192.168.1.0/30
+            ip4cidr/30 reverse name = 0-3.1.168.192.in-addr.arpa.
+
+            ip4 = 192.168.1.123
+            ip4 reverse name = 123.1.168.192.in-addr.arpa.
+
+            ip6cidr/64 = fd93:59ef:8ce1:aac8::/64
+            ip6cidr/64 reverse name = 8.c.a.a.1.e.c.8.f.e.9.5.3.9.d.f.ip6.arpa.
+
+            ip6cidr/76 = fd93:59ef:8ce1:aac8::/76
+            ip6cidr/76 reverse name = 0.0.0.8.c.a.a.1.e.c.8.f.e.9.5.3.9.d.f.ip6.arpa.
+
+            ip6 = fd93:59ef:8ce1:aac8::123
+            ip6 reverse name = 3.2.1.0.0.0.0.0.0.0.0.0.0.0.0.0.8.c.a.a.1.e.c.8.f.e.9.5.3.9.d.f.ip6.arpa.
+    """
+    ip = IP( value )
+
+    return ip.reverseName()
+
+register.filter( 'reverse_name', reverse_name )
+
+@stringfilter
+def reverse_names(value):
+    """
+        Return's a CIDR reverse (arpa) names
+
+        Usage:
+            {{{ <variable>|reverse_names}}}
+
+        I.e.:
+            {% assign ip4cidr24 = '192.168.1.0/24' %}
+            ip4cidr/24 = {{{ ip4cidr24 }}}
+            ip4cidr/24 reverse names = {{{ ip4cidr24|reverse_names }}}
+
+            {% assign ip4cidr30 = '192.168.1.0/30' %}
+            ip4cidr/30 = {{{ ip4cidr30 }}}
+            ip4cidr/30 reverse names = {{{ ip4cidr30|reverse_names }}}
+
+            {% assign ip6cidr64 = 'fd93:59ef:8ce1:aac8::/64' %}
+            ip6cidr/64 reverse names  = {{{ ip6cidr64|reverse_names }}}
+
+        Results in output:
+            ip4cidr/24 = 192.168.1.0/24
+            ip4cidr/24 reverse names = 1.168.192.in-addr.arpa.
+
+            ip4cidr/30 = 192.168.1.0/30
+            ip4cidr/30 reverse names = 0.1.168.192.in-addr.arpa.
+            ip4cidr/30 reverse names = 1.1.168.192.in-addr.arpa.
+            ip4cidr/30 reverse names = 2.1.168.192.in-addr.arpa.
+            ip4cidr/30 reverse names = 3.1.168.192.in-addr.arpa.
+
+            ip6cidr/64 = fd93:59ef:8ce1:aac8::/64
+            ip6cidr/64 reverse names = 8.c.a.a.1.e.c.8.f.e.9.5.3.9.d.f.ip6.arpa.
+
+    """
+    ip = IP( value )
+
+    return ip.reverseNames()
+
+register.filter( 'reverse_names', reverse_names )
 
 @register.tag(name='assign')
 def do_assign(parser,token):
