@@ -21,6 +21,7 @@ v1.2.0
   * new (server) config option: web DOMAIN to prevent cross site scripting and 
     header spoofing
   * added (virtualenv aware) WSGI loader
+  * cmt's django admin templates are now packaged in de pip package
   * NOTE: unfortunately CMT<=1.1.1 (clients) are NOT compatible with 
     CMT 1.2 (server) because of changes in the database model
 
