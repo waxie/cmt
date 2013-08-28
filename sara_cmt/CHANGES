@@ -10,7 +10,7 @@ v1.2.0
   * Network table changes:
     * removed database field: netmask (since IPv6 does not have have netmasks)
     * removed database field: netaddress
-    * new database fields: "cidr" as replacement for netmask, netaddress
+    * new database field: "cidr" as replacement for netmask, netaddress
     * netmask + netaddress is now a (generated) property (still usable for 
       templates)
   * now proper errors are printed if template variable resolving fails
