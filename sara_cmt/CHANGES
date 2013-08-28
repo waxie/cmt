@@ -1,3 +1,29 @@
+v1.2.0
+======
+
+  * now utilizes Django 1.5 : #67
+  * IPv6 support : #8
+  * (backwards compatible) cmt_client template tags changes:
+    * ip_last_digit now supports both IPv4 and IPv6
+    * arpanize, base_net, getbasenets: is now IPv4 only
+    * new tags: (arpa) reverse_name, reverse_names: supports both IPv4 and IPv6
+  * Network table changes:
+    * removed database field: netmask (since IPv6 does not have have netmasks)
+    * removed database field: netaddress
+    * new database fields: "cidr" as replacement for netmask, netaddress
+    * netmask + netaddress is now a (generated) property (still usable for 
+      templates)
+  * now proper errors are printed if template variable resolving fails
+  * dot '.' is now a valid cnames/aliases character, i.e.: r7n1.con : #68
+  * underscore '_' is no longer a valid machinesnames character (since it's 
+    invalid DNS)
+  * field validators help texts are now actually helpful
+  * new (server) config option: web DOMAIN to prevent cross site scripting and 
+    header spoofing
+  * added (virtualenv aware) WSGI loader
+  * NOTE: unfortunately CMT<=1.1.1 (clients) are NOT compatible with 
+    CMT 1.2 (server) because of changes in the database model
+
 v1.1.1
 ======
 Removed:
