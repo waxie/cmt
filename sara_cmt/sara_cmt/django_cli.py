@@ -85,9 +85,14 @@ class ModelExtension(models.Model):
         # Print the values
         print ' .---[  %s  ]---' % instance
         for key in admin_list_display:
-            if key not in ('__unicode__', '__str__'):
-                print ' : %s : %s' % (key.ljust(longest_key), \
-                                      instance.__getattribute__(key))
+            if key in ('__unicode__', '__str__'):
+                continue
+
+            value = instance.__getattribute__(key)
+            if type( value ) is MethodType:
+                print ' : %s : %s' % (key.ljust(longest_key), value() )
+            else:
+                print ' : %s : %s' % (key.ljust(longest_key), value )
         print " '---\n"
 #
 # </STATIC METHODS>
