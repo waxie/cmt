@@ -52,7 +52,7 @@ class NetworkSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Network
         #fields = ('url', 'name', 'netaddress', 'netmask', 'gateway', 'domain', 'vlan', 'hostnames', 'hardware', 'interfaces')
-        fields = ('url', 'name', 'gateway', 'domain', 'vlan', 'hostnames', 'hardware', 'interfaces')
+        fields = ('url', 'name', 'cidr', 'gateway', 'domain', 'vlan', 'hostnames', 'hardware', 'interfaces')
 
 
 #class RackSerializer(serializers.ModelSerializer):
