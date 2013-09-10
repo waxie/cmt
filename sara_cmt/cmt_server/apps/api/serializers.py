@@ -27,102 +27,104 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 #
 
 
-#class ClusterSerializer(serializers.ModelSerializer):
 class ClusterSerializer(serializers.HyperlinkedModelSerializer):
+    hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+
     class Meta:
         model = Cluster
-        fields = ('url', 'name', 'machinenames', 'hardware')
 
 
-#class HardwareSerializer(serializers.ModelSerializer):
 class EquipmentSerializer(serializers.HyperlinkedModelSerializer):
+    interfaces = serializers.HyperlinkedRelatedField(many=True, view_name='interface-detail')
+
     class Meta:
         model = Equipment
-        #fields = ('url', 'rack', 'first_slot', 'label', 'warranty_tag')
-        fields = ('url', 'cluster', 'role', 'network', 'specifications', 'warranty', 'rack', 'seller', 'owner', 'state', 'warranty_tag', 'serial_number', 'first_slot', 'label')
+        depth = 1
 
 
 class InterfaceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Interface
-        fields = ('url', 'network', 'host', 'iftype', 'label', 'aliases', 'hwaddress', 'ip')
+        depth = 1
 
 
 class NetworkSerializer(serializers.HyperlinkedModelSerializer):
+    hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+    interfaces = serializers.HyperlinkedRelatedField(many=True, view_name='interface-detail')
+
     class Meta:
         model = Network
-        #fields = ('url', 'name', 'netaddress', 'netmask', 'gateway', 'domain', 'vlan', 'hostnames', 'hardware', 'interfaces')
-        fields = ('url', 'name', 'cidr', 'gateway', 'domain', 'vlan', 'hostnames', 'hardware', 'interfaces')
 
 
-#class RackSerializer(serializers.ModelSerializer):
 class RackSerializer(serializers.HyperlinkedModelSerializer):
+    contents = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+
     class Meta:
         model = Rack
-        fields = ('url', 'room', 'label', 'capacity', 'contents')
 
 
 class CountrySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Country
-        fields = ('url', 'name', 'country_code', 'addresses')
 
 
 class AddressSerializer(serializers.HyperlinkedModelSerializer):
+    rooms = serializers.HyperlinkedRelatedField(many=True, view_name='room-detail')
+
     class Meta:
         model = Address
-        fields = ('url', 'country', 'address', 'postalcode', 'city')
 
 
 class RoomSerializer(serializers.HyperlinkedModelSerializer):
+    racks = serializers.HyperlinkedRelatedField(many=True, view_name='rack-detail')
+
     class Meta:
         model = Room
-        fields = ('url', 'address', 'floor', 'label', 'racks')
 
 
 class CompanySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Company
-        fields = ('url', 'addresses', 'name', 'website')
 
 
 class ConnectionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Connection
-        fields = ('url', 'address', 'company', 'active', 'name', 'email', 'sold', 'owns')
 
 
 class TelephonenumberSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Telephonenumber
-        fields = ('url', 'country', 'connection', 'areacode', 'subscriber_number', 'number_type')
 
 
 class HardwareModelSerializer(serializers.HyperlinkedModelSerializer):
+    hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+
     class Meta:
         model = HardwareModel
-        fields = ('url', 'vendor', 'name', 'vendorcode', 'rackspace', 'expansions', 'hardware')
 
 
 class RoleSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Role
-        fields = ('url', 'label', 'hardware')
 
 
 class InterfaceTypeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = InterfaceType
-        fields = ('url', 'vendor', 'label')
 
 
 class WarrantyTypeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = WarrantyType
-        fields = ('url', 'contact', 'label')
 
 
 class WarrantyContractSerializer(serializers.HyperlinkedModelSerializer):
+    hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+
     class Meta:
         model = WarrantyContract
-        fields = ('url', 'warranty_type', 'contract_number', 'annual_cost', 'label', 'date_from', 'date_to', 'hardware')
+
+#
+#
+#####
