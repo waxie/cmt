@@ -1,3 +1,13 @@
+v1.2.1
+======
+
+  * fixed packaging issue of admin templates
+  * fixed TypeError when adding role from hardwareunit view on web: #71
+    * unicode functions in model now actually return unicoded strings
+  * when displaying network from CLI: count_ips_assigned and count_ips_free are
+    now displayed correctly : #70
+    * if model value is a property/method: call it in stead of printing it
+
 v1.2.0
 ======
 
