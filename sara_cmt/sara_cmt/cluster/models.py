@@ -18,7 +18,7 @@
 from django.db import models
 from django.core.validators import RegexValidator
 
-import re
+import re, string
 from datetime import date
 
 from psycopg2 import IntegrityError
@@ -396,13 +396,20 @@ class Network(ModelExtension):
         interface_label = self.hostnames.format(machine=machine)
         return interface_label
 
-    def save(self, force_insert=False, force_update=False):
+    def clean(self):
+
+        from django.core.exceptions import ValidationError
+
+        try:         
+            IP( self.cidr )
+        except ValueError, details:
+            exception_msg = string.join( str( details ).split( ' ' )[1:] )
+            err_msg = 'error for %s: %s' %( self.cidr, exception_msg )
+
+            raise ValidationError( err_msg )
+
         if not self.gateway:
             self.gateway = self.default_gateway() 
-        try:
-            super(Network, self).save(force_insert, force_update)
-        except IntegrityError, e:
-            logger.error(e)
 
 class Rack(ModelExtension):
     """
