@@ -15,9 +15,7 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os, os.path, sys, ConfigParser, site, string, time
-
-from socket import gethostbyname_ex
+import os, os.path, sys, ConfigParser, site, string, time, socket
 
 CONFIG_DIR = None
 
@@ -156,7 +154,7 @@ except ConfigParser.NoOptionError, details:
 	pass
 
 try:
-	gethostbyname_ex( DATABASE_HOST )
+	socket.gethostbyname_ex( DATABASE_HOST )
 
 except socket.gaierror, details:
 
