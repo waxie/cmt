@@ -1,3 +1,10 @@
+v1.2.2
+======
+
+  * added network CIDR validation
+  * fixed domain validation to allow subdomains of 2 characters : #74
+  * fixed import error under certain conditions : #73
+
 v1.2.1
 ======
 
