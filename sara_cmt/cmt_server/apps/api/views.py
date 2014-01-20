@@ -79,7 +79,12 @@ class ClusterViewSet(viewsets.ModelViewSet):
 class EquipmentViewSet(viewsets.ModelViewSet):
     queryset = Equipment.objects.all()
     serializer_class = EquipmentSerializer
-    filter_fields = ('cluster__name', 'rack__label')
+    filter_fields = (
+            'cluster__name', 'role__label', 'network__name', 'network__vlan',
+            'specifications__name', 'warranty__label', 'warranty__contract_number',
+            'rack__label', 'warranty_tag', 'serial_number', 'first_slot', 'label',
+            #'in_support'
+            )
 
 
 ## looks deprecated, since django-filter has been implemented now
@@ -139,66 +144,87 @@ class EquipmentViewSet(viewsets.ModelViewSet):
 class RackViewSet(viewsets.ModelViewSet):
     queryset = Rack.objects.all()
     serializer_class = RackSerializer
-    filter_fields = ('label', )
+    filter_fields = ('label', 'room__label')
 
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
+    filter_fields = ('label', 'address__address')
 
 class AddressViewSet(viewsets.ModelViewSet):
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
+    filter_fields = (
+            'country__name', 'country__country_code', 'address'
+            'postalcode', 'city'
+            )
 
 class CountryViewSet(viewsets.ModelViewSet):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
+    filter_fields = ('name', 'country_code')
 
 
 # Network-related
 class InterfaceViewSet(viewsets.ModelViewSet):
     queryset = Interface.objects.all()
     serializer_class = InterfaceSerializer
+    filter_fields = (
+            'network__name', 'network__vlan', 'host__label', 'iftype__label',
+            'label', 'aliases', 'hwaddress', 'ip'
+            )
 
 class NetworkViewSet(viewsets.ModelViewSet):
     queryset = Network.objects.all()
     serializer_class = NetworkSerializer
+    filter_fields = (
+            'name', 'cidr', 'gateway', 'domain', 'vlan'
+            )
 
 
 class ConnectionViewSet(viewsets.ModelViewSet):
     queryset = Connection.objects.all()
     serializer_class = ConnectionSerializer
+    filter_fields = ('name',)
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
+    filter_fields = ('name',)
 
 
 class TelephonenumberViewSet(viewsets.ModelViewSet):
     queryset = Telephonenumber.objects.all()
     serializer_class = TelephonenumberSerializer
+    filter_fields = ('connection__name',)
 
 
 class HardwareModelViewSet(viewsets.ModelViewSet):
     queryset = HardwareModel.objects.all()
     serializer_class = HardwareModelSerializer
+    filter_fields = ('vendor__name', 'name', 'vendorcode')
 
 
 class RoleViewSet(viewsets.ModelViewSet):
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
+    filter_fields = ('label',)
 
 
 class InterfaceTypeViewSet(viewsets.ModelViewSet):
     queryset = InterfaceType.objects.all()
     serializer_class = InterfaceTypeSerializer
+    filter_fields = ('vendor__name', 'label')
 
 
 class WarrantyTypeViewSet(viewsets.ModelViewSet):
     queryset = WarrantyType.objects.all()
     serializer_class = WarrantyTypeSerializer
+    filter_fields = ('contact__name', 'label')
 
 
 class WarrantyContractViewSet(viewsets.ModelViewSet):
     queryset = WarrantyContract.objects.all()
     serializer_class = WarrantyContractSerializer
+    filter_fields = ('warranty_type__label', 'contract_number', 'label')
