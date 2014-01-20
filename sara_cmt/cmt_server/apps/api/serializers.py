@@ -1,51 +1,80 @@
-from django.contrib.auth.models import User, Group
+##from django.contrib.auth.models import User, Group
 from rest_framework import serializers
-from sara_cmt.cluster.models import Cluster, Interface, Network, Rack 
+from sara_cmt.cluster.models import Cluster, Interface, Network, Rack, Room, Address, Country
 from sara_cmt.cluster.models import HardwareUnit as Equipment
-from sara_cmt.cluster.models import Country, Address, Room
-from sara_cmt.cluster.models import Company, Connection, Telephonenumber
+
+from sara_cmt.cluster.models import Interface, Network
+from sara_cmt.cluster.models import Connection, Company, Telephonenumber
 from sara_cmt.cluster.models import HardwareModel, Role, InterfaceType
 from sara_cmt.cluster.models import WarrantyType, WarrantyContract
 
 
-
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = ('url', 'username', 'email', 'groups')
-
-
-class GroupSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Group
-        fields = ('url', 'name',)
-
+##class UserSerializer(serializers.HyperlinkedModelSerializer):
+##    class Meta:
+##        model = User
+##        fields = ('url', 'username', 'email', 'groups')
+##
+##
+##class GroupSerializer(serializers.HyperlinkedModelSerializer):
+##    class Meta:
+##        model = Group
+##        fields = ('url', 'name',)
+##
+##
 
 #####
 #
 # Serializers based on the models in CMT
 #
 
-
 class ClusterSerializer(serializers.HyperlinkedModelSerializer):
     hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
 
     class Meta:
         model = Cluster
+        fields = ('name', 'hardware')
 
 
 class EquipmentSerializer(serializers.HyperlinkedModelSerializer):
+    cluster = serializers.HyperlinkedRelatedField(many=False, view_name='cluster-detail')
     interfaces = serializers.HyperlinkedRelatedField(many=True, view_name='interface-detail')
 
     class Meta:
         model = Equipment
-        depth = 1
+        #fields = ('cluster', 'rack', 'first_slot', 'label')
+        #depth = 1
+
+
+class RackSerializer(serializers.HyperlinkedModelSerializer):
+    contents = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+
+    class Meta:
+        model = Rack
+
+
+class AddressSerializer(serializers.HyperlinkedModelSerializer):
+    rooms = serializers.HyperlinkedRelatedField(many=True, view_name='room-detail')
+
+    class Meta:
+        model = Address
+
+
+class CountrySerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Country
+
+
+class RoomSerializer(serializers.HyperlinkedModelSerializer):
+    racks = serializers.HyperlinkedRelatedField(many=True, view_name='rack-detail')
+
+    class Meta:
+        model = Room
 
 
 class InterfaceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Interface
-        depth = 1
+        #depth = 1
 
 
 class NetworkSerializer(serializers.HyperlinkedModelSerializer):
@@ -56,40 +85,14 @@ class NetworkSerializer(serializers.HyperlinkedModelSerializer):
         model = Network
 
 
-class RackSerializer(serializers.HyperlinkedModelSerializer):
-    contents = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
-
+class ConnectionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Rack
-
-
-class CountrySerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Country
-
-
-class AddressSerializer(serializers.HyperlinkedModelSerializer):
-    rooms = serializers.HyperlinkedRelatedField(many=True, view_name='room-detail')
-
-    class Meta:
-        model = Address
-
-
-class RoomSerializer(serializers.HyperlinkedModelSerializer):
-    racks = serializers.HyperlinkedRelatedField(many=True, view_name='rack-detail')
-
-    class Meta:
-        model = Room
+        model = Connection
 
 
 class CompanySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Company
-
-
-class ConnectionSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Connection
 
 
 class TelephonenumberSerializer(serializers.HyperlinkedModelSerializer):
@@ -107,7 +110,6 @@ class HardwareModelSerializer(serializers.HyperlinkedModelSerializer):
 class RoleSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Role
-
 
 class InterfaceTypeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
