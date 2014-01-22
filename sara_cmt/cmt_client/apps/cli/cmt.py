@@ -10,6 +10,8 @@ import argparse
 #  * http://docs.python.org/2/howto/argparse.html
 #  * http://pymotw.com/2/argparse/
 
+import requests
+
 #from docopt import docopt
 #
 #usage = """Config Management Tool.
@@ -40,14 +42,10 @@ def breadcrumbs(f):
     return _inner
 
 
-# All existing entities in CMT
-ENTITIES = (
-    'hardwareunit',
-    'interface',
-    'cluster',
-    'network'
-    # TODO: complete list
-)
+# Get a list of all existing entities in CMT
+base_url = 'http://localhost:8000/' # should be read from config file
+r = requests.get(base_url)
+ENTITIES = r.json().keys()
 
 def query(s):
     """
@@ -68,6 +66,16 @@ def query(s):
         _s.append(oper)
     return _s
 
+def args_to_payload(q):
+    """
+
+    >>> args_to_payload([['cluster__name', 'cluster1'], ['rack__label', 'rack1']])
+    {'rack__label': 'rack1', 'cluster__name': 'cluster1'}
+    """
+    d = {}
+    for stmt in q:
+        d[stmt[0]] = stmt[1]
+    return d
 
 class Client:
 
@@ -79,19 +87,42 @@ class Client:
 
 
     @breadcrumbs
-    def create(args):
+    def create(self, args):
         print args
+        try:
+            assert(args['set']), 'Missing --set arguments'
+        except AssertionError, e:
+            print AssertionError, e
+
+        url = '%s/' % (base_url + args['entity'].pop())
+        payload = args_to_payload(args['set'])
+        headers = {'content-type': 'application/json'}
+        r = requests.post(url, data=json.dumps(payload), headers=headers)
+        print r # doesn't work yet..
         return
 
 
     @breadcrumbs
     def read(self, args):
-        print '>>> args:', args
+        #print '>>> args:', args
+        # Be sure there's a --get arg before taking care of the rest of the args
         try:
             assert(args['get']), 'Missing --get arguments'
         except AssertionError, e:
             print AssertionError, e
-        return
+
+        # Get data from given --get args to prepare a request
+        url = '%s/' % (base_url + args['entity'].pop())
+        payload = args_to_payload(args['get'])
+        headers = {'content-type': 'application/json'}
+        r = requests.get(url, params=payload, headers=headers)
+
+        # Print response, or 
+        try:
+            assert(r.json()), 'JSON decoding failed'
+        except ValueError, e:
+            print ValueError, e
+        print r.json()
 
 
     @breadcrumbs
@@ -154,7 +185,7 @@ class Client:
         getparser = argparse.ArgumentParser(add_help=False)
         getparser.add_argument('--get', nargs='+', metavar='QUERY', type=query, help='Query to match existing objects, like "KEY=VAL"')
         setparser = argparse.ArgumentParser(add_help=False)
-        getparser.add_argument('--set', nargs='+', metavar='ASSIGNMENT', type=query, help='Definition to assign values to fields, like "KEY=VAL"')
+        setparser.add_argument('--set', nargs='+', metavar='ASSIGNMENT', type=query, help='Definition to assign values to fields, like "KEY=VAL"')
 
         # CRUD commands to [C]reate, [R]ead, [U]pdate and [D]elete objects are parsed by subparsers.
         # Same applies for parsing of templates.
@@ -196,13 +227,14 @@ class Client:
 
         try:
             self._args = vars(parser.parse_args())
-            #print '>>> PARSED ARGS:', self._args
+            print '>>> PARSED ARGS:', self._args
             if self._args['func'] == 'create':
                 if not self._args['assign']:
                     print "Can't create object(s) without a valid QUERY to match for or ASSIGNMENT to assign."
             elif self._args['func'] == 'read':
                 if not self._args['matching']:
                     parser.error("Can't read object(s) without a valid QUERY to match for.")
+                    print "Can't read object(s) without a valid QUERY to match for."
             elif self._args['func'] == 'update':
                 if not self._args['matching'] or not self._args['assign']:
                     print "Can't update object(s) without a valid QUERY to match for or ASSIGNMENT to assign."
@@ -222,6 +254,8 @@ def main(args):
         
         if parsed_args['func'] == 'read':
             c.read(parsed_args)
+        elif parsed_args['func'] == 'create':
+            c.create(parsed_args)
         return 1
     except SystemExit:
         return 2
