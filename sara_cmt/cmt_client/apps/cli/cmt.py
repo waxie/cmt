@@ -44,8 +44,13 @@ def breadcrumbs(f):
 
 # Get a list of all existing entities in CMT
 base_url = 'http://localhost:8000/' # should be read from config file
-r = requests.get(base_url)
-ENTITIES = r.json().keys()
+r = requests.get(base_url, timeout=3.000)
+try:
+    ENTITIES = r.json().keys()
+except requests.exceptions.RequestException, e:
+    print e
+    sys.exit(0)
+
 
 def query(s):
     """
@@ -117,22 +122,25 @@ class Client:
         headers = {'content-type': 'application/json'}
         r = requests.get(url, params=payload, headers=headers)
 
-        # Print response, or 
+        # Return response in JSON-format
         try:
             assert(r.json()), 'JSON decoding failed'
         except ValueError, e:
             print ValueError, e
-        print r.json()
+            return None
+        return r.json()
 
 
     @breadcrumbs
-    def update(args):
-        print args
+    def update(self, args):
+        # First get the selection of objects to update
+        selection = read(args)
+        print selection
         return
 
 
     @breadcrumbs
-    def delete(args):
+    def delete(self, args):
         print args
         return
 
@@ -252,10 +260,20 @@ def main(args):
         parsed_args = c._args
         #print '>>> PARSER:', parsed_args
         
-        if parsed_args['func'] == 'read':
-            c.read(parsed_args)
-        elif parsed_args['func'] == 'create':
+        # Route parsed args to the action given on command line
+        command = parsed_args['func']
+        if command == 'read':
+            retval = c.read(parsed_args)
+            print retval
+        elif command =='create':
             c.create(parsed_args)
+        elif command == 'update':
+            c.create(parsed_args)
+        elif command == 'delete':
+            c.create(parsed_args)
+        elif command == 'parse':
+            c.create(parsed_args)
+
         return 1
     except SystemExit:
         return 2
