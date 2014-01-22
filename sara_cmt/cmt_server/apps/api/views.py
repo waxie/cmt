@@ -3,9 +3,6 @@
 from rest_framework import generics
 from rest_framework import viewsets
 from rest_framework import filters
-from rest_framework.response import Response
-
-from django.db.models import Q
 
 from sara_cmt.cluster.models import Cluster, Rack, Room, Address, Country
 from sara_cmt.cluster.models import HardwareUnit as Equipment
@@ -33,35 +30,12 @@ from cmt_server.apps.api.serializers import WarrantyTypeSerializer, WarrantyCont
 #    queryset = User.objects.all()
 #    serializer_class = UserSerializer
 
-##class GroupViewSet(viewsets.ModelViewSet):
-##    model = Group
-##    queryset = Group.objects.all()
-##    serializer_class = GroupSerializer
-##
-##class ClusterList(generics.ListAPIView):
-##    queryset = Cluster.objects.all()
-##    serializer_class = ClusterSerializer
-##    lookup_field = 'pk'
-##
-##    def get_paginate_by(self):
-##        """
-##        Use smaller pagination for HTML representations.
-##        """
-##        if self.request.accepted_renderer.format == 'html':
-##            return 2
-##        return 20
-##
-##    def get_queryset(self):
-##        return Cluster.objects.all()
-##
-##
-#class ClusterList(generics.ListCreateAPIView):
-#    queryset = Cluster.objects.all()
-#    serializer_class = ClusterSerializer
+#class GroupViewSet(viewsets.ModelViewSet):
+#    model = Group
+#    queryset = Group.objects.all()
+#    serializer_class = GroupSerializer
 #
-#class ClusterDetail(generics.RetrieveUpdateDestroyAPIView):
-#    queryset = Cluster.objects.all()
-#    serializer_class = ClusterSerializer
+
 
 #####
 #
@@ -72,6 +46,7 @@ from cmt_server.apps.api.serializers import WarrantyTypeSerializer, WarrantyCont
 class ClusterViewSet(viewsets.ModelViewSet):
     queryset = Cluster.objects.all()
     serializer_class = ClusterSerializer
+    fields = ('url',)
     filter_fields = ('name',)
     # model = Cluster
     # lookup_fields = (...
@@ -86,60 +61,6 @@ class EquipmentViewSet(viewsets.ModelViewSet):
             #'in_support'
             )
 
-
-## looks deprecated, since django-filter has been implemented now
-#    def get_queryset(self):
-#        #q = self.kwargs # (always?) empty dict
-#        #print 'SELF.KWARGS', q, '(%s)'%type(q)
-#        querydict = self.request.GET # dict (QueryDict) of kwargs
-#        print 'SELF.REQUEST.get', querydict, '(%s)'%type(querydict)
-#        #print 'self.request.query_params', self.request.QUERY_PARAMS
-#
-#        d = {}
-#        for key, val in querydict.iterlists():
-#            #print "KEY %s (%s) VAL %s (%s)"%(key, type(key), val, type(val))
-#            if isinstance(val, list):
-#                d['%s__in'%key] = val
-#            else:
-#                d[key] = val
-#        for key, val in querydict.iterlists():
-#            d['%s__in'%key] = val
-#
-#        queryset = Equipment.objects.filter(**d)
-#        print 'QSET', queryset
-#        return queryset
-#
-#
-#    def list(self, request):
-#        querydict = self.request.GET # dict (QueryDict) of kwargs
-#        #print 'SELF.REQUEST.get', querydict, '(%s)'%type(querydict)
-#        #print 'self.request.query_params', self.request.QUERY_PARAMS
-#        query = None
-#        for key, val in querydict.iterlists():
-#            #print "KEY %s VAL %s"%(key,val)
-#            if query is None:
-#                #print 'QUERY is NONE'
-#                if isinstance(val, list):
-#                    #print 'VAL is LIST'
-#                    query = Q(**{'%s__in'%key: val})
-#                else:
-#                    #print 'VAL is not LIST'
-#                    query = Q(**{key: val})
-#            else:
-#                #print 'QUERY is not NONE'
-#                if isinstance(val, list):
-#                    query &= Q(**{'%s__in'%key: val})
-#                else:
-#                    #print 'VAL is not LIST'
-#                    query &= Q(**{'%s__in'%key: val})
-#        #print "QUERY", query
-#        queryset = Equipment.objects.filter(query)
-#        #print 'QSET', queryset
-#
-#        serializer = EquipmentSerializer(queryset, many=True)
-#        #print 'SERIALIZER', serializer
-#        return Response(serializer.data)
-##
 
 class RackViewSet(viewsets.ModelViewSet):
     queryset = Rack.objects.all()

@@ -1,8 +1,8 @@
 ##from django.contrib.auth.models import User, Group
 from rest_framework import serializers
+
 from sara_cmt.cluster.models import Cluster, Interface, Network, Rack, Room, Address, Country
 from sara_cmt.cluster.models import HardwareUnit as Equipment
-
 from sara_cmt.cluster.models import Interface, Network
 from sara_cmt.cluster.models import Connection, Company, Telephonenumber
 from sara_cmt.cluster.models import HardwareModel, Role, InterfaceType
@@ -28,7 +28,7 @@ from sara_cmt.cluster.models import WarrantyType, WarrantyContract
 #
 
 class ClusterSerializer(serializers.HyperlinkedModelSerializer):
-    hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+    hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail', required=False)
 
     class Meta:
         model = Cluster
