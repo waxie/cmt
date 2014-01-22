@@ -10,7 +10,7 @@ import argparse
 #  * http://docs.python.org/2/howto/argparse.html
 #  * http://pymotw.com/2/argparse/
 
-import requests
+import requests # documented at: http://docs.python-requests.org/
 
 #from docopt import docopt
 #

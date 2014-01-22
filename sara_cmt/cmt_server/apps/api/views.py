@@ -40,6 +40,7 @@ from cmt_server.apps.api.serializers import WarrantyTypeSerializer, WarrantyCont
 #####
 #
 # Viewsets based on the models in CMT. They define the view behavior.
+# Documented at: http://www.django-rest-framework.org/
 #
 
 # Equipment-related
