@@ -3,6 +3,7 @@
 import logging
 import sys
 import textwrap
+import pprint
 
 import argparse
 # Documented at:
@@ -11,6 +12,8 @@ import argparse
 #  * http://pymotw.com/2/argparse/
 
 import requests
+import base64
+from getpass import getpass
 
 #from docopt import docopt
 #
@@ -32,6 +35,17 @@ import requests
 #
 #"""
 
+def create_auth_header():
+
+    """
+    """
+
+    username = raw_input( 'username: ' )
+    password = getpass( 'password: ' )
+
+    base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+
+    return "Basic %s" %base64string
 
 # Decorator for debugging
 def breadcrumbs(f):
@@ -41,10 +55,17 @@ def breadcrumbs(f):
         print "</%s>" % f.__name__.upper()
     return _inner
 
+auth_header = create_auth_header()
 
+headers = { 'Authorization' : auth_header }
 # Get a list of all existing entities in CMT
 base_url = 'http://localhost:8000/' # should be read from config file
-r = requests.get(base_url)
+r = requests.get(base_url, headers=headers)
+
+if r.status_code == 401:
+    print "Authorization failed"
+    sys.exit(1)
+
 ENTITIES = r.json().keys()
 
 def query(s):
@@ -77,6 +98,7 @@ def args_to_payload(q):
         d[stmt[0]] = stmt[1]
     return d
 
+
 class Client:
 
 #    class ReadAction(argparse.Action):
@@ -88,6 +110,9 @@ class Client:
 
     @breadcrumbs
     def create(self, args):
+
+        global auth_header
+
         print args
         try:
             assert(args['set']), 'Missing --set arguments'
@@ -96,7 +121,7 @@ class Client:
 
         url = '%s/' % (base_url + args['entity'].pop())
         payload = args_to_payload(args['set'])
-        headers = {'content-type': 'application/json'}
+        headers = {'content-type': 'application/json', 'Authorization' : auth_header }
         r = requests.post(url, data=json.dumps(payload), headers=headers)
         print r # doesn't work yet..
         return
@@ -104,6 +129,9 @@ class Client:
 
     @breadcrumbs
     def read(self, args):
+
+        global auth_header
+
         #print '>>> args:', args
         # Be sure there's a --get arg before taking care of the rest of the args
         try:
@@ -114,7 +142,7 @@ class Client:
         # Get data from given --get args to prepare a request
         url = '%s/' % (base_url + args['entity'].pop())
         payload = args_to_payload(args['get'])
-        headers = {'content-type': 'application/json'}
+        headers = {'content-type': 'application/json', 'Authorization' : auth_header }
         r = requests.get(url, params=payload, headers=headers)
 
         # Print response, or 
@@ -122,7 +150,7 @@ class Client:
             assert(r.json()), 'JSON decoding failed'
         except ValueError, e:
             print ValueError, e
-        print r.json()
+        pprint.pprint(r.json())
 
 
     @breadcrumbs
