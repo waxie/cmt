@@ -16,25 +16,6 @@ import requests
 import base64
 from getpass import getpass
 
-#from docopt import docopt
-#
-#usage = """Config Management Tool.
-#Usage:
-#  cmt.py [options] create <entity> (with DEFINITION [DEFINITION ...])
-#  cmt.py [options] read <entity> (--get (<name>=<value>)QUERY [QUERY ...])
-#  cmt.py [options] update <entity> (--get QUERY [QUERY ...]) (--set DEFINITION [DEFINITION ...])
-#  cmt.py [options] delete <entity> (--get QUERY [QUERY ...])
-#  cmt.py [options] parse TEMPLATE [--output=FILE]
-#
-#Options:
-#  -h --help     Show this help message and exit.
-#  --version     Show program's version number and exit.
-#  -n --dry-run  Do a dry run. [default: False]
-#  -v --verbose  Increase output verbosity
-#  --get=QUERY [QUERY ...]  test
-#  --quiet       Suppress output verbosity [default: False]
-#
-#"""
 
 def create_auth_header():
 
@@ -56,22 +37,28 @@ def breadcrumbs(f):
         print "</%s>" % f.__name__.upper()
     return _inner
 
-auth_header = create_auth_header()
 
-headers = { 'Authorization' : auth_header }
+# Using a session to persist certain parameters across requests
+s = requests.Session()
+auth_header = create_auth_header()
+s.headers.update( { 'Authorization' : auth_header } )
+s.timeout=3.000
+
 # Get a list of all existing entities in CMT
 base_url = 'http://localhost:8000/' # should be read from config file
-r = requests.get(base_url, headers=headers, timeout=3.000)
+r = s.get(base_url)
 try:
     ENTITIES = r.json().keys()
-except requests.exceptions.RequestException, e:
-    if r.status_code == 401:
-        print "Authorization failed"
+    assert(r.status_code == requests.codes.ok), 'HTTP response not OK'
+except (AssertionError, requests.exceptions.RequestException), e:
+    if r.status_code == requests.codes.UNAUTHORIZED: #401
+        print 'Server gave HTTP response code 401: Authorization failed'
+    elif r.status_code == requests.codes.FORBIDDEN: #403
+        print 'Server gave HTTP response code 403: Forbidden'
     else:
-        print e
+        print 'An error occured when requesting the server:', e
     sys.exit(1)
 
-ENTITIES = r.json().keys()
 
 def query(s):
     """
@@ -157,7 +144,6 @@ class Client:
             print ValueError, e
             return None
         return r.json()
-        pprint.pprint(r.json())
 
 
     @breadcrumbs
@@ -292,8 +278,8 @@ def main(args):
         # Route parsed args to the action given on command line
         command = parsed_args['func']
         if command == 'read':
-            retval = c.read(parsed_args)
-            print retval
+            json = c.read(parsed_args)
+            pprint.pprint(json)
         elif command =='create':
             c.create(parsed_args)
         elif command == 'update':
