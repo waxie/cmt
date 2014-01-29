@@ -2,6 +2,8 @@
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+AUTHENTICATION_ENABLED = True
+LOCAL_TEST = True
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -25,16 +27,28 @@ MANAGERS = ADMINS
 ##        }
 ##    }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'cmt_server_test.db',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+if LOCAL_TEST:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+            'NAME': 'cmt_server_test.db',                      # Or path to database file if using sqlite3.
+            'USER': '',                      # Not used with sqlite3.
+            'PASSWORD': '',                  # Not used with sqlite3.
+            'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+            'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+            'NAME': 'sara_cmt_dev',                      # Or path to database file if using sqlite3.
+            'USER': 'cmt',                      # Not used with sqlite3.
+            'PASSWORD': 'Pgpwvcmtiwm',                  # Not used with sqlite3.
+            'HOST': 'cmt.osd.surfsara.nl',                      # Set to empty string for localhost. Not used with sqlite3.
+            'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        }
+    }
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -190,4 +204,60 @@ REST_FRAMEWORK = {
         'rest_framework.filters.DjangoFilterBackend',
     )
 }
+
+# <AUTH AGAINST LDAP> (based on http://packages.python.org/django-auth-ldap/)
+#
+if AUTHENTICATION_ENABLED:
+    import ldap
+    from django_auth_ldap.config import LDAPSearch, PosixGroupType
+
+    # Baseline configuration.
+    AUTH_LDAP_SERVER_URI = "ldaps://ldap.cua.sara.nl"
+
+    # Set AUTH_LDAP_USER_DN_TEMPLATE to a template that will produce the
+    # authenticating user's DN directly. This template should have one
+    # placeholder, %(user)s.
+    AUTH_LDAP_USER_DN_TEMPLATE = 'uid=%(user)s,ou=Users,dc=hpcv,dc=sara,dc=nl'
+
+    # Set up the basic group parameters.
+    AUTH_LDAP_GROUP_SEARCH = LDAPSearch('ou=Groups,dc=hpcv,dc=sara,dc=nl',
+        ldap.SCOPE_SUBTREE, '(objectClass=posixGroup)',
+    )
+    AUTH_LDAP_GROUP_TYPE = PosixGroupType()
+
+    ## Only users in this group can log in.
+    AUTH_LDAP_REQUIRE_GROUP = 'cn=cmt,ou=Groups,dc=hpcv,dc=sara,dc=nl'
+
+    # Populate the Django user from the LDAP directory.
+    AUTH_LDAP_USER_ATTR_MAP = {
+        'first_name': 'givenName',
+        'last_name': 'sn',
+        'email': 'mail',
+    }
+
+    AUTH_LDAP_USER_FLAGS_BY_GROUP = {
+        'is_active': 'cn=cmt,ou=Groups,dc=hpcv,dc=sara,dc=nl',
+        'is_staff': 'cn=cmt,ou=Groups,dc=hpcv,dc=sara,dc=nl',
+        'is_superuser': 'cn=cmt,ou=Groups,dc=hpcv,dc=sara,dc=nl',
+    }
+
+    # This is the default, but I like to be explicit.
+    AUTH_LDAP_ALWAYS_UPDATE_USER = True
+
+    # Cache group memberships for an hour to minimize LDAP traffic
+    AUTH_LDAP_CACHE_GROUPS = True
+    AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
+    # Keep ModelBackend around for per-user permissions and maybe a local
+    # superuser.
+    AUTHENTICATION_BACKENDS = (
+        'django_auth_ldap.backend.LDAPBackend',
+        'django.contrib.auth.backends.ModelBackend',
+    )
+
+    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = [ 'rest_framework.authentication.BasicAuthentication' ]
+    REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = [ 'rest_framework.permissions.IsAuthenticated' ]
+#
+# </AUTH AGAINST LDAP>
+#
+#####
 
