@@ -9,19 +9,6 @@ from sara_cmt.cluster.models import HardwareModel, Role, InterfaceType
 from sara_cmt.cluster.models import WarrantyType, WarrantyContract
 
 
-##class UserSerializer(serializers.HyperlinkedModelSerializer):
-##    class Meta:
-##        model = User
-##        fields = ('url', 'username', 'email', 'groups')
-##
-##
-##class GroupSerializer(serializers.HyperlinkedModelSerializer):
-##    class Meta:
-##        model = Group
-##        fields = ('url', 'name',)
-##
-##
-
 #####
 #
 # Serializers based on the models in CMT

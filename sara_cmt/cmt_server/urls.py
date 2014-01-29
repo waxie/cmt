@@ -8,12 +8,10 @@ from cmt_server.apps.api.views import *
 # Routers provide an easy way of automatically determining the URL conf
 router = routers.DefaultRouter()
 
-#router.register(r'users', UserViewSet)
-#router.register(r'groups', GroupViewSet)
 
 ## locations of equipment in a cluster
-router.register(r'clusters', ClusterViewSet)
-router.register(r'equipment', EquipmentViewSet)
+router.register(r'cluster', ClusterViewSet)
+router.register(r'hardwareunit', EquipmentViewSet)
 router.register(r'racks', RackViewSet)
 router.register(r'addresses', AddressViewSet)
 router.register(r'countries', CountryViewSet) # not really necessary

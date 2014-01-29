@@ -18,25 +18,6 @@ from cmt_server.apps.api.serializers import HardwareModelSerializer, RoleSeriali
 from cmt_server.apps.api.serializers import WarrantyTypeSerializer, WarrantyContractSerializer
 
 
-#class UserViewSet(viewsets.ModelViewSet):
-#    """
-#    Returns a list of **all** registered users.
-#    
-#    For more details about the user please [see here][ref].
-#
-#    [ref]: https://intranet.surfsara.nl/algemeen/wiki/Telefoonlijst
-#    """
-#    model = User
-#    queryset = User.objects.all()
-#    serializer_class = UserSerializer
-
-#class GroupViewSet(viewsets.ModelViewSet):
-#    model = Group
-#    queryset = Group.objects.all()
-#    serializer_class = GroupSerializer
-#
-
-
 #####
 #
 # Viewsets based on the models in CMT. They define the view behavior.
