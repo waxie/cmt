@@ -12,7 +12,7 @@ import argparse
 #  * http://pymotw.com/2/argparse/
 
 import requests # documented at: http://docs.python-requests.org/
-import requests
+import json
 import base64
 from getpass import getpass
 
@@ -25,7 +25,7 @@ def create_auth_header():
     username = raw_input( 'username: ' )
     password = getpass( 'password: ' )
 
-    base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+    base64string = base64.encodestring('%s:%s' % (username, password)).strip()
 
     return "Basic %s" %base64string
 
@@ -51,14 +51,7 @@ try:
     ENTITIES = r.json().keys()
     assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
 except (AssertionError, requests.exceptions.RequestException), e:
-    if r.status_code == requests.codes.UNAUTHORIZED: #401
-        print 'Server gave HTTP response code 401: Authorization failed'
-    elif r.status_code == requests.codes.FORBIDDEN: #403
-        print 'Server gave HTTP response code 403: Forbidden'
-    elif r.status_code == requests.codes.INTERNAL_SERVER_ERROR: #500
-        print 'Server gave HTTP response code 500: Internal server error'
-    else:
-        print 'An error occured when requesting the server:', e
+    print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
     sys.exit(1)
 
 
@@ -104,9 +97,7 @@ class Client:
 
     def create(self, args):
 
-        global auth_header
-
-        print args
+        # Be sure there's a --set arg before taking care of the rest of the args
         try:
             assert(args['set']), 'Missing --set arguments'
         except AssertionError, e:
@@ -114,17 +105,19 @@ class Client:
 
         url = '%s/' % (base_url + args['entity'].pop())
         payload = args_to_payload(args['set'])
-        headers = {'content-type': 'application/json', 'Authorization' : auth_header }
-        r = requests.post(url, data=json.dumps(payload), headers=headers)
-        print r # doesn't work yet..
-        return
+        s.headers.update( {'content-type': 'application/json' } )
+        response = s.post(url, data=json.dumps(payload)) 
+
+        try:
+            assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
+        except AssertionError, e:
+            print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
+
+        return response.json()
 
 
     def read(self, args):
 
-        global auth_header
-
-        #print '>>> args:', args
         # Be sure there's a --get arg before taking care of the rest of the args
         try:
             assert(args['get']), 'Missing --get arguments'
@@ -134,8 +127,8 @@ class Client:
         # Get data from given --get args to prepare a request
         url = '%s/' % (base_url + args['entity'].pop())
         payload = args_to_payload(args['get'])
-        headers = {'content-type': 'application/json', 'Authorization' : auth_header }
-        r = requests.get(url, params=payload, headers=headers)
+        s.headers.update( {'content-type': 'application/json' } )
+        response = s.get(url, params=payload)
 
         # Return response in JSON-format
         try:
@@ -143,7 +136,7 @@ class Client:
         except ValueError, e:
             print ValueError, e
             return None
-        return r.json()
+        return response.json()
 
 
     def update(self, args):
@@ -278,7 +271,8 @@ def main(args):
             json = c.read(parsed_args)
             pprint.pprint(json)
         elif command =='create':
-            c.create(parsed_args)
+            json = c.create(parsed_args)
+            pprint.pprint(json)
         elif command == 'update':
             c.create(parsed_args)
         elif command == 'delete':
