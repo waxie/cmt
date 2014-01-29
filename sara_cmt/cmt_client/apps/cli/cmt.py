@@ -49,12 +49,14 @@ base_url = 'http://localhost:8000/' # should be read from config file
 r = s.get(base_url)
 try:
     ENTITIES = r.json().keys()
-    assert(r.status_code == requests.codes.ok), 'HTTP response not OK'
+    assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
 except (AssertionError, requests.exceptions.RequestException), e:
     if r.status_code == requests.codes.UNAUTHORIZED: #401
         print 'Server gave HTTP response code 401: Authorization failed'
     elif r.status_code == requests.codes.FORBIDDEN: #403
         print 'Server gave HTTP response code 403: Forbidden'
+    elif r.status_code == requests.codes.INTERNAL_SERVER_ERROR: #500
+        print 'Server gave HTTP response code 500: Internal server error'
     else:
         print 'An error occured when requesting the server:', e
     sys.exit(1)
@@ -100,7 +102,6 @@ class Client:
 #            #print '... readparser:', readparser
 
 
-    @breadcrumbs
     def create(self, args):
 
         global auth_header
@@ -119,7 +120,6 @@ class Client:
         return
 
 
-    @breadcrumbs
     def read(self, args):
 
         global auth_header
@@ -146,7 +146,6 @@ class Client:
         return r.json()
 
 
-    @breadcrumbs
     def update(self, args):
         # First get the selection of objects to update
         selection = read(args)
@@ -154,13 +153,11 @@ class Client:
         return
 
 
-    @breadcrumbs
     def delete(self, args):
         print args
         return
 
 
-    @breadcrumbs
     # Parse a template
     def parse(args):
         print args
