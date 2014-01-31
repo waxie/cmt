@@ -58,7 +58,7 @@ class Cluster(ModelExtension):
         ordering = ('name',)
 
     def __unicode__(self):
-        return self.name or None
+        return unicode(self.name) or None
 
 
 class HardwareUnit(ModelExtension):
@@ -128,9 +128,9 @@ class HardwareUnit(ModelExtension):
     def __unicode__(self):
         try:
             assert self.label, "piece of hardware hasn't got a label yet"
-            return self.label
+            return unicode(self.label)
         except AssertionError, e:
-            return e
+            return unicode(e)
 
     def save(self, force_insert=False, force_update=False):
         """
@@ -216,7 +216,7 @@ class Interface(ModelExtension):
 
     def __unicode__(self):
         #return self.fqdn
-        return self.label or 'anonymous'
+        return unicode(self.label) or unicode('anonymous')
 
     def save(self, force_insert=False, force_update=False):
         """
@@ -272,7 +272,8 @@ class Network(ModelExtension):
 
     name       = models.CharField(max_length=255, help_text='example: \
                                   infiniband')
-    cidr       = models.GenericIPAddressField(help_text='example: 192.168.1.0/24 or fd47:e249:06b2:0385::/64')
+    cidr       = models.CharField(max_length=100, help_text='example: 192.168.1.0/24 or fd47:e249:06b2:0385::/64')
+
     gateway    = models.GenericIPAddressField(blank=True, help_text='Automagically generated if kept empty')
     domain     = models.CharField(max_length=255, help_text='example: \
                                   irc.sara.nl', validators=[domain_validator])
@@ -288,7 +289,7 @@ class Network(ModelExtension):
         verbose_name_plural = 'networks'
 
     def __unicode__(self):
-        return self.name
+        return unicode(self.name)
 
     #
     def _rev_name(self):
@@ -425,7 +426,7 @@ class Rack(ModelExtension):
         return self.room.address
 
     def __unicode__(self):
-        return 'rack %s' % (self.label)
+        return unicode('rack %s' % (self.label) )
 
 #
 #
@@ -453,7 +454,7 @@ class Country(ModelExtension):
         ordering = ('name',)
 
     def __unicode__(self):
-        return self.name
+        return unicode(self.name)
 
 
 class Address(ModelExtension):
@@ -475,7 +476,7 @@ class Address(ModelExtension):
         ordering = ('postalcode',)
 
     def __unicode__(self):
-        return '%s - %s' % (self.city, self.address)
+        return unicode('%s - %s' % (self.city, self.address))
 
 
 class Room(ModelExtension):
@@ -494,7 +495,7 @@ class Room(ModelExtension):
 
     def __unicode__(self):
         #return unicode('%s - %s'%(self.address,self.label))
-        return '%s (%s, %s)' % (self.label, self.address.address, self.address.city)
+        return unicode('%s (%s, %s)' % (self.label, self.address.address, self.address.city))
 
 #
 #
@@ -524,7 +525,7 @@ class Company(ModelExtension):
         return ' | '.join([address.address for address in self.addresses.all()]) or '-'
 
     def __unicode__(self):
-        return self.name
+        return unicode(self.name)
 
     class Meta:
         verbose_name_plural = 'companies'
@@ -545,7 +546,7 @@ class Connection(ModelExtension):
     email  = models.EmailField(blank=True, null=True)
 
     def __unicode__(self):
-        return self.name
+        return unicode(self.name)
 
     def _address(self):
         return address.address
@@ -574,7 +575,7 @@ class Telephonenumber(ModelExtension):
     # !!! TODO: link to company / contact / etc... !!!
 
     def __unicode__(self):
-        return '+%i(%s)%s-%i' % (self.country.country_code, self.areacode[:1], self.areacode[1:], self.subscriber_number)
+        return unicode('+%i(%s)%s-%i' % (self.country.country_code, self.areacode[:1], self.areacode[1:], self.subscriber_number))
 
     class Meta:
         ordering = ('connection',)
@@ -609,7 +610,7 @@ class HardwareModel(ModelExtension):
         ordering = ('vendor', 'name')
 
     def __unicode__(self):
-        return '%s (%s)' % (self.name, self.vendor)
+        return unicode('%s (%s)' % (self.name, self.vendor))
 
     def save(self, force_insert=False, force_update=False):
         """
@@ -637,7 +638,7 @@ class Role(ModelExtension):
         verbose_name_plural = 'roles'
 
     def __unicode__(self):
-        return str(self.label)
+        return unicode(self.label)
 
 
 class InterfaceType(ModelExtension):
@@ -684,7 +685,7 @@ class WarrantyType(ModelExtension):
     class Meta:
         ordering = ('contact__company__name', 'label')
     def __unicode__(self):
-        return self.label
+        return unicode(self.label)
 
 
 class WarrantyContract(ModelExtension):
@@ -708,7 +709,7 @@ class WarrantyContract(ModelExtension):
         return self.date_to < date.today()
 
     def __unicode__(self):
-        return self.label
+        return unicode(self.label)
 
     def save(self, force_insert=False, force_update=False):
         """

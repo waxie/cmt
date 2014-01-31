@@ -131,7 +131,7 @@ config.read( CONFIG_FILE )
 
 try:
 	DATABASE_HOST		= config.get('database', 'HOST')
-	DATABASE_ENGINE		= config.get('database', 'ENGINE')
+	DATABASE_ENGINE		= 'django.db.backends.' + config.get('database', 'ENGINE')
 	DATABASE_NAME		= config.get('database', 'NAME')
 	
 	print 'DATABASE SETTINGS:'
@@ -214,9 +214,9 @@ DATABASES = {
 #   http://docs.djangoproject.com/en/dev/ref/settings/
 
 # Only set CLIENT_ONLY to False on the central CMT-server
-CLIENT_ONLY = True
+CLIENT_ONLY = False
 
-DEBUG = False
+DEBUG = True
 
 ADMINS = (
     ('Sil Westerveld', 'sil.westerveld@sara.nl'),
@@ -277,6 +277,8 @@ if not CLIENT_ONLY:
         'django_auth_ldap.backend.LDAPBackend',
         'django.contrib.auth.backends.ModelBackend',
     )
+
+    ALLOWED_HOSTS = [ '.' + config.get('web', 'DOMAIN') ]
 #
 # </AUTH AGAINST LDAP>
 #
@@ -338,10 +340,10 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'urls'
-#ROOT_URLCONF = 'sara_cmt.urls'
+ROOT_URLCONF = 'sara_cmt.urls'
 
 # Templates for the CMT command line interface.
 # (thus, the templates for our configfiles, etc)
@@ -373,6 +375,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.staticfiles',
     'django.contrib.webdesign',
+    'django.contrib.messages',
     'sara_cmt.cluster',
     'django_extensions',
     'tagging',
