@@ -147,8 +147,44 @@ class Client:
 
 
     def delete(self, args):
-        print args
-        return
+        # Be sure there's a --get arg before taking care of the rest of the args
+        try:
+            assert(args['get']), 'Missing --get arguments'
+        except AssertionError, e:
+            print AssertionError, e
+
+        # Get data from given --get args to prepare a request
+        url = '%s/' % (base_url + args['entity'].pop())
+        payload = args_to_payload(args['get'])
+        s.headers.update( {'content-type': 'application/json' } )
+        response = s.get(url, params=payload)
+
+        # Return response in JSON-format
+        try:
+            assert(r.json()), 'JSON decoding failed'
+        except ValueError, e:
+            print ValueError, e
+            return None
+
+        #pprint.pprint( response.json() )
+
+        confirm_str = 'You are about to delete: %s object(s). Are you sure ([N]/Y)?: ' %response.json()[ 'count' ]
+        confirm = raw_input( confirm_str )
+      
+        if confirm == 'y':
+ 
+            reponse = s.delete(url, params=payload)
+
+            # Return response in JSON-format
+            try:
+                assert(r.json()), 'JSON decoding failed'
+            except ValueError, e:
+                print ValueError, e
+                return None
+
+            return response.json()
+ 
+        return 
 
 
     # Parse a template
@@ -276,16 +312,16 @@ def main(args):
         elif command == 'update':
             c.create(parsed_args)
         elif command == 'delete':
-            c.create(parsed_args)
+            c.delete(parsed_args)
         elif command == 'parse':
             c.create(parsed_args)
 
         return 1
     except SystemExit:
         return 2
-    except:
-        print '>>> Error:', sys.exc_info()[0]
-        return -1
+    #except:
+    #    print '>>> Error:', sys.exc_info()[0]
+    #    return -1
 
 
 if __name__ == '__main__':
