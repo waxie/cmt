@@ -166,14 +166,27 @@ class Client:
             print ValueError, e
             return None
 
-        #pprint.pprint( response.json() )
+        pprint.pprint( response.json() )
 
-        confirm_str = 'You are about to delete: %s object(s). Are you sure ([N]/Y)?: ' %response.json()[ 'count' ]
+        response_data = response.json()
+
+        result_count = response_data[ 'count' ]
+
+        if result_count == 0:
+
+            print 'No objects found'
+            return 
+
+        confirm_str = 'You are about to delete: %s object(s). Are you sure ([N]/Y)?: ' %result_count
         confirm = raw_input( confirm_str )
       
-        if confirm == 'y':
- 
-            reponse = s.delete(url, params=payload)
+        if confirm != 'y':
+
+            return
+
+        for result in response_data['results']:
+
+            reponse = s.delete(result['url'])
 
             # Return response in JSON-format
             try:
@@ -184,9 +197,6 @@ class Client:
 
             return response.json()
  
-        return 
-
-
     # Parse a template
     def parse(args):
         print args
