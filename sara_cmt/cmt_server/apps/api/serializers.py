@@ -47,6 +47,8 @@ class AddressSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class CountrySerializer(serializers.HyperlinkedModelSerializer):
+    addresses = serializers.HyperlinkedRelatedField(many=True, view_name='address-detail')
+
     class Meta:
         model = Country
 

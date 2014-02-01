@@ -57,9 +57,8 @@ class RoomViewSet(viewsets.ModelViewSet):
 class AddressViewSet(viewsets.ModelViewSet):
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
-    filter_fields = (
-            'country__name', 'country__country_code', 'address'
-            'postalcode', 'city'
+    filter_fields = ( 'address',
+            'postalcode', 'city', 'country__name', 'country__country_code'
             )
 
 class CountryViewSet(viewsets.ModelViewSet):
