@@ -17,6 +17,10 @@ from cmt_server.apps.api.serializers import ConnectionSerializer, CompanySeriali
 from cmt_server.apps.api.serializers import HardwareModelSerializer, RoleSerializer, InterfaceTypeSerializer
 from cmt_server.apps.api.serializers import WarrantyTypeSerializer, WarrantyContractSerializer
 
+from django.contrib.admin.models import LogEntry, DELETION, ADDITION, CHANGE
+from django.utils.encoding import force_unicode
+from django.contrib.contenttypes.models import ContentType
+
 
 #####
 #
@@ -60,6 +64,39 @@ class AddressViewSet(viewsets.ModelViewSet):
     filter_fields = ( 'address',
             'postalcode', 'city', 'country__name', 'country__country_code'
             )
+
+    def pre_delete(self, obj):
+
+        LogEntry.objects.log_action(
+            user_id         = self.request.user.pk, 
+            content_type_id = ContentType.objects.get_for_model(obj).pk,
+            object_id       = obj.pk,
+            object_repr     = force_unicode(obj), 
+            action_flag     = DELETION
+        )
+
+    def post_save(self, obj, created=False):
+
+        if created:
+
+            LogEntry.objects.log_action(
+                user_id         = self.request.user.pk, 
+                content_type_id = ContentType.objects.get_for_model(obj).pk,
+                object_id       = obj.pk,
+                object_repr     = force_unicode(obj), 
+                action_flag     = ADDITION
+            )
+
+        else:
+
+            LogEntry.objects.log_action(
+                user_id         = self.request.user.pk, 
+                content_type_id = ContentType.objects.get_for_model(obj).pk,
+                object_id       = obj.pk,
+                object_repr     = force_unicode(obj), 
+                action_flag     = CHANGE
+            )
+
 
 class CountryViewSet(viewsets.ModelViewSet):
     queryset = Country.objects.all()
