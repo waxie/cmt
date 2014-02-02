@@ -21,51 +21,15 @@ from django.contrib.admin.models import LogEntry, DELETION, ADDITION, CHANGE
 from django.utils.encoding import force_unicode
 from django.contrib.contenttypes.models import ContentType
 
-
-#####
-#
-# Viewsets based on the models in CMT. They define the view behavior.
-# Documented at: http://www.django-rest-framework.org/
-#
-
-# Equipment-related
-class ClusterViewSet(viewsets.ModelViewSet):
-    queryset = Cluster.objects.all()
-    serializer_class = ClusterSerializer
-    fields = ('url',)
-    filter_fields = ('name',)
-    # model = Cluster
-    # lookup_fields = (...
-
-class EquipmentViewSet(viewsets.ModelViewSet):
-    queryset = Equipment.objects.all()
-    serializer_class = EquipmentSerializer
-    filter_fields = (
-            'cluster__name', 'role__label', 'network__name', 'network__vlan',
-            'specifications__name', 'warranty__label', 'warranty__contract_number',
-            'rack__label', 'warranty_tag', 'serial_number', 'first_slot', 'label',
-            #'in_support'
-            )
-
-
-class RackViewSet(viewsets.ModelViewSet):
-    queryset = Rack.objects.all()
-    serializer_class = RackSerializer
-    filter_fields = ('label', 'room__label')
-
-class RoomViewSet(viewsets.ModelViewSet):
-    queryset = Room.objects.all()
-    serializer_class = RoomSerializer
-    filter_fields = ('label', 'address__address')
-
-class AddressViewSet(viewsets.ModelViewSet):
-    queryset = Address.objects.all()
-    serializer_class = AddressSerializer
-    filter_fields = ( 'address',
-            'postalcode', 'city', 'country__name', 'country__country_code'
-            )
+class CMTViewSet(viewsets.ModelViewSet):
 
     def pre_delete(self, obj):
+
+        """
+        pre_delete hook is called by ModelViewSet before deleting a object from database
+
+        Log entry to django-admin log
+        """
 
         LogEntry.objects.log_action(
             user_id         = self.request.user.pk, 
@@ -76,6 +40,14 @@ class AddressViewSet(viewsets.ModelViewSet):
         )
 
     def post_save(self, obj, created=False):
+
+        """
+        post_save hook is called by ModelViewSet after saving a object to database
+
+        created indicates if the object was changed (existing) or added (new)
+
+        Log entry to django-admin log
+        """
 
         if created:
 
@@ -97,15 +69,59 @@ class AddressViewSet(viewsets.ModelViewSet):
                 action_flag     = CHANGE
             )
 
+#####
+#
+# Viewsets based on the models in CMT. They define the view behavior.
+# Documented at: http://www.django-rest-framework.org/
+#
 
-class CountryViewSet(viewsets.ModelViewSet):
+# Equipment-related
+class ClusterViewSet(CMTViewSet):
+    queryset = Cluster.objects.all()
+    serializer_class = ClusterSerializer
+    fields = ('url',)
+    filter_fields = ('name',)
+    # model = Cluster
+    # lookup_fields = (...
+
+class EquipmentViewSet(CMTViewSet):
+    queryset = Equipment.objects.all()
+    serializer_class = EquipmentSerializer
+    filter_fields = (
+            'cluster__name', 'role__label', 'network__name', 'network__vlan',
+            'specifications__name', 'warranty__label', 'warranty__contract_number',
+            'rack__label', 'warranty_tag', 'serial_number', 'first_slot', 'label',
+            #'in_support'
+            )
+
+
+class RackViewSet(CMTViewSet):
+    queryset = Rack.objects.all()
+    serializer_class = RackSerializer
+    filter_fields = ('label', 'room__label')
+
+class RoomViewSet(CMTViewSet):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+    filter_fields = ('label', 'address__address')
+
+class AddressViewSet(CMTViewSet):
+    queryset = Address.objects.all()
+    serializer_class = AddressSerializer
+    filter_fields = ( 'address',
+            'postalcode', 'city', 'country__name', 'country__country_code'
+            )
+
+
+
+class CountryViewSet(CMTViewSet):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
     filter_fields = ('name', 'country_code')
 
 
 # Network-related
-class InterfaceViewSet(viewsets.ModelViewSet):
+class InterfaceViewSet(CMTViewSet):
     queryset = Interface.objects.all()
     serializer_class = InterfaceSerializer
     filter_fields = (
@@ -113,7 +129,7 @@ class InterfaceViewSet(viewsets.ModelViewSet):
             'label', 'aliases', 'hwaddress', 'ip'
             )
 
-class NetworkViewSet(viewsets.ModelViewSet):
+class NetworkViewSet(CMTViewSet):
     queryset = Network.objects.all()
     serializer_class = NetworkSerializer
     filter_fields = (
@@ -121,49 +137,49 @@ class NetworkViewSet(viewsets.ModelViewSet):
             )
 
 
-class ConnectionViewSet(viewsets.ModelViewSet):
+class ConnectionViewSet(CMTViewSet):
     queryset = Connection.objects.all()
     serializer_class = ConnectionSerializer
     filter_fields = ('name',)
 
 
-class CompanyViewSet(viewsets.ModelViewSet):
+class CompanyViewSet(CMTViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     filter_fields = ('name',)
 
 
-class TelephonenumberViewSet(viewsets.ModelViewSet):
+class TelephonenumberViewSet(CMTViewSet):
     queryset = Telephonenumber.objects.all()
     serializer_class = TelephonenumberSerializer
     filter_fields = ('connection__name',)
 
 
-class HardwareModelViewSet(viewsets.ModelViewSet):
+class HardwareModelViewSet(CMTViewSet):
     queryset = HardwareModel.objects.all()
     serializer_class = HardwareModelSerializer
     filter_fields = ('vendor__name', 'name', 'vendorcode')
 
 
-class RoleViewSet(viewsets.ModelViewSet):
+class RoleViewSet(CMTViewSet):
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
     filter_fields = ('label',)
 
 
-class InterfaceTypeViewSet(viewsets.ModelViewSet):
+class InterfaceTypeViewSet(CMTViewSet):
     queryset = InterfaceType.objects.all()
     serializer_class = InterfaceTypeSerializer
     filter_fields = ('vendor__name', 'label')
 
 
-class WarrantyTypeViewSet(viewsets.ModelViewSet):
+class WarrantyTypeViewSet(CMTViewSet):
     queryset = WarrantyType.objects.all()
     serializer_class = WarrantyTypeSerializer
     filter_fields = ('contact__name', 'label')
 
 
-class WarrantyContractViewSet(viewsets.ModelViewSet):
+class WarrantyContractViewSet(CMTViewSet):
     queryset = WarrantyContract.objects.all()
     serializer_class = WarrantyContractSerializer
     filter_fields = ('warranty_type__label', 'contract_number', 'label')
