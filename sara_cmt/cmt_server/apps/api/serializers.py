@@ -19,7 +19,7 @@ class ClusterSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Cluster
-        fields = ('name', 'hardware')
+        #fields = ('url', 'name', 'hardware')
 
 
 class EquipmentSerializer(serializers.HyperlinkedModelSerializer):

@@ -42,11 +42,15 @@ def breadcrumbs(f):
 s = requests.Session()
 auth_header = create_auth_header()
 s.headers.update( { 'Authorization' : auth_header } )
-s.timeout=3.000
+s.timeout = 3.000
+base_url = 'http://localhost:8000/' # should be read from config file
 
 # Get a list of all existing entities in CMT
-base_url = 'http://localhost:8000/' # should be read from config file
-r = s.get(base_url)
+try:
+    r = s.get(base_url)
+except requests.exceptions.ConnectionError, e:
+    print 'Error connecting to server: %s' % e
+
 try:
     ENTITIES = r.json().keys()
     assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
@@ -95,40 +99,103 @@ class Client:
 #            #print '... readparser:', readparser
 
 
+    def get_related_ent(self, entity, field):
+        """
+        Current implementation is a placeholder. This must be implemented server-side.
+        """
+        print 'LOOKING UP ENTITY FOR %s__%s' % (entity, field)
+        if entity == 'equipment':
+            if field == 'cluster':
+                return 'clusters'
+            elif field == 'rack':
+                return 'racks'
+        return None
+
+
     def create(self, args):
 
+        print '>>> <CREATING>'
         # Be sure there's a --set arg before taking care of the rest of the args
         try:
             assert(args['set']), 'Missing --set arguments'
         except AssertionError, e:
             print AssertionError, e
 
-        url = '%s/' % (base_url + args['entity'].pop())
+        # Prepare POST request (r) based on session (s) and given --set args
+        entity = args['entity'].pop()
+        url = '%s/' % (base_url + entity)
         payload = args_to_payload(args['set'])
+        print 'PAYLOAD:', payload
+        ## Check for fields that need a reference url, before an error occurs
+        #for key in payload.keys():
+        #    print 'CHECKING KEY:', key
+        #    if '__' in key:
+        #        print 'KEY', key, 'HAS TO BE LOOKED UP'
+        #        val = payload[key] 
+        #        assert(len(key.split('__')) <= 2), 'Lookup to deep'
+        #        field, lookup_field = key.split('__')
+        #        print 'SEARCHING ENTITY FOR FIELD %s IN %s' % (field, entity)
+        #        lookup_ent = self.get_related_ent(entity=entity, field=field)
+        #        print 'LOOK UP', lookup_field, 'IN', lookup_ent
+        #        new_args = {'entity':[lookup_ent], 'get':[[lookup_field,payload[key]]]}
+        #        print 'NEW_ARGS:', new_args
+        #        related_json = self.read(args=new_args, lookup=True)
+        #        print 'TTT'
+        #        urls = related_json['results'].pop()['url']
+        #        print 'URLS:', urls
+        #        payload[field] = urls
+        #print 'PAYLOAD::', payload
         s.headers.update( {'content-type': 'application/json' } )
-        response = s.post(url, data=json.dumps(payload)) 
+        try:
+            r = s.post(url, data=json.dumps(payload)) 
+        except ConnectionError, e:
+            print 'Error connecting to server: %s' % e
 
+        # Check for HTTP-status 200
         try:
             assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
         except AssertionError, e:
             print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
 
-        return response.json()
+            lookups = []
+            if r.status_code == requests.codes.BAD_REQUEST: #400
+                print 'JSON:', r.json()
+                for field, reasons in r.json().items():
+                    reason_found = False
+                    for key in payload.keys():
+                        if key.startswith(field):
+                            print ' * Field %s has to be looked up' % field
+                            lookups.append(
+                            reason_found = True
+                            continue
+                    if not reason_found:
+                        print ' * Field %s is a required field' % field
+
+        print '>>> </CREATING>'
+        return r.json()
 
 
-    def read(self, args):
+    def read(self, args, lookup=False):
 
+        print '>>> <READING>'
         # Be sure there's a --get arg before taking care of the rest of the args
         try:
+            print 'ARGGGGS:', args
             assert(args['get']), 'Missing --get arguments'
         except AssertionError, e:
             print AssertionError, e
 
-        # Get data from given --get args to prepare a request
+        # Prepare GET request (r) based on session (s) and given --get args
         url = '%s/' % (base_url + args['entity'].pop())
         payload = args_to_payload(args['get'])
         s.headers.update( {'content-type': 'application/json' } )
-        response = s.get(url, params=payload)
+        r = s.get(url, params=payload)
+
+        # Check for HTTP-status 200
+        try:
+            assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
+        except AssertionError, e:
+            print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
 
         # Return response in JSON-format
         try:
@@ -136,7 +203,11 @@ class Client:
         except ValueError, e:
             print ValueError, e
             return None
-        return response.json()
+        print '>>> </READING>'
+
+        if lookup:
+            print r.json()
+        return r.json()
 
 
     def update(self, args):
@@ -241,21 +312,23 @@ class Client:
         try:
             self._args = vars(parser.parse_args())
             print '>>> PARSED ARGS:', self._args
-            if self._args['func'] == 'create':
-                if not self._args['assign']:
-                    print "Can't create object(s) without a valid QUERY to match for or ASSIGNMENT to assign."
-            elif self._args['func'] == 'read':
-                if not self._args['matching']:
-                    parser.error("Can't read object(s) without a valid QUERY to match for.")
-                    print "Can't read object(s) without a valid QUERY to match for."
-            elif self._args['func'] == 'update':
-                if not self._args['matching'] or not self._args['assign']:
-                    print "Can't update object(s) without a valid QUERY to match for or ASSIGNMENT to assign."
-            elif self._args['func'] == 'delete':
-                if not self._args['matching']:
-                    print "Can't delete object(s) without a valid QUERY to match for."
-        except:
-            pass
+            #if self._args['func'] == 'create':
+            #    if not self._args['assign']:
+            #        print "Can't create object(s) without a valid QUERY to match for or ASSIGNMENT to assign."
+            #elif self._args['func'] == 'read':
+            #    if not self._args['matching']:
+            #        parser.error("Can't read object(s) without a valid QUERY to match for.")
+            #        print "Can't read object(s) without a valid QUERY to match for."
+            #elif self._args['func'] == 'update':
+            #    if not self._args['matching'] or not self._args['assign']:
+            #        print "Can't update object(s) without a valid QUERY to match for or ASSIGNMENT to assign."
+            #elif self._args['func'] == 'delete':
+            #    if not self._args['matching']:
+            #        print "Can't delete object(s) without a valid QUERY to match for."
+        except exceptions.AttributeError, e:
+            print 'Invalid entity given'
+        except exceptions.NameError, e:
+            print 'nameerror', e
 
 
 
@@ -266,18 +339,20 @@ def main(args):
         #print '>>> PARSER:', parsed_args
         
         # Route parsed args to the action given on command line
-        command = parsed_args['func']
-        if command == 'read':
+        cmd = parsed_args['func']
+        if cmd == 'read':
+            print '>>> CMD is "read"'
             json = c.read(parsed_args)
+            print '>>> JSON:', json
             pprint.pprint(json)
-        elif command =='create':
+        elif cmd =='create':
             json = c.create(parsed_args)
             pprint.pprint(json)
-        elif command == 'update':
+        elif cmd == 'update':
             c.create(parsed_args)
-        elif command == 'delete':
+        elif cmd == 'delete':
             c.create(parsed_args)
-        elif command == 'parse':
+        elif cmd == 'parse':
             c.create(parsed_args)
 
         return 1
