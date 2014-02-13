@@ -217,10 +217,56 @@ class Client:
 
 
     def delete(self, args):
-        print args
-        return
+        # Be sure there's a --get arg before taking care of the rest of the args
+        try:
+            assert(args['get']), 'Missing --get arguments'
+        except AssertionError, e:
+            print AssertionError, e
 
+        # Get data from given --get args to prepare a request
+        url = '%s/' % (base_url + args['entity'].pop())
+        payload = args_to_payload(args['get'])
+        s.headers.update( {'content-type': 'application/json' } )
+        response = s.get(url, params=payload)
 
+        # Return response in JSON-format
+        try:
+            assert(r.json()), 'JSON decoding failed'
+        except ValueError, e:
+            print ValueError, e
+            return None
+
+        pprint.pprint( response.json() )
+
+        response_data = response.json()
+
+        result_count = response_data[ 'count' ]
+
+        if result_count == 0:
+
+            print 'No objects found'
+            return 
+
+        confirm_str = 'You are about to delete: %s object(s). Are you sure ([N]/Y)?: ' %result_count
+        confirm = raw_input( confirm_str )
+      
+        if confirm != 'y':
+
+            return
+
+        for result in response_data['results']:
+
+            reponse = s.delete(result['url'])
+
+            # Return response in JSON-format
+            try:
+                assert(r.json()), 'JSON decoding failed'
+            except ValueError, e:
+                print ValueError, e
+                return None
+
+            return response.json()
+ 
     # Parse a template
     def parse(args):
         print args
@@ -338,28 +384,26 @@ def main(args):
         #print '>>> PARSER:', parsed_args
         
         # Route parsed args to the action given on command line
-        cmd = parsed_args['func']
-        if cmd == 'read':
-            print '>>> CMD is "read"'
+        command = parsed_args['func']
+        if command == 'read':
             json = c.read(parsed_args)
-            print '>>> JSON:', json
             pprint.pprint(json)
-        elif cmd =='create':
+        elif command =='create':
             json = c.create(parsed_args)
             pprint.pprint(json)
-        elif cmd == 'update':
+        elif command == 'update':
             c.create(parsed_args)
-        elif cmd == 'delete':
-            c.create(parsed_args)
-        elif cmd == 'parse':
+        elif command == 'delete':
+            c.delete(parsed_args)
+        elif command == 'parse':
             c.create(parsed_args)
 
         return 1
     except SystemExit:
         return 2
-    except:
-        print '>>> Error:', sys.exc_info()[0]
-        return -1
+    #except:
+    #    print '>>> Error:', sys.exc_info()[0]
+    #    return -1
 
 
 if __name__ == '__main__':
