@@ -165,7 +165,7 @@ class Client:
                     for key in payload.keys():
                         if key.startswith(field):
                             print ' * Field %s has to be looked up' % field
-                            lookups.append(
+                            lookups.append(field)
                             reason_found = True
                             continue
                     if not reason_found:
@@ -370,9 +370,9 @@ class Client:
             #elif self._args['func'] == 'delete':
             #    if not self._args['matching']:
             #        print "Can't delete object(s) without a valid QUERY to match for."
-        except exceptions.AttributeError, e:
+        except AttributeError, e:
             print 'Invalid entity given'
-        except exceptions.NameError, e:
+        except NameError, e:
             print 'nameerror', e
 
 
