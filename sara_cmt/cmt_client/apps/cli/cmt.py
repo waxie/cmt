@@ -180,7 +180,6 @@ class Client:
         print '>>> <READING>'
         # Be sure there's a --get arg before taking care of the rest of the args
         try:
-            print 'ARGGGGS:', args
             assert(args['get']), 'Missing --get arguments'
         except AssertionError, e:
             print AssertionError, e
