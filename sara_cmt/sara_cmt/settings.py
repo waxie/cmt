@@ -278,7 +278,7 @@ if not CLIENT_ONLY:
         'django.contrib.auth.backends.ModelBackend',
     )
 
-    ALLOWED_HOSTS = [ '.' + config.get('web', 'DOMAIN') ]
+    ALLOWED_HOSTS = [ 'localhost', '.' + config.get('web', 'DOMAIN') ]
 #
 # </AUTH AGAINST LDAP>
 #

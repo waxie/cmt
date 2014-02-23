@@ -7,38 +7,38 @@ from rest_framework import routers
 from cmt_server.apps.api.views import *
 
 # Routers provide an easy way of automatically determining the URL conf
-router = routers.DefaultRouter()
+router_v1 = routers.DefaultRouter()
 
 ## locations of equipment in a cluster
-router.register(r'clusters', ClusterViewSet)
-router.register(r'equipment', EquipmentViewSet)
-router.register(r'racks', RackViewSet)
-router.register(r'addresses', AddressViewSet)
-router.register(r'countries', CountryViewSet) # not really necessary
-router.register(r'rooms', RoomViewSet)
+router_v1.register(r'clusters', ClusterViewSet)
+router_v1.register(r'equipment', EquipmentViewSet)
+router_v1.register(r'racks', RackViewSet)
+router_v1.register(r'addresses', AddressViewSet)
+router_v1.register(r'countries', CountryViewSet) # not really necessary
+router_v1.register(r'rooms', RoomViewSet)
 
 ## network-related info of equipment
-router.register(r'interfaces', InterfaceViewSet)
-router.register(r'networks', NetworkViewSet)
+router_v1.register(r'interfaces', InterfaceViewSet)
+router_v1.register(r'networks', NetworkViewSet)
 
 ## contact-related info of relations
-router.register(r'contacts', ConnectionViewSet)
-router.register(r'companies', CompanyViewSet)
-router.register(r'telephonenumbers', TelephonenumberViewSet)
+router_v1.register(r'contacts', ConnectionViewSet)
+router_v1.register(r'companies', CompanyViewSet)
+router_v1.register(r'telephonenumbers', TelephonenumberViewSet)
 
 ## equipment-related info
-router.register(r'hardwaremodels', HardwareModelViewSet)
-router.register(r'roles', RoleViewSet)
-router.register(r'interfacetypes', InterfaceTypeViewSet)
+router_v1.register(r'hardwaremodels', HardwareModelViewSet)
+router_v1.register(r'roles', RoleViewSet)
+router_v1.register(r'interfacetypes', InterfaceTypeViewSet)
 
 ## warranty-related info
-router.register(r'warrantytypes', WarrantyTypeViewSet)
-router.register(r'warrantycontracts', WarrantyContractViewSet)
+router_v1.register(r'warrantytypes', WarrantyTypeViewSet)
+router_v1.register(r'warrantycontracts', WarrantyContractViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browseable API.
 urlpatterns = patterns('',
-    url(r'^', include(router.urls)),
+    url(r'^api/v1/', include(router_v1.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     # Examples:

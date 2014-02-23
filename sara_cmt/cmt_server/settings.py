@@ -248,9 +248,7 @@ if AUTHENTICATION_ENABLED:
     AUTH_LDAP_CACHE_GROUPS = True
     AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
 
-    AUTH_LDAP_CONNECTION_OPTIONS = {
-        'ldap.OPT_TIMEOUT': '3'
-    }
+    #AUTH_LDAP_CONNECTION_OPTIONS['ldap.OPT_TIMEOUT'] = '3000'
 
     # Keep ModelBackend around for per-user permissions and maybe a local
     # superuser.

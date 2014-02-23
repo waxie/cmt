@@ -43,13 +43,18 @@ s = requests.Session()
 auth_header = create_auth_header()
 s.headers.update( { 'Authorization' : auth_header } )
 s.timeout = 3.000
-base_url = 'http://localhost:8000/' # should be read from config file
+base_url = 'http://localhost:8000' # should be read from config file
+
+API_VERSION = '1'
+
+full_url = '%s/api/v%s/' %( base_url, API_VERSION )
 
 # Get a list of all existing entities in CMT
 try:
-    r = s.get(base_url)
-except requests.exceptions.ConnectionError, e:
-    print 'Error connecting to server: %s' % e
+    r = s.get(full_url)
+except requests.exceptions.ConnectionError as req_ce:
+    print 'Error connecting to server: %s' % req_ce.args[0].reason.strerror
+    sys.exit(1)
 
 try:
     ENTITIES = r.json().keys()
@@ -123,7 +128,7 @@ class Client:
 
         # Prepare POST request (r) based on session (s) and given --set args
         entity = args['entity'].pop()
-        url = '%s/' % (base_url + entity)
+        url = '%s/' % (full_url + entity)
         payload = args_to_payload(args['set'])
         print 'PAYLOAD:', payload
         ## Check for fields that need a reference url, before an error occurs
@@ -185,7 +190,7 @@ class Client:
             print AssertionError, e
 
         # Prepare GET request (r) based on session (s) and given --get args
-        url = '%s/' % (base_url + args['entity'].pop())
+        url = '%s/' % (full_url + args['entity'].pop())
         payload = args_to_payload(args['get'])
         s.headers.update( {'content-type': 'application/json' } )
         r = s.get(url, params=payload)
@@ -224,7 +229,7 @@ class Client:
             print AssertionError, e
 
         # Get data from given --get args to prepare a request
-        url = '%s/' % (base_url + args['entity'].pop())
+        url = '%s/' % (full_url + args['entity'].pop())
         payload = args_to_payload(args['get'])
         s.headers.update( {'content-type': 'application/json' } )
         response = s.get(url, params=payload)
