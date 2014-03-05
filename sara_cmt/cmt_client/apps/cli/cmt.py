@@ -4,6 +4,7 @@ import logging
 import sys
 import textwrap
 import pprint
+import os
 
 import argparse
 # Documented at:
@@ -37,6 +38,11 @@ def breadcrumbs(f):
         print "</%s>" % f.__name__.upper()
     return _inner
 
+def is_valid_file(parser, arg):
+    if not os.path.exists(arg):
+       parser.error("The file %s does not exist!"%arg)
+    else:
+       return open(arg,'r')  #return an open file handle
 
 # Using a session to persist certain parameters across requests
 s = requests.Session()
@@ -57,12 +63,12 @@ except requests.exceptions.ConnectionError as req_ce:
     sys.exit(1)
 
 try:
-    ENTITIES = r.json().keys()
     assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
 except (AssertionError, requests.exceptions.RequestException), e:
     print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
     sys.exit(1)
 
+ENTITIES = r.json().keys()
 
 def query(s):
     """
@@ -273,8 +279,34 @@ class Client:
             return response.json()
  
     # Parse a template
-    def parse(args):
-        print args
+    def parse(self, args):
+        print '>>> <PARSING>'
+
+        # Prepare POST request (r) based on session (s)
+        url = full_url + 'template'
+
+        payload = {}
+
+        file_obj = args['template'][0]
+        filename = file_obj.name
+
+        files = { 'file' : file_obj }
+
+        print 'PAYLOAD:', payload
+
+        response = s.post(url, params=payload, files=files )
+
+        pprint.pprint( response.text )
+
+        # Return response in JSON-format
+        #try:
+        #    assert(r.json()), 'JSON decoding failed'
+        #except ValueError, e:
+        #    print ValueError, e
+        #    return None
+
+        #pprint.pprint( response.json() )
+
         return
 
 
@@ -353,8 +385,9 @@ class Client:
 
         # Command for parsing of templates
         parse_parser = subparsers.add_parser('parse', help='Parse a CMT template')
+        parse_parser.set_defaults(func='parse')
         file_group = parse_parser.add_argument_group('files', 'Arguments used for input and output')
-        file_group.add_argument('template', type=file, nargs=1, help='The template file to parse')
+        file_group.add_argument('template', type=lambda x: is_valid_file(parse_parser,x), nargs=1, help='The template file to parse')
         file_group.add_argument('--output', '-o', metavar='FILE', type=file, nargs=1, help='Overwrite output destination')
 
 
@@ -387,7 +420,8 @@ def main(args):
         c = Client(args)
         parsed_args = c._args
         #print '>>> PARSER:', parsed_args
-        
+       
+ 
         # Route parsed args to the action given on command line
         command = parsed_args['func']
         if command == 'read':
@@ -401,7 +435,7 @@ def main(args):
         elif command == 'delete':
             c.delete(parsed_args)
         elif command == 'parse':
-            c.create(parsed_args)
+            c.parse(parsed_args)
 
         return 1
     except SystemExit:

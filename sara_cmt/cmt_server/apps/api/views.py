@@ -1,8 +1,17 @@
+# vim: set noai tabstop=4 shiftwidth=4 expandtab:
+
+import pprint
+
 ### Create your views here.
 ##
 from rest_framework import generics
 from rest_framework import viewsets
 from rest_framework import filters
+
+from rest_framework.views import APIView
+from rest_framework import authentication, permissions
+from rest_framework.parsers import FileUploadParser
+from rest_framework.response import Response
 
 from sara_cmt.cluster.models import Cluster, Rack, Room, Address, Country
 from sara_cmt.cluster.models import HardwareUnit as Equipment
@@ -183,3 +192,19 @@ class WarrantyContractViewSet(CMTViewSet):
     queryset = WarrantyContract.objects.all()
     serializer_class = WarrantyContractSerializer
     filter_fields = ('warranty_type__label', 'contract_number', 'label')
+
+class TemplateView(APIView):
+    parser_classes = (FileUploadParser,)
+    authentication_classes = (authentication.BasicAuthentication,)
+    permissions_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, format=None):
+        file_obj = request.FILES['file']
+
+        #pprint.pprint( request )
+
+        print file_obj.readlines()
+        # ...
+        # do some staff with uploaded file
+        # ...
+        return Response(status=204)

@@ -38,6 +38,7 @@ router_v1.register(r'warrantycontracts', WarrantyContractViewSet)
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browseable API.
 urlpatterns = patterns('',
+    url(r'^api/v1/template', TemplateView.as_view() ),
     url(r'^api/v1/', include(router_v1.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
