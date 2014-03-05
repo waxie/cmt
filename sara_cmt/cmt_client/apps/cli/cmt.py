@@ -29,13 +29,6 @@ def create_auth_header():
 
     return "Basic %s" %base64string
 
-# Decorator for debugging
-def breadcrumbs(f):
-    def _inner(*args, **kwargs):
-        print "<%s>" % f.__name__.upper()
-        f(*args, **kwargs)
-        print "</%s>" % f.__name__.upper()
-    return _inner
 
 
 # Using a session to persist certain parameters across requests
@@ -273,13 +266,11 @@ class Client:
         return
 
 
-    @breadcrumbs
     # Fire a request to the server
     def request(server, r):
         pass
 
 
-    #@breadcrumbs
     def __init__(self, args):
 
         print '>>> Initializing client with args:', args
