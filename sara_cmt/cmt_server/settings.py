@@ -136,6 +136,11 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    '/tmp',
+)
+
+FILE_UPLOAD_HANDLERS = (
+    "django.core.files.uploadhandler.TemporaryFileUploadHandler",
 )
 
 INSTALLED_APPS = (
@@ -248,9 +253,7 @@ if AUTHENTICATION_ENABLED:
     AUTH_LDAP_CACHE_GROUPS = True
     AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
 
-    #AUTH_LDAP_CONNECTION_OPTIONS = {
-    #    'ldap.OPT_TIMEOUT': '3'
-    #}
+    #AUTH_LDAP_CONNECTION_OPTIONS['ldap.OPT_TIMEOUT'] = '3000'
 
     # Keep ModelBackend around for per-user permissions and maybe a local
     # superuser.

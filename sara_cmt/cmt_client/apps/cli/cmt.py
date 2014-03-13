@@ -4,6 +4,7 @@ import logging
 import sys
 import textwrap
 import pprint
+import os
 
 import argparse
 # Documented at:
@@ -30,28 +31,37 @@ def create_auth_header():
     return "Basic %s" %base64string
 
 
+def is_valid_file(parser, arg):
+    if not os.path.exists(arg):
+       parser.error("The file %s does not exist!"%arg)
+    else:
+       return open(arg,'r')  #return an open file handle
 
 # Using a session to persist certain parameters across requests
 s = requests.Session()
 auth_header = create_auth_header()
 s.headers.update( { 'Authorization' : auth_header } )
 s.timeout = 3.000
-base_url = 'http://localhost:8000/' # should be read from config file
+base_url = 'http://localhost:8000' # should be read from config file
+
+API_VERSION = '1'
+
+full_url = '%s/api/v%s/' %( base_url, API_VERSION )
 
 # Get a list of all existing entities in CMT
 try:
-    r = s.get(base_url)
-except requests.exceptions.ConnectionError, e:
-    print 'Error connecting to server: %s' % e
+    r = s.get(full_url)
+except requests.exceptions.ConnectionError as req_ce:
+    print 'Error connecting to server: %s' % req_ce.args[0].reason.strerror
+    sys.exit(1)
 
 try:
-    print '>>> REQUEST:', r
-    ENTITIES = r.json().keys()
     assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
 except (AssertionError, requests.exceptions.RequestException), e:
     print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
     sys.exit(1)
 
+ENTITIES = r.json().keys()
 
 def query(s):
     """
@@ -117,7 +127,7 @@ class Client:
 
         # Prepare POST request (r) based on session (s) and given --set args
         entity = args['entity'].pop()
-        url = '%s/' % (base_url + entity)
+        url = '%s/' % (full_url + entity)
         payload = args_to_payload(args['set'])
         print 'PAYLOAD:', payload
         # Check for fields that need a reference url, before an error occurs
@@ -177,7 +187,7 @@ class Client:
             print AssertionError, e
 
         # Prepare GET request (r) based on session (s) and given --get args
-        url = '%s/' % (base_url + args['entity'].pop())
+        url = '%s/' % (full_url + args['entity'].pop())
         payload = args_to_payload(args['get'])
         s.headers.update( {'content-type': 'application/json' } )
         r = s.get(url, params=payload)
@@ -218,7 +228,7 @@ class Client:
             print AssertionError, e
 
         # Get data from given --get args to prepare a request
-        url = '%s/' % (base_url + args['entity'].pop())
+        url = '%s/' % (full_url + args['entity'].pop())
         payload = args_to_payload(args['get'])
         s.headers.update( {'content-type': 'application/json' } )
         response = s.get(url, params=payload)
@@ -262,8 +272,34 @@ class Client:
             return response.json()
  
     # Parse a template
-    def parse(args):
-        print args
+    def parse(self, args):
+        print '>>> <PARSING>'
+
+        # Prepare POST request (r) based on session (s)
+        url = full_url + 'template'
+
+        payload = {}
+
+        file_obj = args['template'][0]
+        filename = file_obj.name
+
+        files = { 'file' : file_obj }
+
+        print 'PAYLOAD:', payload
+
+        response = s.post(url, params=payload, files=files )
+
+        pprint.pprint( response.text )
+
+        # Return response in JSON-format
+        #try:
+        #    assert(r.json()), 'JSON decoding failed'
+        #except ValueError, e:
+        #    print ValueError, e
+        #    return None
+
+        #pprint.pprint( response.json() )
+
         return
 
 
@@ -340,8 +376,9 @@ class Client:
 
         # Command for parsing of templates
         parse_parser = subparsers.add_parser('parse', help='Parse a CMT template')
+        parse_parser.set_defaults(func='parse')
         file_group = parse_parser.add_argument_group('files', 'Arguments used for input and output')
-        file_group.add_argument('template', type=file, nargs=1, help='The template file to parse')
+        file_group.add_argument('template', type=lambda x: is_valid_file(parse_parser,x), nargs=1, help='The template file to parse')
         file_group.add_argument('--output', '-o', metavar='FILE', type=file, nargs=1, help='Overwrite output destination')
 
 
@@ -388,7 +425,7 @@ def main(args):
         elif command == 'delete':
             c.delete(parsed_args)
         elif command == 'parse':
-            c.create(parsed_args)
+            c.parse(parsed_args)
 
         return 1
     except SystemExit:

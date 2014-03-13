@@ -1,8 +1,17 @@
+# vim: set noai tabstop=4 shiftwidth=4 expandtab:
+
+import pprint
+
 ### Create your views here.
 ##
 from rest_framework import generics
 from rest_framework import viewsets
 from rest_framework import filters
+
+from rest_framework.views import APIView
+from rest_framework import authentication, permissions
+from rest_framework.parsers import FileUploadParser
+from rest_framework.response import Response
 
 from sara_cmt.cluster.models import Cluster, Rack, Room, Address, Country
 from sara_cmt.cluster.models import HardwareUnit as Equipment
@@ -192,3 +201,54 @@ class WarrantyContractViewSet(CMTViewSet):
     queryset = WarrantyContract.objects.all()
     serializer_class = WarrantyContractSerializer
     filter_fields = ('warranty_type__label', 'contract_number', 'label')
+
+class TemplateView(APIView):
+    parser_classes = (FileUploadParser,)
+    authentication_classes = (authentication.BasicAuthentication,)
+    permissions_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, format=None):
+
+        file_obj  = request.FILES['file']
+        file_name = file_obj.name
+
+        file_fullpath = file_obj.temporary_file_path()
+
+        #print file_fullpath
+
+        #return Response(status=204)
+
+        #pprint.pprint( request )
+        #print file_obj.readlines()
+
+        from django.template import Context
+        from django.template.loader import render_to_string
+        from django.template import TemplateDoesNotExist
+        from django.http import HttpResponse
+        import json
+
+        try:
+            # Initialize a Context to render the template with
+            template_data = {}
+            template_data['version'] = '2.0+GIT'
+            template_data['svn_id'] = '$Id:$'
+            template_data['svn_url'] = '$URL:$'
+            template_data['input'] = file_fullpath
+            template_data['__template_outputfiles__'] = {} # reserved for data to write to files
+            template_data['epilogue'] = []
+            context = Context(template_data)
+
+            template_data['stores'] = template_data['__template_outputfiles__'] # to stay bw compatible with ramon's code (temporary)
+
+            rendered_string = render_to_string(file_fullpath, context_instance=context)
+            # While rendering the template there are variables added to the
+            # Context, so these can be used for post-processing.
+            #logger.debug('<RESULT>\n%s\n</RESULT>'%rendered_string)
+
+        except IOError, e:
+            return Response(status=500)
+            #logger.error('Template does not exist: %s' % e)
+
+        #pprint.pprint( context['__template_outputfiles__'] )
+
+        return HttpResponse(json.dumps(context['__template_outputfiles__']), content_type="application/json")
