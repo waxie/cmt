@@ -242,4 +242,6 @@ class TemplateView(APIView):
 
         #pprint.pprint( context['__template_outputfiles__'] )
 
+        file_obj.close()
+
         return HttpResponse(json.dumps(context['__template_outputfiles__']), content_type="application/json")
