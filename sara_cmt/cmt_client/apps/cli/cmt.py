@@ -56,6 +56,7 @@ except requests.exceptions.ConnectionError as req_ce:
     sys.exit(1)
 
 try:
+    print '>>> REQUEST:', r
     assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
 except (AssertionError, requests.exceptions.RequestException), e:
     print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
@@ -411,7 +412,8 @@ def main(args):
         c = Client(args)
         parsed_args = c._args
         #print '>>> PARSER:', parsed_args
-        
+       
+ 
         # Route parsed args to the action given on command line
         command = parsed_args['func']
         if command == 'read':
