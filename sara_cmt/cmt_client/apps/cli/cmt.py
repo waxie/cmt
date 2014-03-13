@@ -294,11 +294,9 @@ class Client:
 
         files = { 'file' : file_obj }
 
-        print 'PAYLOAD:', payload
+        print 'Sending template to server and awaiting response..'
 
         response = s.post(url, params=payload, files=files )
-
-        #pprint.pprint( response.text )
 
         # Return response in JSON-format
         try:
@@ -307,12 +305,12 @@ class Client:
             print ValueError, e
             return None
 
-        #pprint.pprint( response.json() )
+        file_obj.close()
 
         for output_filename, output_file_contents in response.json().items():
 
-            print 'output filename = %s' %output_filename
-            print 'output file contents size = %d' %len( output_file_contents )
+            print 'Received output file: %s' %output_filename
+            print '- file size: %d' %len( output_file_contents )
 
             # Could do some additional stuff here: 
             # - check if output file already exists?
