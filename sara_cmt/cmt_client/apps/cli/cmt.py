@@ -45,6 +45,7 @@ except requests.exceptions.ConnectionError, e:
     print 'Error connecting to server: %s' % e
 
 try:
+    print '>>> REQUEST:', r
     ENTITIES = r.json().keys()
     assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
 except (AssertionError, requests.exceptions.RequestException), e:
@@ -119,25 +120,23 @@ class Client:
         url = '%s/' % (base_url + entity)
         payload = args_to_payload(args['set'])
         print 'PAYLOAD:', payload
-        ## Check for fields that need a reference url, before an error occurs
-        #for key in payload.keys():
-        #    print 'CHECKING KEY:', key
-        #    if '__' in key:
-        #        print 'KEY', key, 'HAS TO BE LOOKED UP'
-        #        val = payload[key] 
-        #        assert(len(key.split('__')) <= 2), 'Lookup to deep'
-        #        field, lookup_field = key.split('__')
-        #        print 'SEARCHING ENTITY FOR FIELD %s IN %s' % (field, entity)
-        #        lookup_ent = self.get_related_ent(entity=entity, field=field)
-        #        print 'LOOK UP', lookup_field, 'IN', lookup_ent
-        #        new_args = {'entity':[lookup_ent], 'get':[[lookup_field,payload[key]]]}
-        #        print 'NEW_ARGS:', new_args
-        #        related_json = self.read(args=new_args, lookup=True)
-        #        print 'TTT'
-        #        urls = related_json['results'].pop()['url']
-        #        print 'URLS:', urls
-        #        payload[field] = urls
-        #print 'PAYLOAD::', payload
+        # Check for fields that need a reference url, before an error occurs
+        for key in payload.keys():
+            if '__' in key:
+                print '>>> Have to lookup %s for a reference url' % key
+                val = payload[key] 
+                assert(len(key.split('__')) <= 2), 'Lookup to deep'
+                field, lookup_field = key.split('__')
+                lookup_ent = self.get_related_ent(entity=entity, field=field)
+
+                new_args = {'entity':[lookup_ent], 'get':[[lookup_field,payload[key]]]}
+                print '>>> args needed for the lookup:', new_args
+                related_json = self.read(args=new_args, lookup=True)
+                print 'RELATED JSON:', related_json['results']
+                urls = related_json['results'].pop()['url']
+                print 'URLS:', urls
+                payload[field] = urls
+        print 'PAYLOAD::', payload
         s.headers.update( {'content-type': 'application/json' } )
         try:
             r = s.post(url, data=json.dumps(payload)) 
@@ -205,7 +204,9 @@ class Client:
     def update(self, args):
         # First get the selection of objects to update
         selection = read(args)
-        print selection
+        print '>>> SELECTION to update:', selection
+        # Iterate over selection and in each iteration:
+        # 1. update fields, and store (use url)
         return
 
 

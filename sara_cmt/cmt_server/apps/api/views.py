@@ -21,6 +21,11 @@ from django.contrib.admin.models import LogEntry, DELETION, ADDITION, CHANGE
 from django.utils.encoding import force_unicode
 from django.contrib.contenttypes.models import ContentType
 
+
+from rest_framework_bulk import ListBulkCreateUpdateDestroyAPIView
+
+
+#class CMTViewSet(ListBulkCreateUpdateDestroyAPIView):
 class CMTViewSet(viewsets.ModelViewSet):
 
     def pre_delete(self, obj):
@@ -79,8 +84,9 @@ class CMTViewSet(viewsets.ModelViewSet):
 class ClusterViewSet(CMTViewSet):
     queryset = Cluster.objects.all()
     serializer_class = ClusterSerializer
-    fields = ('url',)
+    fields = ('url', 'name')
     filter_fields = ('name',)
+    #search_fields = ('name',)
     # model = Cluster
     # lookup_fields = (...
 
@@ -93,6 +99,9 @@ class EquipmentViewSet(CMTViewSet):
             'rack__label', 'warranty_tag', 'serial_number', 'first_slot', 'label',
             #'in_support'
             )
+    #search_fields = (
+    #        'cluster__name', 'rack__label'
+    #        )
 
 
 class RackViewSet(CMTViewSet):
