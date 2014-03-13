@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# vim: set noai tabstop=4 shiftwidth=4 expandtab:
+
 import logging
 import sys
 import textwrap
@@ -286,23 +288,43 @@ class Client:
 
         files = { 'file' : file_obj }
 
-        print 'PAYLOAD:', payload
+        print 'Sending template to server and awaiting response..'
 
         response = s.post(url, params=payload, files=files )
 
-        pprint.pprint( response.text )
-
         # Return response in JSON-format
-        #try:
-        #    assert(r.json()), 'JSON decoding failed'
-        #except ValueError, e:
-        #    print ValueError, e
-        #    return None
+        try:
+            assert(r.json()), 'JSON decoding failed'
+        except ValueError, e:
+            print ValueError, e
+            return None
 
-        #pprint.pprint( response.json() )
+        file_obj.close()
 
-        return
+        for output_filename, output_file_contents in response.json().items():
 
+            print 'Received output file: %s' %output_filename
+            print '- file size: %d' %len( output_file_contents )
+
+            # Could do some additional stuff here: 
+            # - check if output file already exists?
+            # - perform diff on previous output file?
+
+        really_write = raw_input('Really write these output files?: ')
+
+        if really_write != 'y':
+
+            return True
+
+        for output_filename, output_file_contents in response.json().items():
+
+            print "writing '%s': " %output_filename,
+            f = open(output_filename, 'w')
+            f.writelines(output_file_contents)
+            f.close()
+            print 'done'
+
+        return True
 
     # Fire a request to the server
     def request(server, r):

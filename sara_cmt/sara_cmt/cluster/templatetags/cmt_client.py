@@ -443,7 +443,7 @@ class QuerySetNode(template.Node):
         if len(queryset) == 1:
             queryset = queryset[0]
         context[self.key] = queryset
-        logger.debug('context = %s'%context)
+        #logger.debug('context = %s'%context)
         return ''
 
 # use <entity> with <attribute>=<value> as <key>
