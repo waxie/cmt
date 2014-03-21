@@ -7,6 +7,8 @@ import sys
 import textwrap
 import pprint
 import os
+import difflib
+import re
 
 import argparse
 # Documented at:
@@ -19,6 +21,8 @@ import json
 import base64
 from getpass import getpass
 
+def splitkeepsep(s, sep):
+    return reduce(lambda acc, elem: acc[:-1] + [acc[-1] + elem] if elem == sep else acc + [elem], re.split("(%s)" % re.escape(sep), s), [])
 
 def create_auth_header():
 
@@ -257,7 +261,7 @@ class Client:
         confirm_str = 'You are about to delete: %s object(s). Are you sure ([N]/Y)?: ' %result_count
         confirm = raw_input( confirm_str )
       
-        if confirm != 'y':
+        if confirm.lower() != 'y':
 
             return
 
@@ -294,29 +298,145 @@ class Client:
 
         # Return response in JSON-format
         try:
-            assert(r.json()), 'JSON decoding failed'
+            assert(response.json()), 'JSON decoding failed'
         except ValueError, e:
             print ValueError, e
             return None
 
         file_obj.close()
 
-        for output_filename, output_file_contents in response.json().items():
+        output_ignore_regexps = [ ]
+
+        prompt_write = False
+
+        for output_filename, output_file_attrs in response.json().items():
+
+            output_file_contents = output_file_attrs['contents']
+            output_file_diff_ignore = output_file_attrs['diff_ignore']
 
             print 'Received output file: %s' %output_filename
             print '- file size: %d' %len( output_file_contents )
 
-            # Could do some additional stuff here: 
-            # - check if output file already exists?
-            # - perform diff on previous output file?
+            #pprint.pprint( output_file_contents )
 
-        really_write = raw_input('Really write these output files?: ')
+            #pprint.pprint( output_file_diff_ignore )
 
-        if really_write != 'y':
+            for regex in output_file_diff_ignore:
 
-            return True
+                output_ignore_regexps.append( re.compile( regex ) )
 
-        for output_filename, output_file_contents in response.json().items():
+            if os.path.isfile( output_filename ):
+
+                prompt_write = True
+
+                print "file already exists: %s" %output_filename
+
+                if not os.access( output_filename, os.R_OK ):
+
+                    print "cannot read original file (permission denied): %s" %output_filename
+                    print "cannot check diff between original file and new output file"
+
+                else:
+
+                    original_file = open( output_filename, 'r' )
+                    original_contents = original_file.readlines()
+                    original_file.close()
+
+                    #pprint.pprint( original_contents )
+
+                    output_list_contents = splitkeepsep( output_file_contents, '\n' )
+
+                    if output_list_contents[-1] == '':
+
+                        # last \n will result in extra list element containing nothing
+                        del output_list_contents[-1]
+
+                    #pprint.pprint( output_list_contents )
+
+                    diff_check_new = output_list_contents[:]
+
+                    for l in xrange( len(diff_check_new) - 1, -1, -1 ):
+
+                        for r in output_ignore_regexps:
+
+                            if r.match( diff_check_new[l] ):
+
+                                del diff_check_new[l]
+
+                    diff_check_org = original_contents[:]
+
+                    for l in xrange( len(diff_check_org) - 1, -1, -1 ):
+
+                        for r in output_ignore_regexps:
+
+                            if r.match( diff_check_org[l] ):
+
+                                del diff_check_org[l]
+
+                    udiff = difflib.unified_diff( diff_check_org, diff_check_new )
+
+                    udiff_list = list( udiff )
+
+                    if len( udiff_list ) > 0:
+
+                        print 'Received (new) output contents differs from original contents for file: %s' %output_filename
+                        want_diff = raw_input( "Would you like to see the diff(erence)? ([N/y]): " )
+
+                        if want_diff.lower() == 'y':
+
+                            udiff = difflib.unified_diff( original_contents, output_list_contents, fromfile=output_filename, tofile=output_filename )
+
+                            #udiff_list = list( udiff )
+
+                            for uline in udiff:
+
+                                print uline,
+
+                    else:
+                        print 'no difference (excluding commented lines) with original'
+
+        if prompt_write:
+
+            really_write = raw_input('Really write these output files? ([N/y]): ')
+
+            if really_write.lower() != 'y':
+
+                print "Doing nothing and exiting.."
+                return True
+
+        for output_filename, output_file_attrs in response.json().items():
+
+            output_file_contents = output_file_attrs['contents']
+
+            target_dir = os.path.dirname( output_filename )
+
+            if not os.path.isdir( target_dir ):
+
+                print "Directory '%s' for output file '%s' does not exist" %( target_dir, output_filename )
+
+                if not os.access( target_dir, os.W_OK ):
+
+                    print "I do not have permission to create the directory"
+                    print "Aborting and doing nothing.."
+                    sys.exit(1)
+
+                want_create_dir = raw_input( "You want me to create the directory? ([N/y]): " )
+
+                if want_create_dir.lower() == 'y':
+
+                    print "creating directory: %s" %target_dir
+                    os.makedirs( target_dir )
+
+                else:
+
+                    print "skipping output file: %s" %output_filename
+                    continue
+
+            if os.path.isfile( output_filename ) and not os.access( output_filename, os.W_OK ):
+
+                print "Permission denied, file is not writeable: %s" %output_filename
+                print "skipping output file: %s" %output_filename
+                continue
 
             print "writing '%s': " %output_filename,
             f = open(output_filename, 'w')

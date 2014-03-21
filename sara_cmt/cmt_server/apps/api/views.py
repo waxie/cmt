@@ -238,8 +238,6 @@ class TemplateView(APIView):
             template_data['epilogue'] = []
             context = Context(template_data)
 
-            template_data['stores'] = template_data['__template_outputfiles__'] # to stay bw compatible with ramon's code (temporary)
-
             rendered_string = render_to_string(file_fullpath, context_instance=context)
             # While rendering the template there are variables added to the
             # Context, so these can be used for post-processing.

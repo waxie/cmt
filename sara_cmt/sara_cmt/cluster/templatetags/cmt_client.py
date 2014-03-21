@@ -110,6 +110,49 @@ def ip_last_digit(value):
 
 register.filter( 'ip_last_digit', ip_last_digit )
 
+@register.tag(name='diff_ignore')
+def do_diff_ignore(parser,token):
+    """
+        RegExp of lines to ignore in diff checking original/new output files
+
+        Usage: {% diff_ignore <space seperated list of regexps> %}
+         i.e.: {% diff_ignore '^#.*$' '^$' %}
+               to ignore lines starting with #, and empty lines 
+
+        This setting can differ for different output files, if it is used within store tags.
+        If it is set outside store tags, it is a global setting for all output files in this template
+
+        Since diff checking is (optionally) done by the client, the list is simply returned by the API in JSON
+    """
+    definition = token.split_contents()
+
+    if len(definition) < 2:
+        raise template.TemplateSyntaxError, '%r tag requires at least 2 arguments' % tag
+
+    tag = definition[0]
+    ignore_regexps = definition[1:]
+
+    clean_ignore_regexps = [ ]
+
+    for r in ignore_regexps:
+
+        clean_ignore_regexps.append( r.strip("'").strip('"') )
+
+    return rememberVarInContext( '$cmt$diff_ignore', clean_ignore_regexps )
+
+class rememberVarInContext(template.Node):
+
+    def __init__(self, varname, varvalue ):
+
+        self.varname = varname
+        self.varvalue = varvalue
+
+    def render(self, context):
+
+        context[ self.varname ] = self.varvalue
+
+        return ''
+
 @register.tag(name='assign')
 def do_assign(parser,token):
 
@@ -254,7 +297,13 @@ class generateStoreOutput(template.Node):
         output = self.nodelist.render(context)
 
         # RB: store output in context dict for later writing to file
-        context['stores'][ mypath_str ] = output
+        context['__template_outputfiles__'][ mypath_str ] = { }
+        context['__template_outputfiles__'][ mypath_str ][ 'contents' ] = output
+
+        if context.has_key( '$cmt$diff_ignore' ):
+            context['__template_outputfiles__'][ mypath_str ][ 'diff_ignore' ] = context['$cmt$diff_ignore']
+        else:
+            context['__template_outputfiles__'][ mypath_str ][ 'diff_ignore' ] = ''
 
         # RB: output generated into context dict, so we return nothing
         return ''
