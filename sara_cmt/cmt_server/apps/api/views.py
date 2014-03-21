@@ -31,7 +31,7 @@ from django.utils.encoding import force_unicode
 from django.contrib.contenttypes.models import ContentType
 
 
-from rest_framework_bulk import ListBulkCreateUpdateDestroyAPIView
+#from rest_framework_bulk import ListBulkCreateUpdateDestroyAPIView
 
 
 #class CMTViewSet(ListBulkCreateUpdateDestroyAPIView):
