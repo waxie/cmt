@@ -8,6 +8,7 @@ from sara_cmt.cluster.models import Connection, Company, Telephonenumber
 from sara_cmt.cluster.models import HardwareModel, Role, InterfaceType
 from sara_cmt.cluster.models import WarrantyType, WarrantyContract
 
+#import django.db.models
 
 #####
 #
@@ -16,19 +17,32 @@ from sara_cmt.cluster.models import WarrantyType, WarrantyContract
 
 class ClusterSerializer(serializers.HyperlinkedModelSerializer):
     hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail', required=False)
+    #equipments = django.db.models.ForeignKey(Equipment, related_name='cluster')
 
     class Meta:
         model = Cluster
         #fields = ('url', 'name', 'hardware')
 
+class InterfaceListingField(serializers.RelatedField):
+    def to_native(self, value):
+
+        return '%s : %s (%s)' %(value.label, value.network.name, value.iftype)
+
 
 class EquipmentSerializer(serializers.HyperlinkedModelSerializer):
-    cluster = serializers.HyperlinkedRelatedField(many=False, view_name='cluster-detail')
-    interfaces = serializers.HyperlinkedRelatedField(many=True, view_name='interface-detail')
+    cluster = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='name')
+    rack = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='label')
+    interfaces = InterfaceListingField(many=True)
+    role = serializers.SlugRelatedField(required=False, many=True, read_only=False, slug_field='label' )
+    specifications = serializers.SlugRelatedField(required=False, many=False, read_only=False, slug_field='name')
+    warranty = serializers.SlugRelatedField(required=False, many=False, read_only=False, slug_field='label')
+    seller = serializers.SlugRelatedField(required=False, many=False, read_only=False, slug_field='name')
 
     class Meta:
         model = Equipment
-        #fields = ('cluster', 'rack', 'first_slot', 'label')
+        fields = ( 'cluster', 'created_on', 'first_slot', 'interfaces', 'label', 'note', 'owner', 'rack',
+               'role', 'seller', 'serial_number', 'specifications', 'state', 'tags', 'updated_on', 'url',
+               'warranty', 'warranty_tag' )
         #depth = 1
 
 

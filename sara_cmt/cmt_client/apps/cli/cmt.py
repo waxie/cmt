@@ -9,6 +9,7 @@ import pprint
 import os
 import difflib
 import re
+import types
 
 import argparse
 # Documented at:
@@ -89,7 +90,49 @@ def query(s):
         _s.append(oper)
     return _s
 
-def args_to_payload(q):
+def check_multiple_values( value ):
+
+    if value.find( ',') == -1:
+
+        return [ value ]
+
+    return value.split(',')
+
+MANY_FIELDS = { }
+
+def get_many_fields( entity ):
+
+    url = '%s/' % (full_url + entity)
+
+    # Get a list of all existing entities in CMT
+    try:
+        r = s.get(url)
+    except requests.exceptions.ConnectionError as req_ce:
+        print 'Error connecting to server: %s' % req_ce.args[0].reason.strerror
+        sys.exit(1)
+
+    try:
+        print '>>> REQUEST:', r
+        assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
+    except (AssertionError, requests.exceptions.RequestException), e:
+        print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
+        sys.exit(1)
+
+    for field_name, field_value in r.json()['results'][0].items():
+
+        if type( field_value ) is types.ListType:
+
+            if not MANY_FIELDS.has_key( entity ):
+
+                MANY_FIELDS[ entity ] = [ ]
+
+            if not field_name in MANY_FIELDS[ entity ]:
+
+                MANY_FIELDS[ entity ].append( field_name )
+
+ENTITIES = r.json().keys()
+
+def args_to_payload(entity, q):
     """
 
     >>> args_to_payload([['cluster__name', 'cluster1'], ['rack__label', 'rack1']])
@@ -97,7 +140,13 @@ def args_to_payload(q):
     """
     d = {}
     for stmt in q:
-        d[stmt[0]] = stmt[1]
+        if MANY_FIELDS.has_key( entity ):
+            if stmt[0] in MANY_FIELDS[ entity ]:
+                d[stmt[0]] = check_multiple_values( stmt[1] )
+            else:
+                d[stmt[0]] = stmt[1]
+        else:
+            d[stmt[0]] = stmt[1]
     return d
 
 
@@ -134,55 +183,21 @@ class Client:
 
         # Prepare POST request (r) based on session (s) and given --set args
         entity = args['entity'].pop()
-        url = '%s/' % (full_url + entity)
-        payload = args_to_payload(args['set'])
-        print 'PAYLOAD:', payload
-        # Check for fields that need a reference url, before an error occurs
-        for key in payload.keys():
-            if '__' in key:
-                print '>>> Have to lookup %s for a reference url' % key
-                val = payload[key] 
-                assert(len(key.split('__')) <= 2), 'Lookup to deep'
-                field, lookup_field = key.split('__')
-                lookup_ent = self.get_related_ent(entity=entity, field=field)
+        get_many_fields( entity )
 
-                new_args = {'entity':[lookup_ent], 'get':[[lookup_field,payload[key]]]}
-                print '>>> args needed for the lookup:', new_args
-                related_json = self.read(args=new_args, lookup=True)
-                print 'RELATED JSON:', related_json['results']
-                urls = related_json['results'].pop()['url']
-                print 'URLS:', urls
-                payload[field] = urls
-        print 'PAYLOAD::', payload
+        url = '%s/' % (full_url + entity)
+        payload = args_to_payload(entity, args['set'])
+        print 'PAYLOAD:', payload
+
+
         s.headers.update( {'content-type': 'application/json' } )
         try:
             r = s.post(url, data=json.dumps(payload)) 
         except ConnectionError, e:
             print 'Error connecting to server: %s' % e
 
-        # Check for HTTP-status 200
-        try:
-            assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
-        except AssertionError, e:
-            print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
-
-            lookups = []
-            if r.status_code == requests.codes.BAD_REQUEST: #400
-                print 'JSON:', r.json()
-                for field, reasons in r.json().items():
-                    reason_found = False
-                    for key in payload.keys():
-                        if key.startswith(field):
-                            print ' * Field %s has to be looked up' % field
-                            lookups.append(field)
-                            reason_found = True
-                            continue
-                    if not reason_found:
-                        print ' * Field %s is a required field' % field
-
         print '>>> </CREATING>'
         return r.json()
-
 
     def read(self, args, lookup=False):
 
@@ -194,8 +209,9 @@ class Client:
             print AssertionError, e
 
         # Prepare GET request (r) based on session (s) and given --get args
-        url = '%s/' % (full_url + args['entity'].pop())
-        payload = args_to_payload(args['get'])
+        entity = args['entity'].pop()
+        url = '%s/' % (full_url + entity)
+        payload = args_to_payload(entity, args['get'])
         s.headers.update( {'content-type': 'application/json' } )
         r = s.get(url, params=payload)
 
@@ -235,8 +251,9 @@ class Client:
             print AssertionError, e
 
         # Get data from given --get args to prepare a request
-        url = '%s/' % (full_url + args['entity'].pop())
-        payload = args_to_payload(args['get'])
+        entity = args['entity'].pop()
+        url = '%s/' % (full_url + entity )
+        payload = args_to_payload(entity, args['get'])
         s.headers.update( {'content-type': 'application/json' } )
         response = s.get(url, params=payload)
 
