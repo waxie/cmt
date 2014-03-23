@@ -170,7 +170,7 @@ class CompanyViewSet(CMTViewSet):
 class TelephonenumberViewSet(CMTViewSet):
     queryset = Telephonenumber.objects.all()
     serializer_class = TelephonenumberSerializer
-    filter_fields = ('connection__name',)
+    filter_fields = ('connection__name', 'subscriber_number' )
 
 
 class HardwareModelViewSet(CMTViewSet):

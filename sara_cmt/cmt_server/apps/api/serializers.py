@@ -47,64 +47,84 @@ class EquipmentSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class RackSerializer(serializers.HyperlinkedModelSerializer):
-    contents = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+    #contents = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+    room = serializers.RelatedField( many=False )
 
     class Meta:
         model = Rack
 
 
 class AddressSerializer(serializers.HyperlinkedModelSerializer):
-    rooms = serializers.HyperlinkedRelatedField(many=True, view_name='room-detail')
+    #rooms = serializers.HyperlinkedRelatedField(many=True, view_name='room-detail')
+    country = serializers.RelatedField( many=False )
 
     class Meta:
         model = Address
 
 
 class CountrySerializer(serializers.HyperlinkedModelSerializer):
-    addresses = serializers.HyperlinkedRelatedField(many=True, view_name='address-detail')
+    #addresses = serializers.HyperlinkedRelatedField(many=True, view_name='address-detail')
 
     class Meta:
         model = Country
 
+class AddressListingField(serializers.RelatedField):
+    def to_native(self, value):
+
+        return '%s, %s (%s)' %(value.address, value.city, value.country.name)
 
 class RoomSerializer(serializers.HyperlinkedModelSerializer):
-    racks = serializers.HyperlinkedRelatedField(many=True, view_name='rack-detail')
+    #racks = serializers.HyperlinkedRelatedField(many=True, view_name='rack-detail')
+    address = AddressListingField( many=False )
 
     class Meta:
         model = Room
 
 
 class InterfaceSerializer(serializers.HyperlinkedModelSerializer):
+    host = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='label')
+    iftype = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='label')
+    network = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='name')
+
     class Meta:
         model = Interface
         #depth = 1
 
 
 class NetworkSerializer(serializers.HyperlinkedModelSerializer):
-    hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
-    interfaces = serializers.HyperlinkedRelatedField(many=True, view_name='interface-detail')
+    #hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+    #interfaces = serializers.HyperlinkedRelatedField(many=True, view_name='interface-detail')
 
     class Meta:
         model = Network
 
 
 class ConnectionSerializer(serializers.HyperlinkedModelSerializer):
+    address = AddressListingField( many=False )
+    company = serializers.RelatedField( many=False )
+    
     class Meta:
         model = Connection
 
 
 class CompanySerializer(serializers.HyperlinkedModelSerializer):
+    addresses = AddressListingField( many=True )
+
     class Meta:
         model = Company
 
 
 class TelephonenumberSerializer(serializers.HyperlinkedModelSerializer):
+    connection = serializers.RelatedField( many=False )
+    country = serializers.RelatedField( many=False )
+
     class Meta:
         model = Telephonenumber
 
 
 class HardwareModelSerializer(serializers.HyperlinkedModelSerializer):
-    hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+    #hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+    vendor = serializers.RelatedField( many=False )
 
     class Meta:
         model = HardwareModel
@@ -115,17 +135,23 @@ class RoleSerializer(serializers.HyperlinkedModelSerializer):
         model = Role
 
 class InterfaceTypeSerializer(serializers.HyperlinkedModelSerializer):
+    vendor = serializers.RelatedField( many=False )
+
     class Meta:
         model = InterfaceType
 
 
 class WarrantyTypeSerializer(serializers.HyperlinkedModelSerializer):
+    contact = serializers.RelatedField( many=False )
+
     class Meta:
         model = WarrantyType
 
 
 class WarrantyContractSerializer(serializers.HyperlinkedModelSerializer):
-    hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+    #hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+
+    warranty_type = serializers.RelatedField( many=False )
 
     class Meta:
         model = WarrantyContract
