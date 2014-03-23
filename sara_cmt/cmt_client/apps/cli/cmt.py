@@ -235,13 +235,69 @@ class Client:
 
 
     def update(self, args):
-        # First get the selection of objects to update
-        selection = read(args)
-        print '>>> SELECTION to update:', selection
-        # Iterate over selection and in each iteration:
-        # 1. update fields, and store (use url)
-        return
 
+        # Be sure there's a --get arg before taking care of the rest of the args
+        try:
+            assert(args['get']), 'Missing --get arguments'
+        except AssertionError, e:
+            print AssertionError, e
+
+        # Be sure there's a --set arg before taking care of the rest of the args
+        try:
+            assert(args['set']), 'Missing --set arguments'
+        except AssertionError, e:
+            print AssertionError, e
+
+        # Get data from given --get args to prepare a request
+        entity = args['entity'].pop()
+        url = '%s/' % (full_url + entity )
+        payload = args_to_payload(entity, args['get'])
+        s.headers.update( {'content-type': 'application/json' } )
+        response = s.get(url, params=payload)
+
+        # Return response in JSON-format
+        try:
+            assert(r.json()), 'JSON decoding failed'
+        except ValueError, e:
+            print ValueError, e
+            return None
+
+        pprint.pprint( response.json() )
+
+        response_data = response.json()
+
+        result_count = response_data[ 'count' ]
+
+        if result_count == 0:
+
+            print 'No objects found'
+            return 
+
+        confirm_str = 'You are about to update: %s object(s). Are you sure ([N]/Y)?: ' %result_count
+        confirm = raw_input( confirm_str )
+      
+        if confirm.lower() != 'y':
+
+            return
+
+        get_many_fields( entity )
+
+        payload = args_to_payload(entity, args['set'])
+
+        for result in response_data['results']:
+
+            print 'URL:', result['url']
+            print 'PAYLOAD:', payload
+            reponse = s.patch(result['url'], data=json.dumps(payload) )
+
+            # Return response in JSON-format
+            try:
+                assert(response.json()), 'JSON decoding failed'
+            except ValueError, e:
+                print ValueError, e
+                return None
+
+            #pprint.pprint( response.json() )
 
     def delete(self, args):
         # Be sure there's a --get arg before taking care of the rest of the args
@@ -284,16 +340,18 @@ class Client:
 
         for result in response_data['results']:
 
+            print 'URL:', result['url']
+
             reponse = s.delete(result['url'])
 
             # Return response in JSON-format
             try:
-                assert(r.json()), 'JSON decoding failed'
+                assert(response.json()), 'JSON decoding failed'
             except ValueError, e:
                 print ValueError, e
                 return None
 
-            return response.json()
+            #pprint.pprint( response.json() )
  
     # Parse a template
     def parse(self, args):
@@ -582,7 +640,7 @@ def main(args):
             json = c.create(parsed_args)
             pprint.pprint(json)
         elif command == 'update':
-            c.create(parsed_args)
+            c.update(parsed_args)
         elif command == 'delete':
             c.delete(parsed_args)
         elif command == 'parse':
