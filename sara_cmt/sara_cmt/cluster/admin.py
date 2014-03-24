@@ -49,6 +49,8 @@ class CMTAdmin(admin.ModelAdmin):
 
     change_list_template = 'smuggler/change_list.html'
 
+    save_as = True
+
 #
 #
 #
@@ -70,7 +72,6 @@ class AddressInline(admin.TabularInline):
 class InterfaceInline(admin.TabularInline):
     model = Interface
     exclude = GlobalAdmin.fields + ('tags',)
-
 
 class PhoneInline(admin.TabularInline):
     model = Telephonenumber
@@ -111,7 +112,6 @@ class HardwareUnitAdmin(CMTAdmin):
     inlines = [InterfaceInline]
     search_fields = ('label', 'warranty_tag')
 
-    #change_list_template = "admin/change_list_filter_sidebar.html"
 
 
 class CountryAdmin(CMTAdmin):
