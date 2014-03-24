@@ -55,8 +55,10 @@ setup(
         'Django>=1.5.2',
         'IPy>=0.80',
         'django_extensions>=1.1.1',
-        'django_tagging>=0.3.1',
-        'psycopg2>=2.4.6'
+        'psycopg2>=2.4.6',
+        'django-grappelli==2.4.9',
+        'django-smuggler',
+        'feedparser'
     ],
 
     # Only way to get something installed with mode 755 ...

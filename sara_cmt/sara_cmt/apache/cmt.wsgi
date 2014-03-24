@@ -21,6 +21,9 @@
 #
 #  WSGIScriptAlias / /path/to/virtualenvs/cmt/cmt.wsgi
 #  SetEnv VIRTUALENV /path/to/virtualenvs/cmt
+#
+#  Alias /static /path/to/virtualenvs/cmt/lib/python<ver>/site-packages/sara_cmt/static
+#
 
 import os
 import sys

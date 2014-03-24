@@ -37,12 +37,17 @@ from sara_cmt.cluster.models import WarrantyContract, WarrantyType
 
 class GlobalAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_on'
-    fields = ('note', 'tags')
-    list_filter = ('created_on', 'updated_on', 'tags')
+    fields = ('note',)
+    list_filter = ('created_on', 'updated_on' )
     list_per_page = 50
     extra_fieldset = ('Additional fields', {
         'fields': fields,
         'classes': ('collapse',)})
+
+
+class CMTAdmin(admin.ModelAdmin):
+
+    change_list_template = 'smuggler/change_list.html'
 
 #
 #
@@ -64,7 +69,7 @@ class AddressInline(admin.TabularInline):
 
 class InterfaceInline(admin.TabularInline):
     model = Interface
-    exclude = GlobalAdmin.fields
+    exclude = GlobalAdmin.fields + ('tags',)
 
 
 class PhoneInline(admin.TabularInline):
@@ -82,13 +87,13 @@ class RoomInline(admin.TabularInline):
 ######
 
 
-class ClusterAdmin(admin.ModelAdmin):
+class ClusterAdmin(CMTAdmin):
     fields       = ('name','machinenames') + GlobalAdmin.fields
     list_display = ('name','machinenames')
     list_filter  = GlobalAdmin.list_filter
 
 
-class HardwareUnitAdmin(admin.ModelAdmin):
+class HardwareUnitAdmin(CMTAdmin):
     fieldsets = (
         ('Host info', {'fields': (('cluster', 'label'),)}),
         ('Configuration', {'fields': (('state', 'role'),)}),
@@ -106,8 +111,10 @@ class HardwareUnitAdmin(admin.ModelAdmin):
     inlines = [InterfaceInline]
     search_fields = ('label', 'warranty_tag')
 
+    #change_list_template = "admin/change_list_filter_sidebar.html"
 
-class CountryAdmin(admin.ModelAdmin):
+
+class CountryAdmin(CMTAdmin):
     fieldsets = (
         ('None', {'fields': (('name', 'country_code'),)}),
         GlobalAdmin.extra_fieldset)
@@ -115,7 +122,7 @@ class CountryAdmin(admin.ModelAdmin):
     list_filter  = GlobalAdmin.list_filter
 
 
-class AddressAdmin(admin.ModelAdmin):
+class AddressAdmin(CMTAdmin):
     fieldsets = (
         ('Location', {'fields': ('address', 'postalcode', 'city', 'country'),
                       'classes': ('wide',)}),
@@ -127,7 +134,7 @@ class AddressAdmin(admin.ModelAdmin):
     inlines = [RoomInline]
 
 
-class RoomAdmin(admin.ModelAdmin):
+class RoomAdmin(CMTAdmin):
     fieldsets = (
         (None, {'fields': (('address', 'floor', 'label'),)}),
         GlobalAdmin.extra_fieldset)
@@ -135,7 +142,7 @@ class RoomAdmin(admin.ModelAdmin):
     list_display = ('address', 'floor', 'label')
 
 
-class ConnectionAdmin(admin.ModelAdmin):
+class ConnectionAdmin(CMTAdmin):
     fieldsets = (
         ('Summary', {
             'fields': (('name', 'active'), ('email', 'company', 'address')),
@@ -148,7 +155,7 @@ class ConnectionAdmin(admin.ModelAdmin):
     inlines       = [PhoneInline]
 
 
-class RackAdmin(admin.ModelAdmin):
+class RackAdmin(CMTAdmin):
     fieldsets = (
         (None, {'fields': (('room', 'label', 'capacity'),)}),
         GlobalAdmin.extra_fieldset)
@@ -156,7 +163,7 @@ class RackAdmin(admin.ModelAdmin):
     list_filter  = ('room',) + GlobalAdmin.list_filter
 
 
-class InterfaceAdmin(admin.ModelAdmin):
+class InterfaceAdmin(CMTAdmin):
     fieldsets = (
         ('Physical', {'fields': (('iftype', 'host'), ('hwaddress', 'ip'))}),
         ('Network', {'fields': ('network', ('label', 'aliases'))}),
@@ -166,7 +173,7 @@ class InterfaceAdmin(admin.ModelAdmin):
     search_fields = ('label', 'aliases', 'hwaddress', 'ip', 'host__label')
 
 
-class InterfaceTypeAdmin(admin.ModelAdmin):
+class InterfaceTypeAdmin(CMTAdmin):
     fieldsets = (
         ('Properties', {'fields': (('label', 'vendor'),)}),
         GlobalAdmin.extra_fieldset)
@@ -174,24 +181,24 @@ class InterfaceTypeAdmin(admin.ModelAdmin):
     list_filter  = ('vendor',) + GlobalAdmin.list_filter
 
 
-class RoleAdmin(admin.ModelAdmin):
+class RoleAdmin(CMTAdmin):
     fieldsets = (
         (None, {'fields': ('label',)}),
         GlobalAdmin.extra_fieldset)
     list_filter = GlobalAdmin.list_filter
 
 
-class HardwareModelAdmin(admin.ModelAdmin):
+class HardwareModelAdmin(CMTAdmin):
     fieldsets = (
         ('Vendor-specific', {'fields': ('vendor', 'name', 'vendorcode')}),
         ('Dimensions', {'fields': (('rackspace', 'expansions'),)}),
         GlobalAdmin.extra_fieldset)
 
-    list_display = ('vendor', 'name', 'tags')
-    list_filter  = ('vendor', 'tags') + GlobalAdmin.list_filter
+    list_display = ('vendor', 'name' )
+    list_filter  = ('vendor', ) + GlobalAdmin.list_filter
 
 
-class NetworkAdmin(admin.ModelAdmin):
+class NetworkAdmin(CMTAdmin):
     fieldsets = (
         (None, {'fields': (('name', 'hostnames', 'domain'),
                            ('gateway', 'vlan'))}),
@@ -201,7 +208,7 @@ class NetworkAdmin(admin.ModelAdmin):
     list_filter  = GlobalAdmin.list_filter
 
 
-class CompanyAdmin(admin.ModelAdmin):
+class CompanyAdmin(CMTAdmin):
     fieldsets = (
         (None, {'fields': ('name', )}),
         ('Contact info', {'fields': ('website', 'addresses')}),
@@ -211,7 +218,7 @@ class CompanyAdmin(admin.ModelAdmin):
     filter_horizontal = ('addresses', )
 
 
-class TelephonenumberAdmin(admin.ModelAdmin):
+class TelephonenumberAdmin(CMTAdmin):
     fieldsets = (
         ('Owner', {'fields': (('connection', 'number_type'),)}),
         ('Number', {'fields': (('country', 'areacode', 'subscriber_number'),)}),
@@ -220,7 +227,7 @@ class TelephonenumberAdmin(admin.ModelAdmin):
     list_filter  = ('number_type', 'country', 'areacode') + GlobalAdmin.list_filter
 
 
-class WarrantyContractAdmin(admin.ModelAdmin):
+class WarrantyContractAdmin(CMTAdmin):
     fieldsets = (
         (None, {'fields': (('label', 'warranty_type'), ('contract_number', 'annual_cost'))}),
         ('Period', {'fields': (('date_from', 'date_to'),)}),
@@ -230,7 +237,7 @@ class WarrantyContractAdmin(admin.ModelAdmin):
     list_filter  = ('date_to', ) + GlobalAdmin.list_filter
 
 
-class WarrantyTypeAdmin(admin.ModelAdmin):
+class WarrantyTypeAdmin(CMTAdmin):
     fieldsets = (
         (None, {'fields': (('label', 'contact'),)}),
         GlobalAdmin.extra_fieldset)

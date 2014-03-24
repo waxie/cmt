@@ -307,17 +307,24 @@ USE_I18N = True
 
 ## Absolute path to the directory that holds media.
 ## Example: "/home/media/media.lawrence.com/"
-#MEDIA_ROOT = ''
+MEDIA_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), 'media'))
 #
 ## URL that handles the media served from MEDIA_ROOT. Make sure to use a
 ## trailing slash if there is a path component (optional in other cases).
 ## Examples: "http://media.lawrence.com", "http://example.com/media/"
-#MEDIA_URL = ''
+MEDIA_URL = '/media/'
 
 # Static files (replaces adminmedia from Django 1.3)
-STATIC_ROOT = ''
-STATIC_PATH = ''
-STATIC_URL = '/media/'
+STATIC_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), 'static'))
+#STATIC_PATH = ''
+STATIC_URL = '/static/'
+
+#STATICFILES_DIRS = ()
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+)
 
 ## URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 ## trailing slash.
@@ -372,13 +379,15 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'grappelli.dashboard',
+    'grappelli',
+    'smuggler',
     'django.contrib.admin',
     'django.contrib.staticfiles',
     'django.contrib.webdesign',
     'django.contrib.messages',
     'sara_cmt.cluster',
     'django_extensions',
-    'tagging',
 )
 
 if not CLIENT_ONLY:
@@ -392,3 +401,16 @@ INTERNAL_IPS = (
     #'145.100.6.163',
     '127.0.0.1',
 )
+
+GRAPPELLI_ADMIN_TITLE = 'Config Management Tool'
+
+SMUGGLER_EXCLUDE_LIST = [ 'Group', 'User' ]
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.request",
+    "django.core.context_processors.i18n",
+    'django.contrib.messages.context_processors.messages',
+)
+
+GRAPPELLI_INDEX_DASHBOARD = 'sara_cmt.dashboard.CustomIndexDashboard'

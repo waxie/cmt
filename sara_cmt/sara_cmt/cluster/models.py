@@ -46,7 +46,7 @@ class Cluster(ModelExtension):
     """
         A labeled group of hardware pieces.
     """
-    re_valid_machines    = re.compile(r'^([0-9a-z]{1,2})$|^([a-z0-9\{]{1})([a-z0-9\-\{\}]{1,61})([a-z0-9\}]{1})$')
+    re_valid_machines    = re.compile(r'^([a-z0-9\{]{1})([a-z0-9\-\_\{\}]{1,61})([a-z0-9\}]{1})$')
     machines_validator   = RegexValidator(re_valid_machines,'Enter a valid machinenames stringformat. Example: r{rack}n{first_slot}. Valid characters: [0-9], [a-z], "{", "}" and "-"','invalid')
 
     name         = models.CharField(max_length=255, unique=True)

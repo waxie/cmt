@@ -29,6 +29,10 @@ urlpatterns = patterns('',
     # to INSTALLED_APPS to enable admin documentation:
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
+    url(r'^grappelli/', include('grappelli.urls')), # grappelli URLS
+
+    url(r'^admin/', include('smuggler.urls')), # put it before admin url patterns
+
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 
