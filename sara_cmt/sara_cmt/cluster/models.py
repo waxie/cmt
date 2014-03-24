@@ -18,6 +18,8 @@
 from django.db import models
 from django.core.validators import RegexValidator
 
+from django.core.exceptions import ValidationError
+
 import re
 from datetime import date
 
@@ -218,6 +220,29 @@ class Interface(ModelExtension):
         #return self.fqdn
         return unicode(self.label) or unicode('anonymous')
 
+    def clean(self):
+
+        """
+        Non field errors are validated here
+        """
+
+        network = IP('%s' % (self.network.cidr) )
+
+        # If IP is given, make sure it is in the subnet
+        if self.ip is not None and self.ip != '':
+            ip = IP(self.ip)
+
+            if ip not in self.network:
+                raise ValidationError('IP addresses %s is not in subnet: %s (%s)' %(self.ip, self.network.cidr, self.network.name ) )
+
+        # Pick a new IP when it's not defined yet or when the network has
+        # been changed
+        if self.ip is None or self.ip == '':
+            self.ip = self.network.pick_ip()
+
+        if self.ip is None or self.ip == '':
+            raise ValidationError('No more IP addresses available in: %s' %self.network.name )
+
     def save(self, force_insert=False, force_update=False):
         """
             First check for a correct IP address before saving the object.
@@ -241,12 +266,6 @@ class Interface(ModelExtension):
                 print ValueError, e
             except Exception, e:
                 print 'An error occured:', e
-
-            # Pick a new IP when it's not defined yet or when the network has
-            # been changed
-            ip = IP(self.ip or 0)
-            if ip not in network:
-                self.ip = self.network.pick_ip()
 
             self.label = self.label or \
                          self.network.construct_interface_label(self.host)

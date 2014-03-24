@@ -201,7 +201,7 @@ class HardwareModelAdmin(CMTAdmin):
 class NetworkAdmin(CMTAdmin):
     fieldsets = (
         (None, {'fields': (('name', 'hostnames', 'domain'),
-                           ('gateway', 'vlan'))}),
+                           ('cidr', 'gateway', 'vlan'))}),
         GlobalAdmin.extra_fieldset)
     list_display = ('name', 'vlan', 'cidr', 'gateway', 'domain', 'hostnames',
                     'count_ips_assigned', 'count_ips_free')
