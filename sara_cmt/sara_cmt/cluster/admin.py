@@ -24,6 +24,7 @@ from sara_cmt.cluster.models import HardwareModel, Role, InterfaceType
 from sara_cmt.cluster.models import WarrantyContract, WarrantyType
 
 from django.contrib.admin import SimpleListFilter
+from types import *
 
 # Some info about the Django admin site can be found at:
 #   http://docs.djangoproject.com/en/dev/intro/tutorial02/#intro-tutorial02
@@ -94,15 +95,14 @@ class ClusterAdmin(CMTAdmin):
     list_display = ('name','machinenames')
     list_filter  = GlobalAdmin.list_filter
 
-
-class ClusterListFilter(SimpleListFilter):
+class GenericCMTListFilter(SimpleListFilter):
  
     # Human-readable title which will be displayed in the
     # right admin sidebar just above the filter options.
-    title = 'Cluster'
+    title = None
  
     # Parameter for the filter that will be used in the URL query.
-    parameter_name = 'cluster'
+    parameter_name = None
  
     def lookups(self, request, model_admin):
         """
@@ -113,15 +113,54 @@ class ClusterListFilter(SimpleListFilter):
         in the right sidebar.
         """
 
-        clusters = set([c.cluster for c in model_admin.model.objects.all()])
+        #l_objects = set([getattr( l, self.parameter_name ) for l in model_admin.model.objects.all()])
+
+        l_objects = [ ]
+
+        for l in set( model_admin.model.objects.all() ):
+
+            l_object = getattr( l, self.parameter_name )
+
+            # This is for ManyToMany relations
+            if hasattr(l_object, 'all'):
+
+                many_l_objects = list( l_object.all() )
+
+                while len(many_l_objects) > 0:
+
+                    l_objects.append( many_l_objects.pop(0) )
+            else:
+
+                # This is for ForeignKey (1:1) relations
+                l_objects.append( l_object )
 
         lookups = [ ]
 
-        for c in clusters:
+        for l in set( l_objects ):
 
-            c_count_str = ' (%d)' %len( model_admin.model.objects.filter( cluster__name=c.name ) )
+            if type(l) is NoneType:
 
-            lookups.append( (c.id, c.name + c_count_str ) )
+                continue
+
+            l_count_str = ''
+
+            if hasattr(l, 'label'):
+
+                l_name = l.label
+
+                l_filter = { self.parameter_name + '__label' : l.label }
+
+                l_count_str = ' (%d)' %len( model_admin.model.objects.filter( **l_filter ) )
+
+            elif hasattr(l, 'name'):
+
+                l_name = l.name
+
+                l_filter = { self.parameter_name + '__name' : l.name }
+
+                l_count_str = ' (%d)' %len( model_admin.model.objects.filter( **l_filter ) )
+
+            lookups.append( (l.id, l_name + l_count_str ) )
 
         return lookups
  
@@ -131,10 +170,42 @@ class ClusterListFilter(SimpleListFilter):
         provided in the query string and retrievable via
         `self.value()`.
         """
+        q_filter = { self.parameter_name + '__id' : self.value() }
+
         if self.value():
-            return queryset.filter(cluster__id=self.value())
+            return queryset.filter( **q_filter )
         else:
             return queryset
+
+class ClusterListFilter(GenericCMTListFilter):
+
+    title = 'Cluster'
+
+    parameter_name = 'cluster'
+
+class RackListFilter(GenericCMTListFilter):
+
+    title = 'Rack'
+
+    parameter_name = 'rack'
+
+class RoleListFilter(GenericCMTListFilter):
+
+    title = 'Role'
+
+    parameter_name = 'role'
+
+class SpecificationsListFilter(GenericCMTListFilter):
+
+    title = 'Specifications'
+
+    parameter_name = 'specifications'
+
+class WarrantyListFilter(GenericCMTListFilter):
+
+    title = 'Warranty'
+
+    parameter_name = 'warranty'
 
 class HardwareUnitAdmin(CMTAdmin):
     fieldsets = (
@@ -149,7 +220,7 @@ class HardwareUnitAdmin(CMTAdmin):
 
     list_display = ('__unicode__', 'warranty_tag', 'cluster', 'address', 'room', 'rack',
         'first_slot', 'specifications', 'roles', 'in_support')
-    list_filter  = (ClusterListFilter, 'rack', 'role', 'specifications', 'warranty') + \
+    list_filter  = (ClusterListFilter, RackListFilter, RoleListFilter, SpecificationsListFilter, WarrantyListFilter) + \
         GlobalAdmin.list_filter
     inlines = [InterfaceInline]
     search_fields = ('label', 'warranty_tag')
