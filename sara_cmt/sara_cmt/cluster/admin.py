@@ -23,6 +23,7 @@ from sara_cmt.cluster.models import Company, Telephonenumber, Connection
 from sara_cmt.cluster.models import HardwareModel, Role, InterfaceType
 from sara_cmt.cluster.models import WarrantyContract, WarrantyType
 
+from django.contrib.admin import SimpleListFilter
 
 # Some info about the Django admin site can be found at:
 #   http://docs.djangoproject.com/en/dev/intro/tutorial02/#intro-tutorial02
@@ -94,6 +95,47 @@ class ClusterAdmin(CMTAdmin):
     list_filter  = GlobalAdmin.list_filter
 
 
+class ClusterListFilter(SimpleListFilter):
+ 
+    # Human-readable title which will be displayed in the
+    # right admin sidebar just above the filter options.
+    title = 'Cluster'
+ 
+    # Parameter for the filter that will be used in the URL query.
+    parameter_name = 'cluster'
+ 
+    def lookups(self, request, model_admin):
+        """
+        Returns a list of tuples. The first element in each
+        tuple is the coded value for the option that will
+        appear in the URL query. The second element is the
+        human-readable name for the option that will appear
+        in the right sidebar.
+        """
+
+        clusters = set([c.cluster for c in model_admin.model.objects.all()])
+
+        lookups = [ ]
+
+        for c in clusters:
+
+            c_count_str = ' (%d)' %len( model_admin.model.objects.filter( cluster__name=c.name ) )
+
+            lookups.append( (c.id, c.name + c_count_str ) )
+
+        return lookups
+ 
+    def queryset(self, request, queryset):
+        """
+        Returns the filtered queryset based on the value
+        provided in the query string and retrievable via
+        `self.value()`.
+        """
+        if self.value():
+            return queryset.filter(cluster__id=self.value())
+        else:
+            return queryset
+
 class HardwareUnitAdmin(CMTAdmin):
     fieldsets = (
         ('Host info', {'fields': (('cluster', 'label'),)}),
@@ -107,7 +149,7 @@ class HardwareUnitAdmin(CMTAdmin):
 
     list_display = ('__unicode__', 'warranty_tag', 'cluster', 'address', 'room', 'rack',
         'first_slot', 'specifications', 'roles', 'in_support')
-    list_filter  = ('cluster', 'rack', 'role', 'specifications', 'warranty') + \
+    list_filter  = (ClusterListFilter, 'rack', 'role', 'specifications', 'warranty') + \
         GlobalAdmin.list_filter
     inlines = [InterfaceInline]
     search_fields = ('label', 'warranty_tag')
