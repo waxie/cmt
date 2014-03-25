@@ -362,6 +362,7 @@ class getBaseNets(template.Node):
 
     def render(self, context):
 
+
         if (self.network_name[0] == self.network_name[-1] and self.network_name[0] in ('"', "'")):
 
             network_str = str( self.network_name.strip("'").strip('"') )
@@ -424,32 +425,36 @@ class getRacks(template.Node):
         context[ self.name ] = self.racks
         return ''
 
-@register.tag(name='use')
-def do_use(parser, token):
+@register.tag(name='read')
+def do_read(parser, token):
     """
         Compilation function to definine Querysets for later use.
         
-        Usage: {% use <entity> with <attribute>=<value> as <list/var> <key> %}
+        Usage: {% read <entity> --get <attribute>=<value> [<attribute>=<value>..] as <list_name> %}
     """
     tag = token.contents.split()[0]
 
     try:
         definition = token.split_contents()
-        # definition should look like ['use', <entity>, 'with' <query>, 'as', '<key>']
+        # definition should look like ['read', <entity>, '--get', <query1>, <query2>, 'as', '<key>']
     except ValueError:
         raise template.TemplateSyntaxError, '%r tag requires at least 5 arguments' % tag
     if len(definition) != 6:
         raise template.TemplateSyntaxError, '%r tag requires at least 5 arguments' % tag
-    if definition[2] != 'with':
-        raise template.TemplateSyntaxError, "second argument of %r tag has to be 'with'" % tag
+    if definition[2] != '--get':
+        raise template.TemplateSyntaxError, "second argument of %r tag has to be '--get'" % tag
     if definition[-2] != 'as':
-        raise template.TemplateSyntaxError, "second last argument of %r tag has to be 'as'" % tag
+        raise template.TemplateSyntaxError, "second to last argument of %r tag has to be 'as'" % tag
 
     entity = definition[1]
-    query = definition[-3]
+    query = definition[3:-2]
     key = definition[-1]
 
     return QuerySetNode(entity, query, key)
+
+def remove_quotes( val ):
+
+    return str( val.strip("'").strip('"') )
 
 class QuerySetNode(template.Node):
     """
@@ -463,36 +468,65 @@ class QuerySetNode(template.Node):
 
     def render(self, context):
 
-        if (self.query[0] == self.query[-1] and self.query[0] in ('"', "'")):
-
-            myquery_str = str( self.query.strip("'").strip('"') )
-        else:
-            # RB: Not quoted: must be a variable: attempt to resolve to value
-            try:
-                queryvar = template.Variable( str(self.query) )
-                myquery_str = queryvar.resolve(context)
-            except template.VariableDoesNotExist:
-                #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
-                pass
-
-        if myquery_str.count( '=' ) > 1 and myquery_str.count( ',' ) > 0:
-
-            myfilters_list = myquery_str.split( ',' )
-        else:
-            myfilters_list = [ myquery_str ]
-
         filter_dict = { }
 
-        for myfilter in myfilters_list:
+        myquery_str = ''
 
-            attr, val = myfilter.split('=')
-            filter_dict[ attr ] = val
+        for q in self.query:
+
+            myquery_str = remove_quotes( q )
+
+            if myquery_str.find( '=' ) == -1:
+
+                # RB: No operator: must be a variable: attempt to resolve to value
+                try:
+                    queryvar = template.Variable( str(myquery_str) )
+                    myquery_str = queryvar.resolve(context)
+                except template.VariableDoesNotExist:
+                    #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
+                    pass
+
+            if myquery_str.count( '=' ) > 1 and myquery_str.count( ',' ) > 0:
+
+                myfilters_list = myquery_str.split( ',' )
+            else:
+                myfilters_list = [ myquery_str ]
+
+            for myfilter in myfilters_list:
+
+                attr, val = myfilter.split('=')
+
+                val = remove_quotes( val )
+
+                my_model = get_model('cluster', self.entity)
+
+                if hasattr( my_model, attr ):
+
+                    # RB: not a field, but a relation
+                    relation_entity = getattr( get_model('cluster', self.entity), attr ).field.name
+                    relation_model = get_model('cluster', relation_entity )
+                    relation_field_names = relation_model._meta.get_all_field_names()
+
+                    # RB: 'SlugField' ourself.. should be either label or name.. probably..
+                    if 'name' in relation_field_names:
+
+                        attr = attr + '__name'
+
+                    elif 'label' in relation_field_names:
+
+                        attr = attr + '__label'
+
+                filter_dict[ str(attr) ] = str(val)
 
         queryset = get_model('cluster', self.entity).objects.filter(**filter_dict)
+
         if len(queryset) == 1:
             queryset = queryset[0]
+
         context[self.key] = queryset
+
         #logger.debug('context = %s'%context)
+
         return ''
 
 # use <entity> with <attribute>=<value> as <key>
