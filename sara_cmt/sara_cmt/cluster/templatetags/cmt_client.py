@@ -16,6 +16,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os, re, string
+from IPy import IP
 
 # Inspired by Django tips on:
 #   http://www.b-list.org/weblog/2006/jun/07/django-tips-write-better-template-tags/
@@ -47,6 +48,30 @@ def noblanklines(parser, token):
     nodelist = parser.parse(('endnoblanklines',))
     parser.delete_first_token()
     return NoBlankLinesNode(nodelist)
+
+@register.filter(is_safe=False)
+def is_ipv4(value):
+
+    try:
+        if IP( value ).version() == 4:
+
+            return True
+    except ValueError:
+        return False
+
+    return False
+
+@register.filter(is_safe=False)
+def is_ipv6(value):
+
+    try:
+        if IP( value ).version() == 6:
+
+            return True
+    except ValueError:
+        return False
+
+    return False
 
 @stringfilter
 def arpanize(value):
@@ -152,6 +177,7 @@ class rememberVarInContext(template.Node):
         context[ self.varname ] = self.varvalue
 
         return ''
+
 
 @register.tag(name='assign')
 def do_assign(parser,token):
@@ -286,6 +312,7 @@ class generateStoreOutput(template.Node):
                 mypath_str = pathvar.resolve(context)
             except template.VariableDoesNotExist:
                 #raise template.TemplateSyntaxError, '%r tag argument 1: not a variable %r' %( tag, path_str )
+                #TODO: handle this!
                 pass
 
         if self.kw_output_name:
