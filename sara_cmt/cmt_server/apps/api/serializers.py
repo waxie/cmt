@@ -15,7 +15,34 @@ from sara_cmt.cluster.models import WarrantyType, WarrantyContract
 # Serializers based on the models in CMT
 #
 
-class ClusterSerializer(serializers.HyperlinkedModelSerializer):
+class CMTSerializer(serializers.HyperlinkedModelSerializer):
+
+    def __init__(self, *args, **kwargs):
+
+        #RB: based upon http://www.django-rest-framework.org/api-guide/serializers.html#dynamically-modifying-fields
+
+        # Get the fields args from extra supplied context
+        fields_args = kwargs['context'].pop('fields', None)
+
+        fields = None
+
+        if fields_args:
+
+            fields = fields_args.split(',')
+
+        # Instantiate the superclass normally
+        super(CMTSerializer, self).__init__(*args, **kwargs)
+
+        if fields:
+
+            # Drop any fields that are not specified in the `fields` argument.
+            allowed = set(fields)
+            existing = set(self.fields.keys())
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
+                print 'popping ' + field_name
+
+class ClusterSerializer(CMTSerializer):
     hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail', required=False)
     #equipments = django.db.models.ForeignKey(Equipment, related_name='cluster')
 
@@ -29,7 +56,7 @@ class InterfaceListingField(serializers.RelatedField):
         return '%s : %s (%s)' %(value.label, value.network.name, value.iftype)
 
 
-class EquipmentSerializer(serializers.HyperlinkedModelSerializer):
+class EquipmentSerializer(CMTSerializer):
     cluster = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='name')
     rack = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='label')
     interfaces = InterfaceListingField(many=True)
@@ -46,7 +73,7 @@ class EquipmentSerializer(serializers.HyperlinkedModelSerializer):
         #depth = 1
 
 
-class RackSerializer(serializers.HyperlinkedModelSerializer):
+class RackSerializer(CMTSerializer):
     #contents = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
     room = serializers.RelatedField( many=False )
 
@@ -54,7 +81,7 @@ class RackSerializer(serializers.HyperlinkedModelSerializer):
         model = Rack
 
 
-class AddressSerializer(serializers.HyperlinkedModelSerializer):
+class AddressSerializer(CMTSerializer):
     #rooms = serializers.HyperlinkedRelatedField(many=True, view_name='room-detail')
     country = serializers.RelatedField( many=False )
 
@@ -62,7 +89,7 @@ class AddressSerializer(serializers.HyperlinkedModelSerializer):
         model = Address
 
 
-class CountrySerializer(serializers.HyperlinkedModelSerializer):
+class CountrySerializer(CMTSerializer):
     #addresses = serializers.HyperlinkedRelatedField(many=True, view_name='address-detail')
 
     class Meta:
@@ -73,7 +100,7 @@ class AddressListingField(serializers.RelatedField):
 
         return '%s, %s (%s)' %(value.address, value.city, value.country.name)
 
-class RoomSerializer(serializers.HyperlinkedModelSerializer):
+class RoomSerializer(CMTSerializer):
     #racks = serializers.HyperlinkedRelatedField(many=True, view_name='rack-detail')
     address = AddressListingField( many=False )
 
@@ -81,7 +108,7 @@ class RoomSerializer(serializers.HyperlinkedModelSerializer):
         model = Room
 
 
-class InterfaceSerializer(serializers.HyperlinkedModelSerializer):
+class InterfaceSerializer(CMTSerializer):
     host = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='label')
     iftype = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='label')
     network = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='name')
@@ -91,7 +118,7 @@ class InterfaceSerializer(serializers.HyperlinkedModelSerializer):
         #depth = 1
 
 
-class NetworkSerializer(serializers.HyperlinkedModelSerializer):
+class NetworkSerializer(CMTSerializer):
     #hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
     #interfaces = serializers.HyperlinkedRelatedField(many=True, view_name='interface-detail')
 
@@ -99,7 +126,7 @@ class NetworkSerializer(serializers.HyperlinkedModelSerializer):
         model = Network
 
 
-class ConnectionSerializer(serializers.HyperlinkedModelSerializer):
+class ConnectionSerializer(CMTSerializer):
     address = AddressListingField( many=False )
     company = serializers.RelatedField( many=False )
     
@@ -107,14 +134,14 @@ class ConnectionSerializer(serializers.HyperlinkedModelSerializer):
         model = Connection
 
 
-class CompanySerializer(serializers.HyperlinkedModelSerializer):
+class CompanySerializer(CMTSerializer):
     addresses = AddressListingField( many=True )
 
     class Meta:
         model = Company
 
 
-class TelephonenumberSerializer(serializers.HyperlinkedModelSerializer):
+class TelephonenumberSerializer(CMTSerializer):
     connection = serializers.RelatedField( many=False )
     country = serializers.RelatedField( many=False )
 
@@ -122,7 +149,7 @@ class TelephonenumberSerializer(serializers.HyperlinkedModelSerializer):
         model = Telephonenumber
 
 
-class HardwareModelSerializer(serializers.HyperlinkedModelSerializer):
+class HardwareModelSerializer(CMTSerializer):
     #hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
     vendor = serializers.RelatedField( many=False )
 
@@ -130,25 +157,25 @@ class HardwareModelSerializer(serializers.HyperlinkedModelSerializer):
         model = HardwareModel
 
 
-class RoleSerializer(serializers.HyperlinkedModelSerializer):
+class RoleSerializer(CMTSerializer):
     class Meta:
         model = Role
 
-class InterfaceTypeSerializer(serializers.HyperlinkedModelSerializer):
+class InterfaceTypeSerializer(CMTSerializer):
     vendor = serializers.RelatedField( many=False )
 
     class Meta:
         model = InterfaceType
 
 
-class WarrantyTypeSerializer(serializers.HyperlinkedModelSerializer):
+class WarrantyTypeSerializer(CMTSerializer):
     contact = serializers.RelatedField( many=False )
 
     class Meta:
         model = WarrantyType
 
 
-class WarrantyContractSerializer(serializers.HyperlinkedModelSerializer):
+class WarrantyContractSerializer(CMTSerializer):
     #hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
 
     warranty_type = serializers.RelatedField( many=False )

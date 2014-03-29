@@ -212,6 +212,13 @@ class Client:
         entity = args['entity'].pop()
         url = '%s/' % (full_url + entity)
         payload = args_to_payload(entity, args['get'])
+
+        if args.has_key( 'fields' ):
+            if args['fields'] != None:
+                payload[ 'fields' ] = args['fields'][0]
+
+        print 'PAYLOAD:', payload
+
         s.headers.update( {'content-type': 'application/json' } )
         r = s.get(url, params=payload)
 
@@ -561,6 +568,8 @@ class Client:
         getparser.add_argument('--get', nargs='+', metavar='QUERY', type=query, help='Query to match existing objects, like "KEY=VAL"')
         setparser = argparse.ArgumentParser(add_help=False)
         setparser.add_argument('--set', nargs='+', metavar='ASSIGNMENT', type=query, help='Definition to assign values to fields, like "KEY=VAL"')
+        fieldsparser = argparse.ArgumentParser(add_help=False)
+        fieldsparser.add_argument('--fields', nargs='+', metavar='FIELDS', type=str, help='Comma seperated list of fields to get, like "KEY[,KEY]"')
 
         # CRUD commands to [C]reate, [R]ead, [U]pdate and [D]elete objects are parsed by subparsers.
         # Same applies for parsing of templates.
@@ -578,7 +587,7 @@ class Client:
         create_parser.set_defaults(func='create')
 
         # CRUD command Read
-        read_parser = subparsers.add_parser('read', help='Read an existing object', parents=[getparser])
+        read_parser = subparsers.add_parser('read', help='Read an existing object', parents=[getparser,fieldsparser])
         read_parser.add_argument('entity', choices=ENTITIES, nargs=1, help='The entity to read')
         read_parser.set_defaults(func='read')
 

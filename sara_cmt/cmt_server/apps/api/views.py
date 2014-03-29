@@ -83,6 +83,21 @@ class CMTViewSet(viewsets.ModelViewSet):
                 action_flag     = CHANGE
             )
 
+    def get_serializer_context(self):
+        """
+        Extra context provided to the serializer class.
+
+        RB: pass extra "fields" args along, which optionally specifies which fields to return
+        """
+        fields = self.request.QUERY_PARAMS.get('fields', None)
+
+        return {
+            'request': self.request,
+            'format': self.format_kwarg,
+            'view': self,
+            'fields': fields
+        }
+
 #####
 #
 # Viewsets based on the models in CMT. They define the view behavior.
@@ -106,6 +121,7 @@ class EquipmentViewSet(CMTViewSet):
             'cluster__name', 'role__label', 'network__name', 'network__vlan',
             'specifications__name', 'warranty__label', 'warranty__contract_number',
             'rack__label', 'warranty_tag', 'serial_number', 'first_slot', 'label',
+            'warranty'
             #'in_support'
             )
     #search_fields = (
