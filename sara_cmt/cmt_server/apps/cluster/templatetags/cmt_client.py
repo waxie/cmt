@@ -24,7 +24,7 @@ from django import template
 from django.template.defaultfilters import stringfilter
 from django.utils.encoding import smart_unicode, force_unicode
 
-from sara_cmt.logger import Logger
+from cmt_server.logger import Logger
 logger = Logger().getLogger()
 
 #from django.db.models import get_model

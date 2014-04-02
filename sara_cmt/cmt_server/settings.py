@@ -3,52 +3,193 @@
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 AUTHENTICATION_ENABLED = True
-LOCAL_TEST = True
+
+import os, os.path, sys, ConfigParser, site, string
+
+from socket import gethostbyname_ex
+from exceptions import SystemExit
+
+error_occured = False
+error_messages = [ ]
+
+CONFIG_DIR = None
+
+where_am_i = os.path.dirname( __file__ )
+devel_file = os.path.normpath(os.path.join( where_am_i, '.DEVELOPMENT' ) )
+
+if os.path.exists( devel_file ):
+
+    # Don't use system wide (production) config, but local development config
+    CONFIG_FILE = os.path.normpath(os.path.join( where_am_i, 'cmt.conf') )
+    CONFIG_DIR = where_am_i
+    DEVELOPMENT_ENVIRONMENT = True
+else:
+    DEVELOPMENT_ENVIRONMENT = False
+
+    # RB: config location finding logic due to stupid distutils
+    for config_dir_guess in [ 'etc/cmt', 'local/etc/cmt' ]:
+
+         if os.path.exists( os.path.join( site.sys.prefix, config_dir_guess ) ):
+
+              CONFIG_DIR = os.path.join( site.sys.prefix, config_dir_guess )
+              CONFIG_FILE = '%s/cmt.conf' % CONFIG_DIR
+
+if not CONFIG_DIR:
+
+    err_str = "Unable to find config dir. Tried these path's:"
+    print err_str
+
+    error_messages.append( err_str )
+
+    for config_dir_guess in [ 'etc/cmt', 'local/etc/cmt' ]:
+
+        err_str = '- %s' %( os.path.join( site.sys.prefix, config_dir_guess ) )
+        print err_str
+
+        error_messages.append( err_str )
+
+    raise SystemExit( string.join( error_messages, '\n') )
+
+# Path's customizable through virtualenv
+sample_configfile = '%s/cmt.conf.sample' % CONFIG_DIR
+
+if not os.path.exists( CONFIG_FILE ):
+
+    error_occured = True
+    err_str = 'Unable to find config file: %s' %CONFIG_FILE
+    print err_str
+
+    error_messages.append( err_str )
+
+    print ''
+    print 'Fatal: Giving up and exiting now..'
+
+    raise SystemExit( string.join( error_messages, '\n') )
+
+config = ConfigParser.RawConfigParser()
+config.read( CONFIG_FILE )
+
+try:
+    DATABASE_HOST       = config.get('database', 'HOST')
+    DATABASE_ENGINE     = 'django.db.backends.' + config.get('database', 'ENGINE')
+    DATABASE_NAME       = config.get('database', 'NAME')
+
+
+except (ConfigParser.NoOptionError, ConfigParser.NoSectionError), details:
+
+    error_occured = True
+    err_msg = 'Config file error: %s' %str(details)
+    print err_str
+
+    error_messages.append( err_str )
+
+    print ''
+    print 'Fatal: Giving up and exiting now..'
+
+    raise SystemExit( string.join( error_messages, '\n') )
+
+try: # Optional
+    DATABASE_PORT = config.get('database', 'PORT')
+
+except (ConfigParser.NoOptionError, ConfigParser.NoSectionError), details:
+
+    DATABASE_PORT = None
+
+try: # Optional
+    TEST_DATABASE_NAME = config.get('database', 'TEST_NAME')
+
+except (ConfigParser.NoOptionError, ConfigParser.NoSectionError), details:
+
+    TEST_DATABASE_NAME = None
+
+try:
+    gethostbyname_ex( DATABASE_HOST )
+
+except socket.gaierror, details:
+
+    error_occured = True
+    err_msg = 'Unable to resolve database host: %s' %DATABASE_HOST
+    print err_str
+
+    error_messages.append( err_str )
+
+    print ''
+    print 'Giving up and exiting now..'
+
+    raise SystemExit( string.join( error_messages, '\n') )
+
+try:
+    DATABASE_USER       = config.get('database', 'USER')
+
+except (ConfigParser.NoOptionError, ConfigParser.NoSectionError), details:
+
+    error_occured = True
+    err_str = 'No option [database] USER'
+    print err_str
+
+    error_messages.append( err_str )
+
+    print ''
+    print 'Giving up and exiting now..'
+
+    raise SystemExit( string.join( error_messages, '\n') )
+
+try:
+    DATABASE_PASSWORD   = config.get('database', 'PASSWORD')
+
+except (ConfigParser.NoOptionError, ConfigParser.NoSectionError), details:
+
+    error_occured = True
+    err_str = 'No option [database] PASSWORD'
+    print err_str
+
+    error_messages.append( err_str )
+
+    print ''
+    print 'Giving up and exiting now..'
+
+    raise SystemExit( string.join( error_messages, '\n') )
+
+try:
+    WEB_DOMAIN   = config.get('web', 'DOMAIN')
+
+except (ConfigParser.NoOptionError, ConfigParser.NoSectionError), details:
+
+    error_occured = True
+    err_str = 'No option [web] DOMAIN'
+    print err_str
+
+    error_messages.append( err_str )
+
+    print ''
+    print 'Giving up and exiting now..'
+
+    raise SystemExit( string.join( error_messages, '\n') )
+
+DATABASES = {
+    'default': {
+        'ENGINE': DATABASE_ENGINE,
+        'NAME': DATABASE_NAME,
+        'USER': DATABASE_USER,
+        'PASSWORD': DATABASE_PASSWORD,
+        'HOST': DATABASE_HOST,
+    }
+}
+
+if DATABASE_PORT:
+    DATABASES['default']['PORT'] = DATABASE_PORT
+
+if TEST_DATABASE_NAME:
+    DATABASES['default']['NAME'] = TEST_DATABASE_NAME
+
+ALLOWED_HOSTS = [ 'localhost', '.' + WEB_DOMAIN ]
 
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+    ('Ramon Bastiaans', 'ramon.bastiaans@surfsara.nl'),
+    ('Sil Westerveld', 'sil.westerveld@surfsara.nl')
 )
 
 MANAGERS = ADMINS
-
-##try:
-##    import settings_db
-##    DATABASES = settings_db.DATABASES
-##    print 'using database settings from external file'
-##except:
-##    DATABASES = {
-##        'default': {
-##            'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-##            'NAME': 'cmt_server_test.db',                      # Or path to database file if using sqlite3.
-##            'USER': '',                      # Not used with sqlite3.
-##            'PASSWORD': '',                  # Not used with sqlite3.
-##            'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-##            'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-##        }
-##    }
-
-if LOCAL_TEST:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-            'NAME': 'cmt_server_test.db',                      # Or path to database file if using sqlite3.
-            'USER': '',                      # Not used with sqlite3.
-            'PASSWORD': '',                  # Not used with sqlite3.
-            'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-            'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-            'NAME': 'sara_cmt_dev',                      # Or path to database file if using sqlite3.
-            'USER': 'cmt',                      # Not used with sqlite3.
-            'PASSWORD': 'Pgpwvcmtiwm',                  # Not used with sqlite3.
-            'HOST': 'cmt.osd.surfsara.nl',                      # Set to empty string for localhost. Not used with sqlite3.
-            'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-        }
-    }
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -57,7 +198,7 @@ else:
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = 'Europe/Amsterdam'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -75,18 +216,18 @@ USE_L10N = True
 
 ## Absolute filesystem path to the directory that will hold user-uploaded files.
 ## Example: "/home/media/media.lawrence.com/media/"
-#MEDIA_ROOT = ''
+MEDIA_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), 'media'))
 #
 ## URL that handles the media served from MEDIA_ROOT. Make sure to use a
 ## trailing slash.
 ## Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-#MEDIA_URL = ''
+MEDIA_URL = '/media/'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), 'static'))
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -95,7 +236,7 @@ STATIC_URL = '/static/'
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
 # Examples: "http://foo.com/static/admin/", "/static/admin/".
-ADMIN_MEDIA_PREFIX = '/static/admin/'
+#ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -109,7 +250,6 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -119,7 +259,6 @@ SECRET_KEY = 'u#396z3t0s(@a2jvgs@%pbu$ytvhzzic70!*=x4cb9g-ae8_k_'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -142,22 +281,39 @@ FILE_UPLOAD_HANDLERS = (
     "django.core.files.uploadhandler.TemporaryFileUploadHandler",
 )
 
-INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
-    'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
-    'sara_cmt.cluster',
-    'tagging',
-    #'cmt_server.apps.api',
-    'rest_framework',
+
+FIXTURE_DIRS = (
+    # A fixture is a collection of files that contain serialized contents of
+    # the database. (can be used for testing)
+    os.path.normpath(os.path.join(os.path.dirname(__file__), 'fixtures')),
 )
+
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
+
+SOUTH_DATABASE_ADAPTERS = {'default':'south.db.postgresql_psycopg2'}
+
+# Append your IP to use the debug_toolbar
+INTERNAL_IPS = (
+    #'145.100.6.163',
+    '127.0.0.1',
+)
+
+GRAPPELLI_ADMIN_TITLE = 'Config Management Tool'
+
+SMUGGLER_EXCLUDE_LIST = [ 'Group', 'User' ]
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.core.context_processors.tz",
+    "django.contrib.messages.context_processors.messages",
+    "django.core.context_processors.request",
+)
+
+GRAPPELLI_INDEX_DASHBOARD = 'cmt_server.dashboard.CustomIndexDashboard'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -187,7 +343,6 @@ LOGGING = {
         },
     }
 }
-
 
 REST_FRAMEWORK = {
     # Use hyperlinked styles by default.
@@ -268,3 +423,35 @@ if AUTHENTICATION_ENABLED:
 #
 #####
 
+INSTALLED_APPS = (
+    'rest_framework',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'grappelli.dashboard',
+    'grappelli',
+    'smuggler',
+    'django.contrib.admin',
+    'django.contrib.sites',
+    'django.contrib.staticfiles',
+    'django.contrib.webdesign',
+    'django.contrib.messages',
+    #'django.contrib.sites',
+    'cmt_server.apps.cluster',
+    'south',
+    'debug_toolbar',
+    'django_extensions',
+)
+
+# Finally: test our django/database (settings)
+from django.db import connection
+from exceptions import *
+
+try:
+    c=connection.cursor()
+except Exception as details:
+
+    raise SystemExit( str( details ) )
+
+print 'DATABASE SETTINGS:'
+print 'host: %s | engine: %s | name: %s' %(DATABASE_HOST,DATABASE_ENGINE,DATABASE_NAME)

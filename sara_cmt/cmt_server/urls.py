@@ -1,9 +1,11 @@
 
 from django.conf.urls import patterns, include, url
+
 from django.contrib import admin
-#from django.contrib.auth.models import User, Group
+admin.autodiscover()
+
 from rest_framework import routers
-#from django.core.urlresolvers import reverse
+
 from cmt_server.apps.api.views import *
 
 # Routers provide an easy way of automatically determining the URL conf
@@ -49,6 +51,9 @@ urlpatterns = patterns('',
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
-    # Uncomment the next line to enable the admin:
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^grappelli/', include('grappelli.urls')), # grappelli URLS
+
+    url(r'^admin/', include('smuggler.urls')), # put it before admin url patterns
+
+    url(r'^admin/', include(admin.site.urls))
 )

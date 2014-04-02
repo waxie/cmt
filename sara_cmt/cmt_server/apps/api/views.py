@@ -13,12 +13,12 @@ from rest_framework import authentication, permissions
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 
-from sara_cmt.cluster.models import Cluster, Rack, Room, Address, Country
-from sara_cmt.cluster.models import HardwareUnit as Equipment
-from sara_cmt.cluster.models import Interface, Network
-from sara_cmt.cluster.models import Connection, Company, Telephonenumber
-from sara_cmt.cluster.models import HardwareModel, Role, InterfaceType
-from sara_cmt.cluster.models import WarrantyType, WarrantyContract
+from cmt_server.apps.cluster.models import Cluster, Rack, Room, Address, Country
+from cmt_server.apps.cluster.models import HardwareUnit as Equipment
+from cmt_server.apps.cluster.models import Interface, Network
+from cmt_server.apps.cluster.models import Connection, Company, Telephonenumber
+from cmt_server.apps.cluster.models import HardwareModel, Role, InterfaceType
+from cmt_server.apps.cluster.models import WarrantyType, WarrantyContract
 
 from cmt_server.apps.api.serializers import ClusterSerializer, EquipmentSerializer, RackSerializer, RoomSerializer, AddressSerializer, CountrySerializer
 from cmt_server.apps.api.serializers import InterfaceSerializer, NetworkSerializer

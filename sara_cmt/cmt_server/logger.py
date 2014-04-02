@@ -15,9 +15,9 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import logging
-import logging.config
-import settings
+import logging, logging.config, settings, os.path
+
+from exceptions import SystemExit
 
 class Logger:
     """
@@ -29,6 +29,10 @@ class Logger:
 
     # Check for existence of a global logging object, otherwise make one
     if 'logger' not in __shared_state.keys():
+
+        if not os.path.exists( '%s/logging.conf' %settings.CONFIG_DIR ):
+
+            raise SystemExit( 'Config file does not exist: %s/logging.conf' %settings.CONFIG_DIR )
 
         logging.config.fileConfig('%s/logging.conf' %settings.CONFIG_DIR )
         __shared_state['logger'] = logging.getLogger('cli')

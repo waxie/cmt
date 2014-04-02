@@ -26,10 +26,10 @@ from types import *
 import sqlite3
 from sqlite3 import IntegrityError
 
-from sara_cmt.logger import Logger
+from cmt_server.logger import Logger
 logger = Logger().getLogger()
 
-from sara_cmt.parser import Parser
+from cmt_server.parser import Parser
 parser = Parser().getParser()
 
 from django.db import models
@@ -40,11 +40,10 @@ from django_extensions.db.fields import CreationDateTimeField, \
                                         ModificationDateTimeField
 
 import settings
-if not settings.CLIENT_ONLY:
-    # To be able to migrate fields of 3rd party app django-extensions
-    from south.modelsinspector import add_introspection_rules
-    add_introspection_rules([], ["^django_extensions\.db\.fields"])
 
+# To be able to migrate fields of 3rd party app django-extensions
+from south.modelsinspector import add_introspection_rules
+add_introspection_rules([], ["^django_extensions\.db\.fields"])
 
 class ModelExtension(models.Model):
     """
@@ -72,8 +71,8 @@ class ModelExtension(models.Model):
         """
         # First get access to the admin
         admin_class_name = instance._meta.object_name + 'Admin'
-        import sara_cmt.cluster.admin
-        admin_list_display = eval('sara_cmt.cluster.admin.' \
+        import cmt_server.apps.cluster.admin
+        admin_list_display = eval('cmt_server.apps.cluster.admin.' \
                                 + admin_class_name + '.list_display')
 
         # Determine longest value-string to display
@@ -507,7 +506,7 @@ class QueryManager():
             # args = list of args from cli, like:
             #     ['get', 'label=fs7', 'label=fs6']
             # entity = class of given entity, like:
-            #     <class 'sara_cmt.cluster.models.HardwareUnit'>
+            #     <class 'cmt_server.apps.cluster.models.HardwareUnit'>
             # keys = the key(s) to use (which depends on the given option),
             # like:
             #     ['get']

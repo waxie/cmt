@@ -17,11 +17,11 @@
 
 from django.contrib import admin
 
-from sara_cmt.cluster.models import Cluster, HardwareUnit, Interface, Network, Rack
-from sara_cmt.cluster.models import Country, Address, Room
-from sara_cmt.cluster.models import Company, Telephonenumber, Connection
-from sara_cmt.cluster.models import HardwareModel, Role, InterfaceType
-from sara_cmt.cluster.models import WarrantyContract, WarrantyType
+from cmt_server.apps.cluster.models import Cluster, HardwareUnit, Interface, Network, Rack
+from cmt_server.apps.cluster.models import Country, Address, Room
+from cmt_server.apps.cluster.models import Company, Telephonenumber, Connection
+from cmt_server.apps.cluster.models import HardwareModel, Role, InterfaceType
+from cmt_server.apps.cluster.models import WarrantyContract, WarrantyType
 
 from django.contrib.admin import SimpleListFilter
 from types import *

@@ -27,22 +27,14 @@ from psycopg2 import IntegrityError
 
 from IPy import IP
 
-from sara_cmt.logger import Logger
+from cmt_server.logger import Logger
 logger = Logger().getLogger()
 
-from sara_cmt.django_cli import ModelExtension
+from cmt_server.django_cli import ModelExtension
 
 from tagging.fields import TagField
 from django_extensions.db.fields import CreationDateTimeField, \
                                         ModificationDateTimeField
-
-
-
-######
-#
-# Classes of sara_cmt.core
-#
-
 
 class Cluster(ModelExtension):
     """
@@ -447,19 +439,6 @@ class Rack(ModelExtension):
     def __unicode__(self):
         return unicode('rack %s' % (self.label) )
 
-#
-#
-#
-######
-
-
-
-######
-#
-# Classes for sara_cmt.locations
-#
-
-
 class Country(ModelExtension):
     """
         Model for country - country-code pairs. Country-codes can be found on:
@@ -515,18 +494,6 @@ class Room(ModelExtension):
     def __unicode__(self):
         #return unicode('%s - %s'%(self.address,self.label))
         return unicode('%s (%s, %s)' % (self.label, self.address.address, self.address.city))
-
-#
-#
-#
-######
-
-
-######
-#
-# Classes for sara_cmt.contacts
-#
-
 
 class Company(ModelExtension):
     """
@@ -599,19 +566,6 @@ class Telephonenumber(ModelExtension):
     class Meta:
         ordering = ('connection',)
 
-
-#
-#
-#
-#####
-
-
-######
-#
-# Classes for sara_cmt.specifications
-#
-
-
 class HardwareModel(ModelExtension):
     """
         This model is being used to specify some extra information about a
@@ -680,18 +634,6 @@ class InterfaceType(ModelExtension):
 
     def __unicode__(self):
         return self.label
-
-#
-#
-#
-######
-
-
-######
-#
-# Classes for sara_cmt.support
-#
-
 
 class WarrantyType(ModelExtension):
     """

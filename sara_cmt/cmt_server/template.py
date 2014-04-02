@@ -17,7 +17,7 @@
 
 from django.template import Template
 
-from sara_cmt.logger import Logger
+from cmt_server.logger import Logger
 logger = Logger().getLogger()
 
 

@@ -1,14 +1,11 @@
-##from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 
-from sara_cmt.cluster.models import Cluster, Interface, Network, Rack, Room, Address, Country
-from sara_cmt.cluster.models import HardwareUnit as Equipment
-from sara_cmt.cluster.models import Interface, Network
-from sara_cmt.cluster.models import Connection, Company, Telephonenumber
-from sara_cmt.cluster.models import HardwareModel, Role, InterfaceType
-from sara_cmt.cluster.models import WarrantyType, WarrantyContract
-
-#import django.db.models
+from cmt_server.apps.cluster.models import Cluster, Interface, Network, Rack, Room, Address, Country
+from cmt_server.apps.cluster.models import HardwareUnit as Equipment
+from cmt_server.apps.cluster.models import Interface, Network
+from cmt_server.apps.cluster.models import Connection, Company, Telephonenumber
+from cmt_server.apps.cluster.models import HardwareModel, Role, InterfaceType
+from cmt_server.apps.cluster.models import WarrantyType, WarrantyContract
 
 #####
 #

@@ -50,6 +50,7 @@ auth_header = create_auth_header()
 s.headers.update( { 'Authorization' : auth_header } )
 s.timeout = 3.000
 base_url = 'http://localhost:8000' # should be read from config file
+#base_url = 'https://dev.cmt.surfsara.nl' # should be read from config file
 
 API_VERSION = '1'
 
@@ -58,8 +59,14 @@ full_url = '%s/api/v%s/' %( base_url, API_VERSION )
 # Get a list of all existing entities in CMT
 try:
     r = s.get(full_url)
+
+except requests.exceptions.SSLError as ssl_err:
+    print 'Unable to verify SSL certificate: %s' %str( ssl_err)
+    print 'Are your ROOT CAs up2date?'
+    sys.exit(1)
+
 except requests.exceptions.ConnectionError as req_ce:
-    print 'Error connecting to server: %s' % req_ce.args[0].reason.strerror
+    print 'Error connecting to server: %s' % str( req_ce )
     sys.exit(1)
 
 try:
