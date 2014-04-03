@@ -46,6 +46,38 @@ def is_valid_file(parser, arg):
     else:
        return open(arg,'r')  #return an open file handle
 
+SSL_ROOT_CAS = None
+
+def set_root_ca_bundle( location=None ):
+
+    global SSL_ROOT_CAS
+
+    default_locations = [ ]
+    default_locations.append( '/etc/ssl/certs/ca-certificates.crt' ) # Debian default location
+    default_locations.append( '/etc/ssl/certs/ca-bundle.crt') #Red Hat default location
+
+    # Use location if specified
+    if location:
+        if os.path.exists( location ):
+            SSL_ROOT_CAS = location
+            return True
+        else:
+            print 'file does not exist: %s' %location
+            sys.exit(1)
+
+    # Search for OS default locations
+    for l in default_locations:
+
+        if os.path.exists( l ):
+
+            SSL_ROOT_CAS = l
+            return True
+
+    # Fallback to python module supplied CA file
+    SSL_ROOT_CAS = requests.certs.where()
+    return False
+
+
 # Using a session to persist certain parameters across requests
 s = requests.Session()
 auth_header = create_auth_header()
@@ -53,21 +85,15 @@ s.headers.update( { 'Authorization' : auth_header } )
 s.timeout = 3.000
 base_url = 'http://localhost:8000' # should be read from config file
 base_url = 'https://dev.cmt.surfsara.nl' # should be read from config file
+set_root_ca_bundle()
 
 API_VERSION = '1'
 
 full_url = '%s/api/v%s/' %( base_url, API_VERSION )
 
-if os.path.exists( '/etc/ssl/certs/ca-certificates.crt' ):
-
-    #TODO: should be configurable
-    ssl_root_cas = '/etc/ssl/certs/ca-certificates.crt'
-else:
-    ssl_root_cas = requests.certs.where()
-
 # Get a list of all existing entities in CMT
 try:
-    r = s.get(full_url, verify=ssl_root_cas)
+    r = s.get(full_url, verify=SSL_ROOT_CAS)
 
 except requests.exceptions.SSLError as ssl_err:
     print 'Unable to verify SSL certificate: %s' %str( ssl_err)
@@ -123,7 +149,7 @@ def get_many_fields( entity ):
 
     # Get a list of all existing entities in CMT
     try:
-        r = s.get(url, verify=ssl_root_cas)
+        r = s.get(url, verify=SSL_ROOT_CAS)
     except requests.exceptions.ConnectionError as req_ce:
         print 'Error connecting to server: %s' % req_ce.args[0].reason.strerror
         sys.exit(1)
@@ -209,7 +235,7 @@ class Client:
 
         s.headers.update( {'content-type': 'application/json' } )
         try:
-            r = s.post(url, data=json.dumps(payload), verify=ssl_root_cas) 
+            r = s.post(url, data=json.dumps(payload), verify=SSL_ROOT_CAS) 
         except ConnectionError, e:
             print 'Error connecting to server: %s' % e
 
@@ -237,7 +263,7 @@ class Client:
         print 'PAYLOAD:', payload
 
         s.headers.update( {'content-type': 'application/json' } )
-        r = s.get(url, params=payload, verify=ssl_root_cas)
+        r = s.get(url, params=payload, verify=SSL_ROOT_CAS)
 
         # Check for HTTP-status 200
         try:
@@ -277,7 +303,7 @@ class Client:
         url = '%s/' % (full_url + entity )
         payload = args_to_payload(entity, args['get'])
         s.headers.update( {'content-type': 'application/json' } )
-        response = s.get(url, params=payload, verify=ssl_root_cas)
+        response = s.get(url, params=payload, verify=SSL_ROOT_CAS)
 
         # Return response in JSON-format
         try:
@@ -312,7 +338,7 @@ class Client:
 
             print 'URL:', result['url']
             print 'PAYLOAD:', payload
-            reponse = s.patch(result['url'], data=json.dumps(payload), verify=ssl_root_cas )
+            reponse = s.patch(result['url'], data=json.dumps(payload), verify=SSL_ROOT_CAS )
 
             # Return response in JSON-format
             try:
@@ -335,7 +361,7 @@ class Client:
         url = '%s/' % (full_url + entity )
         payload = args_to_payload(entity, args['get'])
         s.headers.update( {'content-type': 'application/json' } )
-        response = s.get(url, params=payload, verify=ssl_root_cas)
+        response = s.get(url, params=payload, verify=SSL_ROOT_CAS)
 
         # Return response in JSON-format
         try:
@@ -366,7 +392,7 @@ class Client:
 
             print 'URL:', result['url']
 
-            reponse = s.delete(result['url'], verify=ssl_root_cas)
+            reponse = s.delete(result['url'], verify=SSL_ROOT_CAS)
 
             # Return response in JSON-format
             try:
@@ -393,7 +419,7 @@ class Client:
 
         print 'Sending template to server and awaiting response..'
 
-        response = s.post(url, params=payload, files=files, verify=ssl_root_cas )
+        response = s.post(url, params=payload, files=files, verify=SSL_ROOT_CAS )
 
         # Return response in JSON-format
         try:
