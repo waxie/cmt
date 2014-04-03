@@ -25,18 +25,20 @@ from getpass import getpass
 def splitkeepsep(s, sep):
     return reduce(lambda acc, elem: acc[:-1] + [acc[-1] + elem] if elem == sep else acc + [elem], re.split("(%s)" % re.escape(sep), s), [])
 
-def create_auth_header():
+def create_auth_header( user=None, passw=None ):
 
     """
     """
 
-    username = raw_input( 'username: ' )
-    password = getpass( 'password: ' )
+    if not user:
+        username = raw_input( 'username: ' )
+
+    if not passw:
+        password = getpass( 'password: ' )
 
     base64string = base64.encodestring('%s:%s' % (username, password)).strip()
 
     return "Basic %s" %base64string
-
 
 def is_valid_file(parser, arg):
     if not os.path.exists(arg):
@@ -50,18 +52,26 @@ auth_header = create_auth_header()
 s.headers.update( { 'Authorization' : auth_header } )
 s.timeout = 3.000
 base_url = 'http://localhost:8000' # should be read from config file
-#base_url = 'https://dev.cmt.surfsara.nl' # should be read from config file
+base_url = 'https://dev.cmt.surfsara.nl' # should be read from config file
 
 API_VERSION = '1'
 
 full_url = '%s/api/v%s/' %( base_url, API_VERSION )
 
+if os.path.exists( '/etc/ssl/certs/ca-certificates.crt' ):
+
+    #TODO: should be configurable
+    ssl_root_cas = '/etc/ssl/certs/ca-certificates.crt'
+else:
+    ssl_root_cas = requests.certs.where()
+
 # Get a list of all existing entities in CMT
 try:
-    r = s.get(full_url)
+    r = s.get(full_url, verify=ssl_root_cas)
 
 except requests.exceptions.SSLError as ssl_err:
     print 'Unable to verify SSL certificate: %s' %str( ssl_err)
+    print 'Using root CAs: %s' %ssl_root_cas
     print 'Are your ROOT CAs up2date?'
     sys.exit(1)
 
@@ -113,7 +123,7 @@ def get_many_fields( entity ):
 
     # Get a list of all existing entities in CMT
     try:
-        r = s.get(url)
+        r = s.get(url, verify=ssl_root_cas)
     except requests.exceptions.ConnectionError as req_ce:
         print 'Error connecting to server: %s' % req_ce.args[0].reason.strerror
         sys.exit(1)
@@ -199,7 +209,7 @@ class Client:
 
         s.headers.update( {'content-type': 'application/json' } )
         try:
-            r = s.post(url, data=json.dumps(payload)) 
+            r = s.post(url, data=json.dumps(payload), verify=ssl_root_cas) 
         except ConnectionError, e:
             print 'Error connecting to server: %s' % e
 
@@ -227,7 +237,7 @@ class Client:
         print 'PAYLOAD:', payload
 
         s.headers.update( {'content-type': 'application/json' } )
-        r = s.get(url, params=payload)
+        r = s.get(url, params=payload, verify=ssl_root_cas)
 
         # Check for HTTP-status 200
         try:
@@ -267,7 +277,7 @@ class Client:
         url = '%s/' % (full_url + entity )
         payload = args_to_payload(entity, args['get'])
         s.headers.update( {'content-type': 'application/json' } )
-        response = s.get(url, params=payload)
+        response = s.get(url, params=payload, verify=ssl_root_cas)
 
         # Return response in JSON-format
         try:
@@ -302,7 +312,7 @@ class Client:
 
             print 'URL:', result['url']
             print 'PAYLOAD:', payload
-            reponse = s.patch(result['url'], data=json.dumps(payload) )
+            reponse = s.patch(result['url'], data=json.dumps(payload), verify=ssl_root_cas )
 
             # Return response in JSON-format
             try:
@@ -325,7 +335,7 @@ class Client:
         url = '%s/' % (full_url + entity )
         payload = args_to_payload(entity, args['get'])
         s.headers.update( {'content-type': 'application/json' } )
-        response = s.get(url, params=payload)
+        response = s.get(url, params=payload, verify=ssl_root_cas)
 
         # Return response in JSON-format
         try:
@@ -356,7 +366,7 @@ class Client:
 
             print 'URL:', result['url']
 
-            reponse = s.delete(result['url'])
+            reponse = s.delete(result['url'], verify=ssl_root_cas)
 
             # Return response in JSON-format
             try:
@@ -383,7 +393,7 @@ class Client:
 
         print 'Sending template to server and awaiting response..'
 
-        response = s.post(url, params=payload, files=files )
+        response = s.post(url, params=payload, files=files, verify=ssl_root_cas )
 
         # Return response in JSON-format
         try:
