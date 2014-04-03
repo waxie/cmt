@@ -2,117 +2,13 @@
 
 # vim: set noai tabstop=4 shiftwidth=4 expandtab:
 
-import logging
-import sys
-import textwrap
-import pprint
-import os
-import difflib
-import re
-import types
+import logging, sys, textwrap, pprint, os, difflib
+import requests, json, base64, re, types, argparse
 
-import argparse
-# Documented at:
-#  * http://docs.python.org/2/library/argparse.html
-#  * http://docs.python.org/2/howto/argparse.html
-#  * http://pymotw.com/2/argparse/
-
-import requests # documented at: http://docs.python-requests.org/
-import json
-import base64
 from getpass import getpass
 
 def splitkeepsep(s, sep):
     return reduce(lambda acc, elem: acc[:-1] + [acc[-1] + elem] if elem == sep else acc + [elem], re.split("(%s)" % re.escape(sep), s), [])
-
-def create_auth_header( user=None, passw=None ):
-
-    """
-    """
-
-    if not user:
-        username = raw_input( 'username: ' )
-
-    if not passw:
-        password = getpass( 'password: ' )
-
-    base64string = base64.encodestring('%s:%s' % (username, password)).strip()
-
-    return "Basic %s" %base64string
-
-def is_valid_file(parser, arg):
-    if not os.path.exists(arg):
-       parser.error("The file %s does not exist!"%arg)
-    else:
-       return open(arg,'r')  #return an open file handle
-
-SSL_ROOT_CAS = None
-
-def set_root_ca_bundle( location=None ):
-
-    global SSL_ROOT_CAS
-
-    default_locations = [ ]
-    default_locations.append( '/etc/ssl/certs/ca-certificates.crt' ) # Debian default location
-    default_locations.append( '/etc/ssl/certs/ca-bundle.crt') #Red Hat default location
-
-    # Use location if specified
-    if location:
-        if os.path.exists( location ):
-            SSL_ROOT_CAS = location
-            return True
-        else:
-            print 'file does not exist: %s' %location
-            sys.exit(1)
-
-    # Search for OS default locations
-    for l in default_locations:
-
-        if os.path.exists( l ):
-
-            SSL_ROOT_CAS = l
-            return True
-
-    # Fallback to python module supplied CA file
-    SSL_ROOT_CAS = requests.certs.where()
-    return False
-
-
-# Using a session to persist certain parameters across requests
-s = requests.Session()
-auth_header = create_auth_header()
-s.headers.update( { 'Authorization' : auth_header } )
-s.timeout = 3.000
-base_url = 'http://localhost:8000' # should be read from config file
-base_url = 'https://dev.cmt.surfsara.nl' # should be read from config file
-set_root_ca_bundle()
-
-API_VERSION = '1'
-
-full_url = '%s/api/v%s/' %( base_url, API_VERSION )
-
-# Get a list of all existing entities in CMT
-try:
-    r = s.get(full_url, verify=SSL_ROOT_CAS)
-
-except requests.exceptions.SSLError as ssl_err:
-    print 'Unable to verify SSL certificate: %s' %str( ssl_err)
-    print 'Using root CAs: %s' %ssl_root_cas
-    print 'Are your ROOT CAs up2date?'
-    sys.exit(1)
-
-except requests.exceptions.ConnectionError as req_ce:
-    print 'Error connecting to server: %s' % str( req_ce )
-    sys.exit(1)
-
-try:
-    print '>>> REQUEST:', r
-    assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
-except (AssertionError, requests.exceptions.RequestException), e:
-    print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
-    sys.exit(1)
-
-ENTITIES = r.json().keys()
 
 def query(s):
     """
@@ -141,79 +37,274 @@ def check_multiple_values( value ):
 
     return value.split(',')
 
-MANY_FIELDS = { }
 
-def get_many_fields( entity ):
+def is_valid_file(parser, arg):
+    if not os.path.exists(arg):
+       parser.error("The file %s does not exist!"%arg)
+    else:
+       return open(arg,'r')  #return an open file handle
 
-    url = '%s/' % (full_url + entity)
+class ApiConnection:
 
-    # Get a list of all existing entities in CMT
-    try:
-        r = s.get(url, verify=SSL_ROOT_CAS)
-    except requests.exceptions.ConnectionError as req_ce:
-        print 'Error connecting to server: %s' % req_ce.args[0].reason.strerror
-        sys.exit(1)
+    ENTITIES = None
+    API_VERSION = None
+    SESSION = None
+    SSL_ROOT_CAS = None
+    MANY_FIELDS = None
 
-    try:
-        print '>>> REQUEST:', r
-        assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
-    except (AssertionError, requests.exceptions.RequestException), e:
-        print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
-        sys.exit(1)
+    def __init__( self, url=None, api_version=None, root_ca=None, user=None, passwd=None ):
 
-    for field_name, field_value in r.json()['results'][0].items():
+        self.SESSION = requests.Session()
 
-        if type( field_value ) is types.ListType:
+        self.AUTH_HEADER = self.create_auth_header( user, passwd )
 
-            if not MANY_FIELDS.has_key( entity ):
+        self.SESSION.headers.update( { 'Authorization' : self.AUTH_HEADER } )
+        self.SESSION.timeout = 3.000
 
-                MANY_FIELDS[ entity ] = [ ]
-
-            if not field_name in MANY_FIELDS[ entity ]:
-
-                MANY_FIELDS[ entity ].append( field_name )
-
-ENTITIES = r.json().keys()
-
-def args_to_payload(entity, q):
-    """
-
-    >>> args_to_payload([['cluster__name', 'cluster1'], ['rack__label', 'rack1']])
-    {'rack__label': 'rack1', 'cluster__name': 'cluster1'}
-    """
-    d = {}
-    for stmt in q:
-        if MANY_FIELDS.has_key( entity ):
-            if stmt[0] in MANY_FIELDS[ entity ]:
-                d[stmt[0]] = check_multiple_values( stmt[1] )
-            else:
-                d[stmt[0]] = stmt[1]
+        if not url:
+            base_url = 'https://dev.cmt.surfsara.nl'
         else:
-            d[stmt[0]] = stmt[1]
-    return d
+            base_url = url
 
+        self.set_root_ca_bundle( root_ca )
+
+        if not api_version:
+            self.API_VERSION = '1'
+        else:
+            self.API_VERSION = api_version
+
+        self.FULL_URL = '%s/api/v%s/' %( base_url, self.API_VERSION )
+
+        self.retrieve_entities()
+
+    def create_auth_header( self, user=None, passw=None ):
+
+        """
+        """
+
+        if not user:
+            username = raw_input( 'username: ' )
+
+        if not passw:
+            password = getpass( 'password: ' )
+
+        base64string = base64.encodestring('%s:%s' % (username, password)).strip()
+
+        return "Basic %s" %base64string
+
+    def retrieve_entities(self):
+
+        # Get a list of all existing entities in CMT
+        try:
+            r = self.SESSION.get(self.FULL_URL, verify=self.SSL_ROOT_CAS)
+
+        except requests.exceptions.SSLError as ssl_err:
+            print 'Unable to verify SSL certificate: %s' %str( ssl_err)
+            print 'Using root CAs: %s' %ssl_root_cas
+            print 'Are your ROOT CAs up2date?'
+            sys.exit(1)
+
+        except requests.exceptions.ConnectionError as req_ce:
+            print 'Error connecting to server: %s' % str( req_ce )
+            sys.exit(1)
+
+        try:
+            print '>>> REQUEST:', r
+            assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
+        except (AssertionError, requests.exceptions.RequestException), e:
+            print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
+            sys.exit(1)
+
+        self.ENTITIES = r.json().keys()
+
+    def set_root_ca_bundle( self, location=None ):
+
+        default_locations = [ ]
+        default_locations.append( '/etc/ssl/certs/ca-certificates.crt' ) # Debian default location
+        default_locations.append( '/etc/ssl/certs/ca-bundle.crt') #Red Hat default location
+
+        # Use location if specified
+        if location:
+            if os.path.exists( location ):
+                self.SSL_ROOT_CAS = location
+                return True
+            else:
+                print 'file does not exist: %s' %location
+                sys.exit(1)
+
+        # Search for OS default locations
+        for l in default_locations:
+
+            if os.path.exists( l ):
+
+                self.SSL_ROOT_CAS = l
+                return True
+
+        # Fallback to python module supplied CA file
+        self.SSL_ROOT_CAS = requests.certs.where()
+        return False
+
+    def get_entities(self):
+
+        if not self.ENTITIES:
+            self.retrieve_entities()
+
+        return self.ENTITIES
+
+    def retrieve_many_fields( self, entity ):
+
+        self.MANY_FIELDS = { }
+
+        url = '%s/' % (self.FULL_URL + entity)
+
+        # Get a list of all existing entities in CMT
+        try:
+            r = self.SESSION.get(url, verify=self.SSL_ROOT_CAS)
+        except requests.exceptions.ConnectionError as req_ce:
+            print 'Error connecting to server: %s' % req_ce.args[0].reason.strerror
+            sys.exit(1)
+
+        try:
+            print '>>> REQUEST:', r
+            assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
+        except (AssertionError, requests.exceptions.RequestException), e:
+            print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
+            sys.exit(1)
+
+        for field_name, field_value in r.json()['results'][0].items():
+
+            if type( field_value ) is types.ListType:
+
+                if not self.MANY_FIELDS.has_key( entity ):
+
+                    self.MANY_FIELDS[ entity ] = [ ]
+
+                if not field_name in self.MANY_FIELDS[ entity ]:
+
+                    self.MANY_FIELDS[ entity ].append( field_name )
+
+    def get_many_fields( self ):
+
+        return self.MANY_FIELDS
 
 class Client:
 
-#    class ReadAction(argparse.Action):
-#        def __call__(self, parser, namespace, values, option_string=None):
-#            print '>>> %r :: %r :: %r' % (namespace, values, option_string)
-#            setattr(namespace, self.dest, values)
-#            #print '... readparser:', readparser
+    def __init__(self, args, api_connection=None ):
 
+        print '>>> Initializing client with args:', args
+        self._args = None
 
-    def get_related_ent(self, entity, field):
+        if not api_connection:
+            self.API_CONNECTION = ApiConnection()
+        else:
+            self.API_CONNECTION = api_connection
+
+        output_formats = (
+            'plain',
+            'xml',
+            'json',
+            # TODO: complete list
+        )
+
+        # Initialize a parser to parse the given arguments
+        parser = argparse.ArgumentParser(
+            description=textwrap.dedent(
+                """\
+                This is the CMT client application.
+                It's friends with the CMT server, and likes to talk with it.
+                """
+            ),
+            epilog="That's all folks!"
+        )
+
+        print 'getting entities..'
+
+        ENTITIES = self.API_CONNECTION.get_entities()
+
+        parser.add_argument('--dry-run', '-n', action='store_true', dest='dryrun', help='do a dry run')
+        output_group = parser.add_mutually_exclusive_group()
+        output_group.add_argument('--verbose', '-v', action='count', default=0, help='increase output verbosity')
+        output_group.add_argument('--quiet', '-s', action='store_true', help='suppress output messages')
+        parser.add_argument('--version', action='version', version='%(prog)s 2.0')
+
+        getparser = argparse.ArgumentParser(add_help=False)
+        getparser.add_argument('--get', nargs='+', metavar='QUERY', type=query, help='Query to match existing objects, like "KEY=VAL"')
+        setparser = argparse.ArgumentParser(add_help=False)
+        setparser.add_argument('--set', nargs='+', metavar='ASSIGNMENT', type=query, help='Definition to assign values to fields, like "KEY=VAL"')
+        fieldsparser = argparse.ArgumentParser(add_help=False)
+        fieldsparser.add_argument('--fields', nargs='+', metavar='FIELDS', type=str, help='Comma seperated list of fields to get, like "KEY[,KEY]"')
+
+        # CRUD commands to [C]reate, [R]ead, [U]pdate and [D]elete objects are parsed by subparsers.
+        # Same applies for parsing of templates.
+        subparsers = parser.add_subparsers(description=textwrap.dedent(
+            """\
+            These subcommands should be used for CRUD-actions and template-parsing.
+            """
+            ),
+            dest='command', # to store the name of the subparser that was invoked
+            help='Available actions')
+
+        # CRUD command Create
+        create_parser = subparsers.add_parser('create', help='Create a new object', parents=[setparser])
+        create_parser.add_argument('entity', choices=ENTITIES, nargs=1, help='The entity to create')
+        create_parser.set_defaults(func='create')
+
+        # CRUD command Read
+        read_parser = subparsers.add_parser('read', help='Read an existing object', parents=[getparser,fieldsparser])
+        read_parser.add_argument('entity', choices=ENTITIES, nargs=1, help='The entity to read')
+        read_parser.set_defaults(func='read')
+
+        # CRUD command Update
+        update_parser = subparsers.add_parser('update', help='Update an existing object', parents=[getparser,setparser])
+        update_parser.add_argument('entity', choices=ENTITIES, nargs=1, help='The entity to update')
+        update_parser.set_defaults(func='update')
+
+        # CRUD command Delete
+        delete_parser = subparsers.add_parser('delete', help='Delete an existing object', parents=[getparser])
+        delete_parser.add_argument('entity', choices=ENTITIES, nargs=1, help='The entity to delete')
+        delete_parser.set_defaults(func='delete')
+
+        # Command for parsing of templates
+        parse_parser = subparsers.add_parser('parse', help='Parse a CMT template')
+        parse_parser.set_defaults(func='parse')
+        file_group = parse_parser.add_argument_group('files', 'Arguments used for input and output')
+        file_group.add_argument('template', type=lambda x: is_valid_file(parse_parser,x), nargs=1, help='The template file to parse')
+        file_group.add_argument('--output', '-o', metavar='FILE', type=file, nargs=1, help='Overwrite output destination')
+
+        print 'parsing args..'
+
+        try:
+            self._args = vars(parser.parse_args( args ))
+            print '>>> PARSED ARGS:', self._args
+        except AttributeError, e:
+            print 'Invalid entity given'
+        #except NameError, e:
+        #    print 'nameerror', e
+
+    def get_args( self ):
+
+        return self._args
+
+    def args_to_payload(self, entity, q):
         """
-        Current implementation is a placeholder. This must be implemented server-side.
-        """
-        print 'LOOKING UP ENTITY FOR %s__%s' % (entity, field)
-        if entity == 'equipment':
-            if field == 'cluster':
-                return 'clusters'
-            elif field == 'rack':
-                return 'racks'
-        return None
 
+        >>> args_to_payload([['cluster__name', 'cluster1'], ['rack__label', 'rack1']])
+        {'rack__label': 'rack1', 'cluster__name': 'cluster1'}
+        """
+        d = {}
+
+        self.API_CONNECTION.retrieve_many_fields( entity )
+        MANY_FIELDS = self.API_CONNECTION.get_many_fields()
+
+        for stmt in q:
+            if MANY_FIELDS.has_key( entity ):
+                if stmt[0] in MANY_FIELDS[ entity ]:
+                    d[stmt[0]] = check_multiple_values( stmt[1] )
+                else:
+                    d[stmt[0]] = stmt[1]
+            else:
+                d[stmt[0]] = stmt[1]
+        return d
 
     def create(self, args):
 
@@ -226,16 +317,17 @@ class Client:
 
         # Prepare POST request (r) based on session (s) and given --set args
         entity = args['entity'].pop()
-        get_many_fields( entity )
 
-        url = '%s/' % (full_url + entity)
-        payload = args_to_payload(entity, args['set'])
+        self.API_CONNECTION.retrieve_many_fields( entity )
+
+        url = '%s/' % (self.API_CONNECTION.FULL_URL + entity)
+        payload = self.args_to_payload(entity, args['set'])
         print 'PAYLOAD:', payload
 
 
-        s.headers.update( {'content-type': 'application/json' } )
+        self.API_CONNECTION.SESSION.headers.update( {'content-type': 'application/json' } )
         try:
-            r = s.post(url, data=json.dumps(payload), verify=SSL_ROOT_CAS) 
+            r = self.API_CONNECTION.SESSION.post(url, data=json.dumps(payload), verify=self.API_CONNECTION.SSL_ROOT_CAS) 
         except ConnectionError, e:
             print 'Error connecting to server: %s' % e
 
@@ -253,8 +345,8 @@ class Client:
 
         # Prepare GET request (r) based on session (s) and given --get args
         entity = args['entity'].pop()
-        url = '%s/' % (full_url + entity)
-        payload = args_to_payload(entity, args['get'])
+        url = '%s/' % (self.API_CONNECTION.FULL_URL + entity)
+        payload = self.args_to_payload(entity, args['get'])
 
         if args.has_key( 'fields' ):
             if args['fields'] != None:
@@ -262,8 +354,8 @@ class Client:
 
         print 'PAYLOAD:', payload
 
-        s.headers.update( {'content-type': 'application/json' } )
-        r = s.get(url, params=payload, verify=SSL_ROOT_CAS)
+        self.API_CONNECTION.SESSION.headers.update( {'content-type': 'application/json' } )
+        r = self.API_CONNECTION.SESSION.get(url, params=payload, verify=self.API_CONNECTION.SSL_ROOT_CAS)
 
         # Check for HTTP-status 200
         try:
@@ -283,7 +375,6 @@ class Client:
             print r.json()
         return r.json()
 
-
     def update(self, args):
 
         # Be sure there's a --get arg before taking care of the rest of the args
@@ -300,14 +391,14 @@ class Client:
 
         # Get data from given --get args to prepare a request
         entity = args['entity'].pop()
-        url = '%s/' % (full_url + entity )
-        payload = args_to_payload(entity, args['get'])
-        s.headers.update( {'content-type': 'application/json' } )
-        response = s.get(url, params=payload, verify=SSL_ROOT_CAS)
+        url = '%s/' % (self.API_CONNECTION.FULL_URL + entity )
+        payload = self.args_to_payload(entity, args['get'])
+        self.API_CONNECTION.SESSION.headers.update( {'content-type': 'application/json' } )
+        response = self.API_CONNECTION.SESSION.get(url, params=payload, verify=self.API_CONNECTION.SSL_ROOT_CAS)
 
         # Return response in JSON-format
         try:
-            assert(r.json()), 'JSON decoding failed'
+            assert(response.json()), 'JSON decoding failed'
         except ValueError, e:
             print ValueError, e
             return None
@@ -330,15 +421,15 @@ class Client:
 
             return
 
-        get_many_fields( entity )
+        self.API_CONNECTION.retrieve_many_fields( entity )
 
-        payload = args_to_payload(entity, args['set'])
+        payload = self.args_to_payload(entity, args['set'])
 
         for result in response_data['results']:
 
             print 'URL:', result['url']
             print 'PAYLOAD:', payload
-            reponse = s.patch(result['url'], data=json.dumps(payload), verify=SSL_ROOT_CAS )
+            reponse = self.API_CONNECTION.SESSION.patch(result['url'], data=json.dumps(payload), verify=self.API_CONNECTION.SSL_ROOT_CAS )
 
             # Return response in JSON-format
             try:
@@ -358,14 +449,14 @@ class Client:
 
         # Get data from given --get args to prepare a request
         entity = args['entity'].pop()
-        url = '%s/' % (full_url + entity )
-        payload = args_to_payload(entity, args['get'])
-        s.headers.update( {'content-type': 'application/json' } )
-        response = s.get(url, params=payload, verify=SSL_ROOT_CAS)
+        url = '%s/' % (self.API_CONNECTION.FULL_URL + entity )
+        payload = self.args_to_payload(entity, args['get'])
+        self.API_CONNECTION.SESSION.headers.update( {'content-type': 'application/json' } )
+        response = self.API_CONNECTION.SESSION.get(url, params=payload, verify=self.API_CONNECTION.SSL_ROOT_CAS)
 
         # Return response in JSON-format
         try:
-            assert(r.json()), 'JSON decoding failed'
+            assert(response.json()), 'JSON decoding failed'
         except ValueError, e:
             print ValueError, e
             return None
@@ -392,7 +483,7 @@ class Client:
 
             print 'URL:', result['url']
 
-            reponse = s.delete(result['url'], verify=SSL_ROOT_CAS)
+            reponse = self.API_CONNECTION.SESSION.delete(result['url'], verify=self.API_CONNECTION.SSL_ROOT_CAS)
 
             # Return response in JSON-format
             try:
@@ -408,7 +499,7 @@ class Client:
         print '>>> <PARSING>'
 
         # Prepare POST request (r) based on session (s)
-        url = full_url + 'template'
+        url = self.API_CONNECTION.FULL_URL + 'template'
 
         payload = {}
 
@@ -419,7 +510,7 @@ class Client:
 
         print 'Sending template to server and awaiting response..'
 
-        response = s.post(url, params=payload, files=files, verify=SSL_ROOT_CAS )
+        response = self.API_CONNECTION.SESSION.post(url, params=payload, files=files, verify=self.API_CONNECTION.SSL_ROOT_CAS )
 
         # Return response in JSON-format
         try:
@@ -571,120 +662,15 @@ class Client:
 
         return True
 
-    # Fire a request to the server
-    def request(server, r):
-        pass
-
-
-    def __init__(self, args):
-
-        print '>>> Initializing client with args:', args
-        _args = None
-
-        output_formats = (
-            'plain',
-            'xml',
-            'json',
-            # TODO: complete list
-        )
-
-        # Initialize a parser to parse the given arguments
-        parser = argparse.ArgumentParser(
-            description=textwrap.dedent(
-                """\
-                This is the CMT client application.
-                It's friends with the CMT server, and likes to talk with it.
-                """
-            ),
-            epilog="That's all folks!"
-        )
-
-        # TODO: implement
-        parser.add_argument('--dry-run', '-n', action='store_true', dest='dryrun', help='do a dry run')
-        output_group = parser.add_mutually_exclusive_group()
-        output_group.add_argument('--verbose', '-v', action='count', default=0, help='increase output verbosity')
-        output_group.add_argument('--quiet', '-s', action='store_true', help='suppress output messages')
-        parser.add_argument('--version', action='version', version='%(prog)s 2.0')
-
-
-        getparser = argparse.ArgumentParser(add_help=False)
-        getparser.add_argument('--get', nargs='+', metavar='QUERY', type=query, help='Query to match existing objects, like "KEY=VAL"')
-        setparser = argparse.ArgumentParser(add_help=False)
-        setparser.add_argument('--set', nargs='+', metavar='ASSIGNMENT', type=query, help='Definition to assign values to fields, like "KEY=VAL"')
-        fieldsparser = argparse.ArgumentParser(add_help=False)
-        fieldsparser.add_argument('--fields', nargs='+', metavar='FIELDS', type=str, help='Comma seperated list of fields to get, like "KEY[,KEY]"')
-
-        # CRUD commands to [C]reate, [R]ead, [U]pdate and [D]elete objects are parsed by subparsers.
-        # Same applies for parsing of templates.
-        subparsers = parser.add_subparsers(description=textwrap.dedent(
-            """\
-            These subcommands should be used for CRUD-actions and template-parsing.
-            """
-            ),
-            dest='command', # to store the name of the subparser that was invoked
-            help='Available actions')
-
-        # CRUD command Create
-        create_parser = subparsers.add_parser('create', help='Create a new object', parents=[setparser])
-        create_parser.add_argument('entity', choices=ENTITIES, nargs=1, help='The entity to create')
-        create_parser.set_defaults(func='create')
-
-        # CRUD command Read
-        read_parser = subparsers.add_parser('read', help='Read an existing object', parents=[getparser,fieldsparser])
-        read_parser.add_argument('entity', choices=ENTITIES, nargs=1, help='The entity to read')
-        read_parser.set_defaults(func='read')
-
-        # CRUD command Update
-        update_parser = subparsers.add_parser('update', help='Update an existing object', parents=[getparser,setparser])
-        update_parser.add_argument('entity', choices=ENTITIES, nargs=1, help='The entity to update')
-        update_parser.set_defaults(func='update')
-
-        # CRUD command Delete
-        delete_parser = subparsers.add_parser('delete', help='Delete an existing object', parents=[getparser])
-        delete_parser.add_argument('entity', choices=ENTITIES, nargs=1, help='The entity to delete')
-        delete_parser.set_defaults(func='delete')
-
-        # Command for parsing of templates
-        parse_parser = subparsers.add_parser('parse', help='Parse a CMT template')
-        parse_parser.set_defaults(func='parse')
-        file_group = parse_parser.add_argument_group('files', 'Arguments used for input and output')
-        file_group.add_argument('template', type=lambda x: is_valid_file(parse_parser,x), nargs=1, help='The template file to parse')
-        file_group.add_argument('--output', '-o', metavar='FILE', type=file, nargs=1, help='Overwrite output destination')
-
-
-
-        try:
-            self._args = vars(parser.parse_args())
-            print '>>> PARSED ARGS:', self._args
-            #if self._args['func'] == 'create':
-            #    if not self._args['assign']:
-            #        print "Can't create object(s) without a valid QUERY to match for or ASSIGNMENT to assign."
-            #elif self._args['func'] == 'read':
-            #    if not self._args['matching']:
-            #        parser.error("Can't read object(s) without a valid QUERY to match for.")
-            #        print "Can't read object(s) without a valid QUERY to match for."
-            #elif self._args['func'] == 'update':
-            #    if not self._args['matching'] or not self._args['assign']:
-            #        print "Can't update object(s) without a valid QUERY to match for or ASSIGNMENT to assign."
-            #elif self._args['func'] == 'delete':
-            #    if not self._args['matching']:
-            #        print "Can't delete object(s) without a valid QUERY to match for."
-        except AttributeError, e:
-            print 'Invalid entity given'
-        except NameError, e:
-            print 'nameerror', e
-
-
-
 def main(args):
+
     try:
         c = Client(args)
-        parsed_args = c._args
-        #print '>>> PARSER:', parsed_args
+        parsed_args = c.get_args()
        
- 
         # Route parsed args to the action given on command line
         command = parsed_args['func']
+
         if command == 'read':
             json = c.read(parsed_args)
             pprint.pprint(json)
@@ -701,10 +687,6 @@ def main(args):
         return 1
     except SystemExit:
         return 2
-    #except:
-    #    print '>>> Error:', sys.exc_info()[0]
-    #    return -1
-
 
 if __name__ == '__main__':
     status = main(sys.argv[1:])
