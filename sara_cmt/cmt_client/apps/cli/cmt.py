@@ -61,6 +61,7 @@ class ApiConnection:
         self.SESSION.timeout = 3.000
 
         if not url:
+            #base_url = 'http://localhost:8000'
             base_url = 'https://dev.cmt.surfsara.nl'
         else:
             base_url = url
@@ -356,10 +357,10 @@ class Client:
 
         # Return response in JSON-format
         try:
-            assert(r.json()), '[ERROR] JSON decoding failed'
+            assert(r.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
         except ValueError, e:
-            print ValueError, e
-            return None
+            print e
+            return False
         #print '>>> </READING>'
 
         if lookup:
@@ -389,10 +390,10 @@ class Client:
 
         # Return response in JSON-format
         try:
-            assert(response.json()), '[ERROR] JSON decoding failed'
+            assert(response.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
         except ValueError, e:
-            print ValueError, e
-            return None
+            print e
+            return False
 
         pprint.pprint( response.json() )
 
@@ -424,19 +425,19 @@ class Client:
 
             # Return response in JSON-format
             try:
-                assert(response.json()), 'JSON decoding failed'
+                assert(response.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
             except ValueError, e:
-                print ValueError, e
-                return None
+                print e
+                return False
 
             #pprint.pprint( response.json() )
 
     def delete(self, args):
         # Be sure there's a --get arg before taking care of the rest of the args
         try:
-            assert(args['get']), 'Missing --get arguments'
+            assert(args['get']), '[ERROR] Missing --get arguments'
         except AssertionError, e:
-            print AssertionError, e
+            print e
 
         # Get data from given --get args to prepare a request
         entity = args['entity'].pop()
@@ -447,10 +448,10 @@ class Client:
 
         # Return response in JSON-format
         try:
-            assert(response.json()), 'JSON decoding failed'
+            assert(response.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
         except ValueError, e:
-            print ValueError, e
-            return None
+            print e
+            return False
 
         pprint.pprint( response.json() )
 
@@ -478,10 +479,10 @@ class Client:
 
             # Return response in JSON-format
             try:
-                assert(response.json()), 'JSON decoding failed'
+                assert(response.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
             except ValueError, e:
-                print ValueError, e
-                return None
+                print e
+                return False
 
             #pprint.pprint( response.json() )
  
@@ -505,16 +506,20 @@ class Client:
 
         # Return response in JSON-format
         try:
-            assert(response.json()), 'JSON decoding failed'
+            assert(response.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
         except ValueError, e:
-            print ValueError, e
-            return None
+            print e
+            return False
 
         file_obj.close()
 
         output_ignore_regexps = [ ]
 
         prompt_write = False
+
+        if not hasattr( response.json(), 'items' ):
+            print '[ERROR] %s' %str(response.json())
+            sys.exit(1)
 
         for output_filename, output_file_attrs in response.json().items():
 
@@ -599,6 +604,8 @@ class Client:
 
                                 print uline,
 
+                            print ''
+
                     else:
                         print '[SAME] no difference (excluding commented lines) with original'
 
@@ -645,12 +652,12 @@ class Client:
                 print "[SKIPPING] skipping output file: %s" %output_filename
                 continue
 
-            print "[WRITING] writing '%s': " %output_filename,
+            print "[WRITING] writing: %s " %output_filename
             f = open(output_filename, 'w')
             f.writelines(output_file_contents)
             f.close()
-            print '[FINISHED] done'
 
+        print '[FINISHED] done'
         return True
 
 def main(args):

@@ -30,6 +30,7 @@ from django.contrib.admin.models import LogEntry, DELETION, ADDITION, CHANGE
 from django.utils.encoding import force_unicode
 from django.contrib.contenttypes.models import ContentType
 
+from django.template import TemplateSyntaxError
 
 #from rest_framework_bulk import ListBulkCreateUpdateDestroyAPIView
 
@@ -254,10 +255,14 @@ class TemplateView(APIView):
             template_data['epilogue'] = []
             context = Context(template_data)
 
-            rendered_string = render_to_string(file_fullpath, context_instance=context)
-            # While rendering the template there are variables added to the
-            # Context, so these can be used for post-processing.
-            #logger.debug('<RESULT>\n%s\n</RESULT>'%rendered_string)
+            try:
+                rendered_string = render_to_string(file_fullpath, context_instance=context)
+                # While rendering the template there are variables added to the
+                # Context, so these can be used for post-processing.
+                #logger.debug('<RESULT>\n%s\n</RESULT>'%rendered_string)
+            except TemplateSyntaxError as template_error:
+                #TODO: report template line number of error?
+                return HttpResponse(json.dumps(str(template_error)), content_type="application/json")
 
         except IOError, e:
             return Response(status=500)
