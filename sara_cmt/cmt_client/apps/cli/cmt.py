@@ -37,10 +37,9 @@ def check_multiple_values( value ):
 
     return value.split(',')
 
-
 def is_valid_file(parser, arg):
     if not os.path.exists(arg):
-       parser.error("The file %s does not exist!"%arg)
+       parser.error("[ERROR] The file %s does not exist!"%arg)
     else:
        return open(arg,'r')  #return an open file handle
 
@@ -99,20 +98,19 @@ class ApiConnection:
             r = self.SESSION.get(self.FULL_URL, verify=self.SSL_ROOT_CAS)
 
         except requests.exceptions.SSLError as ssl_err:
-            print 'Unable to verify SSL certificate: %s' %str( ssl_err)
-            print 'Using root CAs: %s' %ssl_root_cas
-            print 'Are your ROOT CAs up2date?'
+            print '[ERROR] Unable to verify SSL certificate: %s' %str( ssl_err)
+            print '[INFO]  Using root CAs: %s' %self.SSL_ROOT_CAS
             sys.exit(1)
 
         except requests.exceptions.ConnectionError as req_ce:
-            print 'Error connecting to server: %s' % str( req_ce )
+            print '[ERROR] connecting to server: %s' % str( req_ce )
             sys.exit(1)
 
         try:
-            print '>>> REQUEST:', r
+            #print '>>> REQUEST:', r
             assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
         except (AssertionError, requests.exceptions.RequestException), e:
-            print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
+            print '[ERROR] Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
             sys.exit(1)
 
         self.ENTITIES = r.json().keys()
@@ -129,7 +127,7 @@ class ApiConnection:
                 self.SSL_ROOT_CAS = location
                 return True
             else:
-                print 'file does not exist: %s' %location
+                print '[ERROR] file does not exist: %s' %location
                 sys.exit(1)
 
         # Search for OS default locations
@@ -161,14 +159,14 @@ class ApiConnection:
         try:
             r = self.SESSION.get(url, verify=self.SSL_ROOT_CAS)
         except requests.exceptions.ConnectionError as req_ce:
-            print 'Error connecting to server: %s' % req_ce.args[0].reason.strerror
+            print '[ERROR] connecting to server: %s' % req_ce.args[0].reason.strerror
             sys.exit(1)
 
         try:
-            print '>>> REQUEST:', r
+            #print '>>> REQUEST:', r
             assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
         except (AssertionError, requests.exceptions.RequestException), e:
-            print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
+            print '[ERROR] Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
             sys.exit(1)
 
         for field_name, field_value in r.json()['results'][0].items():
@@ -191,7 +189,7 @@ class Client:
 
     def __init__(self, args, api_connection=None ):
 
-        print '>>> Initializing client with args:', args
+        #print '>>> Initializing client with args:', args
         self._args = None
 
         if not api_connection:
@@ -216,8 +214,6 @@ class Client:
             ),
             epilog="That's all folks!"
         )
-
-        print 'getting entities..'
 
         ENTITIES = self.API_CONNECTION.get_entities()
 
@@ -271,15 +267,11 @@ class Client:
         file_group.add_argument('template', type=lambda x: is_valid_file(parse_parser,x), nargs=1, help='The template file to parse')
         file_group.add_argument('--output', '-o', metavar='FILE', type=file, nargs=1, help='Overwrite output destination')
 
-        print 'parsing args..'
-
         try:
             self._args = vars(parser.parse_args( args ))
-            print '>>> PARSED ARGS:', self._args
+            #print '>>> PARSED ARGS:', self._args
         except AttributeError, e:
-            print 'Invalid entity given'
-        #except NameError, e:
-        #    print 'nameerror', e
+            print '[ERROR] Invalid entity given'
 
     def get_args( self ):
 
@@ -308,10 +300,10 @@ class Client:
 
     def create(self, args):
 
-        print '>>> <CREATING>'
+        #print '>>> <CREATING>'
         # Be sure there's a --set arg before taking care of the rest of the args
         try:
-            assert(args['set']), 'Missing --set arguments'
+            assert(args['set']), '[ERROR] Missing --set arguments'
         except AssertionError, e:
             print AssertionError, e
 
@@ -322,24 +314,23 @@ class Client:
 
         url = '%s/' % (self.API_CONNECTION.FULL_URL + entity)
         payload = self.args_to_payload(entity, args['set'])
-        print 'PAYLOAD:', payload
-
+        #print 'PAYLOAD:', payload
 
         self.API_CONNECTION.SESSION.headers.update( {'content-type': 'application/json' } )
         try:
             r = self.API_CONNECTION.SESSION.post(url, data=json.dumps(payload), verify=self.API_CONNECTION.SSL_ROOT_CAS) 
         except ConnectionError, e:
-            print 'Error connecting to server: %s' % e
+            print '[ERROR] connecting to server: %s' % e
 
-        print '>>> </CREATING>'
+        #print '>>> </CREATING>'
         return r.json()
 
     def read(self, args, lookup=False):
 
-        print '>>> <READING>'
+        #print '>>> <READING>'
         # Be sure there's a --get arg before taking care of the rest of the args
         try:
-            assert(args['get']), 'Missing --get arguments'
+            assert(args['get']), '[ERROR] Missing --get arguments'
         except AssertionError, e:
             print AssertionError, e
 
@@ -352,7 +343,7 @@ class Client:
             if args['fields'] != None:
                 payload[ 'fields' ] = args['fields'][0]
 
-        print 'PAYLOAD:', payload
+        #print 'PAYLOAD:', payload
 
         self.API_CONNECTION.SESSION.headers.update( {'content-type': 'application/json' } )
         r = self.API_CONNECTION.SESSION.get(url, params=payload, verify=self.API_CONNECTION.SSL_ROOT_CAS)
@@ -361,15 +352,15 @@ class Client:
         try:
             assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
         except AssertionError, e:
-            print 'Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
+            print '[INFO] Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
 
         # Return response in JSON-format
         try:
-            assert(r.json()), 'JSON decoding failed'
+            assert(r.json()), '[ERROR] JSON decoding failed'
         except ValueError, e:
             print ValueError, e
             return None
-        print '>>> </READING>'
+        #print '>>> </READING>'
 
         if lookup:
             print r.json()
@@ -379,13 +370,13 @@ class Client:
 
         # Be sure there's a --get arg before taking care of the rest of the args
         try:
-            assert(args['get']), 'Missing --get arguments'
+            assert(args['get']), '[ERROR] Missing --get arguments'
         except AssertionError, e:
             print AssertionError, e
 
         # Be sure there's a --set arg before taking care of the rest of the args
         try:
-            assert(args['set']), 'Missing --set arguments'
+            assert(args['set']), '[ERROR] Missing --set arguments'
         except AssertionError, e:
             print AssertionError, e
 
@@ -398,7 +389,7 @@ class Client:
 
         # Return response in JSON-format
         try:
-            assert(response.json()), 'JSON decoding failed'
+            assert(response.json()), '[ERROR] JSON decoding failed'
         except ValueError, e:
             print ValueError, e
             return None
@@ -414,12 +405,12 @@ class Client:
             print 'No objects found'
             return 
 
-        confirm_str = 'You are about to update: %s object(s). Are you sure ([N]/Y)?: ' %result_count
+        confirm_str = '[UPDATE] You are about to update: %s object(s). Are you sure ([N]/Y)?: ' %result_count
         confirm = raw_input( confirm_str )
       
         if confirm.lower() != 'y':
 
-            return
+            return False
 
         self.API_CONNECTION.retrieve_many_fields( entity )
 
@@ -427,8 +418,8 @@ class Client:
 
         for result in response_data['results']:
 
-            print 'URL:', result['url']
-            print 'PAYLOAD:', payload
+            #print 'URL:', result['url']
+            #print 'PAYLOAD:', payload
             reponse = self.API_CONNECTION.SESSION.patch(result['url'], data=json.dumps(payload), verify=self.API_CONNECTION.SSL_ROOT_CAS )
 
             # Return response in JSON-format
@@ -472,7 +463,7 @@ class Client:
             print 'No objects found'
             return 
 
-        confirm_str = 'You are about to delete: %s object(s). Are you sure ([N]/Y)?: ' %result_count
+        confirm_str = '[DELETE] You are about to delete: %s object(s). Are you sure ([N]/Y)?: ' %result_count
         confirm = raw_input( confirm_str )
       
         if confirm.lower() != 'y':
@@ -481,7 +472,7 @@ class Client:
 
         for result in response_data['results']:
 
-            print 'URL:', result['url']
+            #print 'URL:', result['url']
 
             reponse = self.API_CONNECTION.SESSION.delete(result['url'], verify=self.API_CONNECTION.SSL_ROOT_CAS)
 
@@ -496,7 +487,7 @@ class Client:
  
     # Parse a template
     def parse(self, args):
-        print '>>> <PARSING>'
+        #print '>>> <PARSING>'
 
         # Prepare POST request (r) based on session (s)
         url = self.API_CONNECTION.FULL_URL + 'template'
@@ -508,7 +499,7 @@ class Client:
 
         files = { 'file' : file_obj }
 
-        print 'Sending template to server and awaiting response..'
+        print '[SENDING] template to server and awaiting response..'
 
         response = self.API_CONNECTION.SESSION.post(url, params=payload, files=files, verify=self.API_CONNECTION.SSL_ROOT_CAS )
 
@@ -530,8 +521,8 @@ class Client:
             output_file_contents = output_file_attrs['contents']
             output_file_diff_ignore = output_file_attrs['diff_ignore']
 
-            print 'Received output file: %s' %output_filename
-            print '- file size: %d' %len( output_file_contents )
+            print '[RECEIVED] output file: %s' %output_filename
+            print '[RECEIVED] - file size: %d' %len( output_file_contents )
 
             #pprint.pprint( output_file_contents )
 
@@ -545,12 +536,12 @@ class Client:
 
                 prompt_write = True
 
-                print "file already exists: %s" %output_filename
+                print "[EXISTS] File already exists: %s" %output_filename
 
                 if not os.access( output_filename, os.R_OK ):
 
-                    print "cannot read original file (permission denied): %s" %output_filename
-                    print "cannot check diff between original file and new output file"
+                    print "[WARNING] Cannot read original file (permission denied): %s" %output_filename
+                    print "[WARNING] Cannot check diff between original file and new output file"
 
                 else:
 
@@ -595,8 +586,8 @@ class Client:
 
                     if len( udiff_list ) > 0:
 
-                        print 'Received (new) output contents differs from original contents for file: %s' %output_filename
-                        want_diff = raw_input( "Would you like to see the diff(erence)? ([N/y]): " )
+                        print '[UPDATED] Received (new) output contents differs from original contents for file: %s' %output_filename
+                        want_diff = raw_input( "[DIFF] Would you like to see the diff(erence)? ([N/y]): " )
 
                         if want_diff.lower() == 'y':
 
@@ -609,16 +600,16 @@ class Client:
                                 print uline,
 
                     else:
-                        print 'no difference (excluding commented lines) with original'
+                        print '[SAME] no difference (excluding commented lines) with original'
 
         if prompt_write:
 
-            really_write = raw_input('Really write these output files? ([N/y]): ')
+            really_write = raw_input('[WRITE] Really write these output files? ([N/y]): ')
 
             if really_write.lower() != 'y':
 
-                print "Doing nothing and exiting.."
-                return True
+                print "[ABORTED] Doing nothing and exiting.."
+                return False
 
         for output_filename, output_file_attrs in response.json().items():
 
@@ -628,37 +619,37 @@ class Client:
 
             if not os.path.isdir( target_dir ):
 
-                print "Directory '%s' for output file '%s' does not exist" %( target_dir, output_filename )
+                print "[WARNING] Directory '%s' for output file '%s' does not exist" %( target_dir, output_filename )
 
                 if not os.access( target_dir, os.W_OK ):
 
-                    print "I do not have permission to create the directory"
-                    print "Aborting and doing nothing.."
+                    print "[ERROR] I do not have permission to create the directory"
+                    print "[ERROR] Aborting and doing nothing.."
                     sys.exit(1)
 
-                want_create_dir = raw_input( "You want me to create the directory? ([N/y]): " )
+                want_create_dir = raw_input( "[MKDIR] You want me to create the directory? ([N/y]): " )
 
                 if want_create_dir.lower() == 'y':
 
-                    print "creating directory: %s" %target_dir
+                    print "[MKDIR] creating directory: %s" %target_dir
                     os.makedirs( target_dir )
 
                 else:
 
-                    print "skipping output file: %s" %output_filename
+                    print "[SKIPPING] skipping output file: %s" %output_filename
                     continue
 
             if os.path.isfile( output_filename ) and not os.access( output_filename, os.W_OK ):
 
-                print "Permission denied, file is not writeable: %s" %output_filename
-                print "skipping output file: %s" %output_filename
+                print "[ERROR] Permission denied, file is not writeable: %s" %output_filename
+                print "[SKIPPING] skipping output file: %s" %output_filename
                 continue
 
-            print "writing '%s': " %output_filename,
+            print "[WRITING] writing '%s': " %output_filename,
             f = open(output_filename, 'w')
             f.writelines(output_file_contents)
             f.close()
-            print 'done'
+            print '[FINISHED] done'
 
         return True
 
@@ -684,9 +675,9 @@ def main(args):
         elif command == 'parse':
             c.parse(parsed_args)
 
-        return 1
+        return 0
     except SystemExit:
-        return 2
+        return 1
 
 if __name__ == '__main__':
     status = main(sys.argv[1:])
