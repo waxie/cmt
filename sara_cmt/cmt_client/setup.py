@@ -47,7 +47,7 @@ setup(
         'Topic :: Utilities',
     ],
 
-    packages = [ 'cmt_client', 'cmt_client.apps', 'cmt_client.apps.cli' ],
+    packages = [ 'cmt_client' ],
 
     install_requires = [
         'Python>=2.6.0','Python<3.0'
@@ -67,15 +67,15 @@ setup(
 
         # templates
         ( 'etc/cmt/templates', [
-            'etc/templates/examples/README'
+            'etc/cmt/templates/examples/README'
         ]),
 
         # examples of CMT-templates
         ( 'etc/cmt/templates/examples', [
-            'etc/templates/examples/simple_cnames.cmt',
-            'etc/templates/examples/simple_hostnames.cmt',
-            'etc/templates/examples/simple_dhcpd.conf.cmt',
-            'etc/templates/examples/complex_dns.cmt'
+            'etc/cmt/templates/examples/simple_cnames.cmt',
+            'etc/cmt/templates/examples/simple_hostnames.cmt',
+            'etc/cmt/templates/examples/simple_dhcpd.conf.cmt',
+            'etc/cmt/templates/examples/complex_dns.cmt'
         ])
     ]
 )
