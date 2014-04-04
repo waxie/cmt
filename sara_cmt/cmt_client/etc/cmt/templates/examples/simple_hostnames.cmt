@@ -13,7 +13,7 @@
 #
 {% load cmt_client %}
 
-{% use hardwareunit with 'rack=31' as machines %}
+{% read hardwareunit --get 'rack=31' as machines %}
 
 {% store '/tmp/hostnames_example.txt' %}
 

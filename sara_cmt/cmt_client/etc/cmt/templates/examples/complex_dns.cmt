@@ -36,10 +36,10 @@
 
 $INCLUDE db.subdomain.example.com.manual
 
-{% use Network with 'name__contains=gina' as gina_networks %}
+{% read Network --get 'name__contains=gina' as gina_networks %}
 {% for n in gina_networks %}
   {% assign network_query = 'network__name=' n.name %}
-  {% use interface with network_query as network_interfaces %}
+  {% read interface --get network_query as network_interfaces %}
 
 $ORIGIN {{ n.domain }}.
 
@@ -100,7 +100,7 @@ $ORIGIN {{ bnet|arpanize }}.
 
     {% noblanklines %}
     {% assign network_query = 'network__name=' n.name %}
-    {% use interface with network_query as network_interfaces %}
+    {% read interface --get network_query as network_interfaces %}
     {% for iface in network_interfaces %}
       {% if iface.ip|base_net == bnet %}
 

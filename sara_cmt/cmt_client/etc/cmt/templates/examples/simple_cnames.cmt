@@ -15,7 +15,7 @@
 
 {% store '/tmp/simple_cnames_example.txt' %}
 
-{% use hardwareunit with 'rack=31' as machines %}
+{% read hardwareunit --get 'rack=31' as machines %}
 
 {% noblanklines %}
 {% for machine in machines %}

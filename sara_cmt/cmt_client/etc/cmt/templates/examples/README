@@ -1,10 +1,10 @@
 Please consult the website for complete documentation on how to utilize CMT and it's templating capabilities.
 
 The CMT website: 
- * https://subtrac.sara.nl/oss/cmt/
+ * https://oss.trac.surfsara.nl/cmt
 
 Description of available templating functions:
- * https://subtrac.sara.nl/oss/cmt/wiki/Usage/TemplatingDocumentation
+ * https://oss.trac.surfsara.nl/cmt/wiki/Usage/TemplatingDocumentation
 
 Description of available (data/model) fields and their names:
- * https://subtrac.sara.nl/oss/cmt/wiki/Data/Datastructure#Availablemodels
+ * https://oss.trac.surfsara.nl/cmt/wiki/Data/Datastructure#Availablemodels
