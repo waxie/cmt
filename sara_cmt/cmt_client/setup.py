@@ -21,12 +21,12 @@ from cmt_client import __version__
 setup(
     name = 'cmt-client',
     version = __version__,
-    description = 'Cluster Management Tool',
+    description = 'Cluster Management Tool client',
     url = 'http://oss.trac.sara.nl/cmt/',
     author = 'CMT Development team',
     author_email = 'cmt-users@lists.osd.sara.nl',
     license = 'GPL',
-    long_description = 'CMT is a Cluster Management Tool originally created at SURFsara.',
+    long_description = 'Client for the Cluster Management Tool (API) server',
 
     platforms = [ 'linux-x86_64', 'linux-i386' ],
 
@@ -47,7 +47,7 @@ setup(
         'Topic :: Utilities',
     ],
 
-    packages = [ 'cmt_client.apps.cli' ],
+    packages = [ 'cmt_client', 'cmt_client.apps', 'cmt_client.apps.cli' ],
 
     install_requires = [
         'Python>=2.6.0','Python<3.0'
@@ -63,7 +63,6 @@ setup(
         # config-files
         ( 'etc/cmt', [
             'etc/cmt.conf.sample',
-            'etc/logging.conf'
         ]),
 
         # templates
