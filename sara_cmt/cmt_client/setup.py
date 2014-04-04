@@ -67,15 +67,15 @@ setup(
 
         # templates
         ( 'etc/cmt/templates', [
-            'templates/examples/README'
+            'etc/templates/examples/README'
         ]),
 
         # examples of CMT-templates
         ( 'etc/cmt/templates/examples', [
-            'templates/examples/simple_cnames.cmt',
-            'templates/examples/simple_hostnames.cmt',
-            'templates/examples/simple_dhcpd.conf.cmt',
-            'templates/examples/complex_dns.cmt'
+            'etc/templates/examples/simple_cnames.cmt',
+            'etc/templates/examples/simple_hostnames.cmt',
+            'etc/templates/examples/simple_dhcpd.conf.cmt',
+            'etc/templates/examples/complex_dns.cmt'
         ])
     ]
 )
