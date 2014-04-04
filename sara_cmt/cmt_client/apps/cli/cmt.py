@@ -7,6 +7,11 @@ import requests, json, base64, re, types, argparse
 
 from getpass import getpass
 
+def i_print( interactive, i_str ):
+
+    if interactive:
+        print i_str
+
 def splitkeepsep(s, sep):
     return reduce(lambda acc, elem: acc[:-1] + [acc[-1] + elem] if elem == sep else acc + [elem], re.split("(%s)" % re.escape(sep), s), [])
 
@@ -51,9 +56,19 @@ class ApiConnection:
     SSL_ROOT_CAS = None
     MANY_FIELDS = None
 
-    def __init__( self, url=None, api_version=None, root_ca=None, user=None, passwd=None ):
+    interactive = False
+
+    def __init__( self, url=None, api_version=None, root_ca=None, user=None, passwd=None, interactive=False ):
+
+        self.interactive = interactive
 
         self.SESSION = requests.Session()
+
+        if not self.interactive:
+
+            if not user or not passwd:
+
+                raise RuntimeError('Not interactive and no user/passwd supplied')
 
         self.AUTH_HEADER = self.create_auth_header( user, passwd )
 
@@ -94,18 +109,22 @@ class ApiConnection:
 
     def retrieve_entities(self):
 
-        # Get a list of all existing entities in CMT
-        try:
+        if not self.interactive:
             r = self.SESSION.get(self.FULL_URL, verify=self.SSL_ROOT_CAS)
+        else:
 
-        except requests.exceptions.SSLError as ssl_err:
-            print '[ERROR] Unable to verify SSL certificate: %s' %str( ssl_err)
-            print '[INFO]  Using root CAs: %s' %self.SSL_ROOT_CAS
-            sys.exit(1)
+            # Get a list of all existing entities in CMT
+            try:
+                r = self.SESSION.get(self.FULL_URL, verify=self.SSL_ROOT_CAS)
 
-        except requests.exceptions.ConnectionError as req_ce:
-            print '[ERROR] connecting to server: %s' % str( req_ce )
-            sys.exit(1)
+            except requests.exceptions.SSLError as ssl_err:
+                print '[ERROR] Unable to verify SSL certificate: %s' %str( ssl_err)
+                print '[INFO]  Using root CAs: %s' %self.SSL_ROOT_CAS
+                sys.exit(1)
+
+            except requests.exceptions.ConnectionError as req_ce:
+                print '[ERROR] connecting to server: %s' % str( req_ce )
+                sys.exit(1)
 
         try:
             #print '>>> REQUEST:', r
@@ -156,12 +175,18 @@ class ApiConnection:
 
         url = '%s/' % (self.FULL_URL + entity)
 
-        # Get a list of all existing entities in CMT
-        try:
+        if not self.interactive:
+
             r = self.SESSION.get(url, verify=self.SSL_ROOT_CAS)
-        except requests.exceptions.ConnectionError as req_ce:
-            print '[ERROR] connecting to server: %s' % req_ce.args[0].reason.strerror
-            sys.exit(1)
+
+        else:
+
+            # Get a list of all existing entities in CMT
+            try:
+                r = self.SESSION.get(url, verify=self.SSL_ROOT_CAS)
+            except requests.exceptions.ConnectionError as req_ce:
+                print '[ERROR] connecting to server: %s' % req_ce.args[0].reason.strerror
+                sys.exit(1)
 
         try:
             #print '>>> REQUEST:', r
@@ -188,13 +213,18 @@ class ApiConnection:
 
 class Client:
 
-    def __init__(self, args, api_connection=None ):
+    API_CONNECTION = None
+    interactive = False
+
+    def __init__(self, args, api_connection=None, interactive=False ):
+
+        self.interactive = interactive
 
         #print '>>> Initializing client with args:', args
         self._args = None
 
         if not api_connection:
-            self.API_CONNECTION = ApiConnection()
+            self.API_CONNECTION = ApiConnection( **{ 'interactive': self.interactive }  )
         else:
             self.API_CONNECTION = api_connection
 
@@ -299,14 +329,18 @@ class Client:
                 d[stmt[0]] = stmt[1]
         return d
 
-    def create(self, args):
+    def create(self, args ):
 
         #print '>>> <CREATING>'
         # Be sure there's a --set arg before taking care of the rest of the args
         try:
             assert(args['set']), '[ERROR] Missing --set arguments'
         except AssertionError, e:
-            print AssertionError, e
+
+            if self.interactive:
+                print e
+            else:
+                raise SyntaxError('Missing set arguments')
 
         # Prepare POST request (r) based on session (s) and given --set args
         entity = args['entity'].pop()
@@ -321,19 +355,28 @@ class Client:
         try:
             r = self.API_CONNECTION.SESSION.post(url, data=json.dumps(payload), verify=self.API_CONNECTION.SSL_ROOT_CAS) 
         except ConnectionError, e:
-            print '[ERROR] connecting to server: %s' % e
+            if self.interactive:
+                print '[ERROR] connecting to server: %s' % e
+            else:
+                raise RuntimeError('Error connecting to server: %s' %e)
+            return False
 
         #print '>>> </CREATING>'
         return r.json()
 
-    def read(self, args, lookup=False):
+    def read(self, args ):
 
         #print '>>> <READING>'
         # Be sure there's a --get arg before taking care of the rest of the args
         try:
             assert(args['get']), '[ERROR] Missing --get arguments'
         except AssertionError, e:
-            print AssertionError, e
+
+            if self.interactive:
+                print e
+                return False
+            else:
+                raise SyntaxError('Missing get arguments')
 
         # Prepare GET request (r) based on session (s) and given --get args
         entity = args['entity'].pop()
@@ -353,18 +396,24 @@ class Client:
         try:
             assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
         except AssertionError, e:
-            print '[INFO] Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
+
+            if self.interactive:
+                print '[INFO] Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
+            else:
+                raise RuntimeError('Server gave HTTP response code %s: %s' % (r.status_code,r.reason) )
 
         # Return response in JSON-format
         try:
             assert(r.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
         except ValueError, e:
-            print e
+            if self.interactive:
+                print e
+            else:
+                raise TypeError('JSON decoding failed')
             return False
+
         #print '>>> </READING>'
 
-        if lookup:
-            print r.json()
         return r.json()
 
     def update(self, args):
@@ -373,13 +422,21 @@ class Client:
         try:
             assert(args['get']), '[ERROR] Missing --get arguments'
         except AssertionError, e:
-            print AssertionError, e
+            if self.interactive:
+                print e
+            else:
+                raise SyntaxError('Missing get arguments')
+            return False
 
         # Be sure there's a --set arg before taking care of the rest of the args
         try:
             assert(args['set']), '[ERROR] Missing --set arguments'
         except AssertionError, e:
-            print AssertionError, e
+            if self.interactive:
+                print e
+            else:
+                raise SyntaxError('Missing set arguments')
+            return False
 
         # Get data from given --get args to prepare a request
         entity = args['entity'].pop()
@@ -392,10 +449,14 @@ class Client:
         try:
             assert(response.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
         except ValueError, e:
-            print e
+            if self.interactive:
+                print e
+            else:
+                raise TypeError('JSON decoding failed')
             return False
 
-        pprint.pprint( response.json() )
+        if self.interactive:
+            pprint.pprint( response.json() )
 
         response_data = response.json()
 
@@ -403,15 +464,16 @@ class Client:
 
         if result_count == 0:
 
-            print 'No objects found'
-            return 
-
-        confirm_str = '[UPDATE] You are about to update: %s object(s). Are you sure ([N]/Y)?: ' %result_count
-        confirm = raw_input( confirm_str )
-      
-        if confirm.lower() != 'y':
-
+            i_print('No objects found', self.interactive)
             return False
+
+        if self.interactive:
+            confirm_str = '[UPDATE] You are about to update: %s object(s). Are you sure ([N]/Y)?: ' %result_count
+            confirm = raw_input( confirm_str )
+      
+            if confirm.lower() != 'y':
+
+                return False
 
         self.API_CONNECTION.retrieve_many_fields( entity )
 
@@ -427,7 +489,10 @@ class Client:
             try:
                 assert(response.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
             except ValueError, e:
-                print e
+                if self.interactive:
+                    print e
+                else:
+                    raise TypeError('JSON decoding failed')
                 return False
 
             #pprint.pprint( response.json() )
@@ -437,7 +502,11 @@ class Client:
         try:
             assert(args['get']), '[ERROR] Missing --get arguments'
         except AssertionError, e:
-            print e
+            if self.interactive:
+                print e
+            else:
+                raise SyntaxError('Missing get arguments')
+            return False
 
         # Get data from given --get args to prepare a request
         entity = args['entity'].pop()
@@ -450,10 +519,14 @@ class Client:
         try:
             assert(response.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
         except ValueError, e:
-            print e
+            if self.interactive:
+                print e
+            else:
+                raise TypeError('JSON decoding failed')
             return False
 
-        pprint.pprint( response.json() )
+        if self.interactive:
+            pprint.pprint( response.json() )
 
         response_data = response.json()
 
@@ -461,15 +534,16 @@ class Client:
 
         if result_count == 0:
 
-            print 'No objects found'
-            return 
+            i_print('No objects found', self.interactive)
+            return False
 
-        confirm_str = '[DELETE] You are about to delete: %s object(s). Are you sure ([N]/Y)?: ' %result_count
-        confirm = raw_input( confirm_str )
+        if self.interactive:
+            confirm_str = '[DELETE] You are about to delete: %s object(s). Are you sure ([N]/Y)?: ' %result_count
+            confirm = raw_input( confirm_str )
       
-        if confirm.lower() != 'y':
+            if confirm.lower() != 'y':
 
-            return
+                return False
 
         for result in response_data['results']:
 
@@ -481,7 +555,10 @@ class Client:
             try:
                 assert(response.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
             except ValueError, e:
-                print e
+                if self.interactive:
+                    print e
+                else:
+                    raise TypeError('JSON decoding failed')
                 return False
 
             #pprint.pprint( response.json() )
@@ -500,7 +577,7 @@ class Client:
 
         files = { 'file' : file_obj }
 
-        print '[SENDING] template to server and awaiting response..'
+        i_print('[SENDING] template to server and awaiting response..', self.interactive )
 
         response = self.API_CONNECTION.SESSION.post(url, params=payload, files=files, verify=self.API_CONNECTION.SSL_ROOT_CAS )
 
@@ -508,7 +585,10 @@ class Client:
         try:
             assert(response.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
         except ValueError, e:
-            print e
+            if self.interactive:
+                print e
+            else:
+                raise TypeError('JSON decoding failed')
             return False
 
         file_obj.close()
@@ -518,8 +598,14 @@ class Client:
         prompt_write = False
 
         if not hasattr( response.json(), 'items' ):
-            print '[ERROR] %s' %str(response.json())
-            sys.exit(1)
+            if self.interactive:
+                print '[ERROR] %s' %str(response.json())
+            else:
+                raise RuntimeError(str(response.json()))
+            return False
+
+        if not self.interactive:
+            return response.json()
 
         for output_filename, output_file_attrs in response.json().items():
 
@@ -609,7 +695,7 @@ class Client:
                     else:
                         print '[SAME] no difference (excluding commented lines) with original'
 
-        if prompt_write:
+        if prompt_write and self.interactive:
 
             really_write = raw_input('[WRITE] Really write these output files? ([N/y]): ')
 
@@ -626,13 +712,18 @@ class Client:
 
             if not os.path.isdir( target_dir ):
 
-                print "[WARNING] Directory '%s' for output file '%s' does not exist" %( target_dir, output_filename )
+                if self.interactive:
+                    print "[WARNING] Directory '%s' for output file '%s' does not exist" %( target_dir, output_filename )
+                else:
+                    raise RuntimeError("Directory '%s' does not exist" %target_dir )
+                    return False
 
                 if not os.access( target_dir, os.W_OK ):
 
-                    print "[ERROR] I do not have permission to create the directory"
-                    print "[ERROR] Aborting and doing nothing.."
-                    sys.exit(1)
+                    if self.interactive:
+                        print "[ERROR] I do not have permission to create the directory"
+                        print "[ERROR] Aborting and doing nothing.."
+                        return False
 
                 want_create_dir = raw_input( "[MKDIR] You want me to create the directory? ([N/y]): " )
 
@@ -662,8 +753,10 @@ class Client:
 
 def main(args):
 
+    kw_args = { 'args' : args, 'interactive' : True }
+
     try:
-        c = Client(args)
+        c = Client( **kw_args )
         parsed_args = c.get_args()
        
         # Route parsed args to the action given on command line
