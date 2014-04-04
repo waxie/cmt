@@ -2,10 +2,23 @@
 
 # vim: set noai tabstop=4 shiftwidth=4 expandtab:
 
-import logging, sys, textwrap, pprint, os, difflib
-import requests, json, base64, re, types, argparse
+import logging, sys, textwrap, pprint, os, difflib, ConfigParser
+import requests, json, base64, re, types, argparse, site
+
+from cmt_client import __version__ as cmt_version
 
 from getpass import getpass
+
+DEFAULT_CONFIG_FILE = None
+
+# RB: config location finding logic due to stupid distutils
+for config_dir_guess in [ 'etc/cmt', 'local/etc/cmt' ]:
+
+    if os.path.exists( os.path.join( site.sys.prefix, config_dir_guess ) ):
+
+        CONFIG_DIR = os.path.join( site.sys.prefix, config_dir_guess )
+        DEFAULT_CONFIG_FILE = '%s/cmt.conf' % CONFIG_DIR
+        break
 
 def i_print( interactive, i_str ):
 
@@ -58,7 +71,7 @@ class ApiConnection:
 
     interactive = False
 
-    def __init__( self, url=None, api_version=None, root_ca=None, user=None, passwd=None, interactive=False ):
+    def __init__( self, url=None, api_version=None, root_cas_file=None, user=None, passwd=None, interactive=False ):
 
         self.interactive = interactive
 
@@ -81,7 +94,7 @@ class ApiConnection:
         else:
             base_url = url
 
-        self.set_root_ca_bundle( root_ca )
+        self.set_root_ca_bundle( root_cas_file )
 
         if not api_version:
             self.API_VERSION = '1'
@@ -215,6 +228,7 @@ class Client:
 
     API_CONNECTION = None
     interactive = False
+    config_options = None
 
     def __init__(self, args, api_connection=None, interactive=False ):
 
@@ -222,11 +236,6 @@ class Client:
 
         #print '>>> Initializing client with args:', args
         self._args = None
-
-        if not api_connection:
-            self.API_CONNECTION = ApiConnection( **{ 'interactive': self.interactive }  )
-        else:
-            self.API_CONNECTION = api_connection
 
         output_formats = (
             'plain',
@@ -246,13 +255,46 @@ class Client:
             epilog="That's all folks!"
         )
 
-        ENTITIES = self.API_CONNECTION.get_entities()
-
         parser.add_argument('--dry-run', '-n', action='store_true', dest='dryrun', help='do a dry run')
         output_group = parser.add_mutually_exclusive_group()
         output_group.add_argument('--verbose', '-v', action='count', default=0, help='increase output verbosity')
         output_group.add_argument('--quiet', '-s', action='store_true', help='suppress output messages')
-        parser.add_argument('--version', action='version', version='%(prog)s 2.0')
+        parser.add_argument('--version', action='version', version='%(prog)s ' +str(cmt_version) )
+
+        parser.add_argument('--config-file', '-c', type=lambda x: is_valid_file(parser,x), help='Which config file to use')
+
+        # first parse basic options
+        # need config file (settings) (if supplied) for creating API Connection..
+        self.temp_args = vars(parser.parse_known_args( args )[0] )
+        #print '>>> PARSED temp ARGS:', self.temp_args
+
+        if self.temp_args.has_key( 'config_file' ):
+
+            self.read_config_file( self.temp_args['config_file'] )
+
+        elif interactive:
+
+            if os.path.exists( DEFAULT_CONFIG_FILE ):
+
+                self.read_config_file( open( DEFAULT_CONFIG_FILE, 'r' ) )
+
+            else:
+
+                # currently a config file is not required.. should it be?
+                pass
+
+        if not api_connection:
+
+            kw_args = { 'interactive': self.interactive }
+
+            if self.config_options:
+                kw_args.update( self.config_options )
+
+            self.API_CONNECTION = ApiConnection( **kw_args )
+        else:
+            self.API_CONNECTION = api_connection
+
+        ENTITIES = self.API_CONNECTION.get_entities()
 
         getparser = argparse.ArgumentParser(add_help=False)
         getparser.add_argument('--get', nargs='+', metavar='QUERY', type=query, help='Query to match existing objects, like "KEY=VAL"')
@@ -296,13 +338,37 @@ class Client:
         parse_parser.set_defaults(func='parse')
         file_group = parse_parser.add_argument_group('files', 'Arguments used for input and output')
         file_group.add_argument('template', type=lambda x: is_valid_file(parse_parser,x), nargs=1, help='The template file to parse')
-        file_group.add_argument('--output', '-o', metavar='FILE', type=file, nargs=1, help='Overwrite output destination')
 
         try:
             self._args = vars(parser.parse_args( args ))
             #print '>>> PARSED ARGS:', self._args
         except AttributeError, e:
             print '[ERROR] Invalid entity given'
+
+    def read_config_file( self, file_object ):
+
+        config = ConfigParser.RawConfigParser()
+        config.readfp( file_object)
+
+        self.config_options = { }
+
+        if config.has_section( 'server' ):
+
+            if config.has_option( 'server', 'api_version' ):
+                
+                self.config_options[ 'api_version' ] = config.get( 'server', 'api_version' )
+
+            if config.has_option( 'server', 'url' ):
+                
+                self.config_options[ 'url' ] = config.get( 'server', 'url' )
+
+        if config.has_section( 'ssl' ):
+
+            if config.has_option( 'ssl', 'root_cas_file' ):
+                
+                self.config_options[ 'root_cas_file' ] = config.get( 'ssl', 'root_cas_file' )
+
+        file_object.close()
 
     def get_args( self ):
 

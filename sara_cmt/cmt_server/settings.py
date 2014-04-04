@@ -33,6 +33,7 @@ else:
 
               CONFIG_DIR = os.path.join( site.sys.prefix, config_dir_guess )
               CONFIG_FILE = '%s/cmt.conf' % CONFIG_DIR
+              break
 
 if not CONFIG_DIR:
 
