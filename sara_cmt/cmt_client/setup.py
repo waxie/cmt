@@ -50,7 +50,9 @@ setup(
     packages = [ 'cmt_client' ],
 
     install_requires = [
-        'Python>=2.6.0','Python<3.0'
+        'Python>=2.6.0','Python<3.0',
+        'requests',
+        'argparse'
     ],
 
     # Only way to get something installed with mode 755 ...
@@ -62,7 +64,7 @@ setup(
 
         # config-files
         ( 'etc/cmt', [
-            'etc/cmt.conf.sample',
+            'etc/cmt/cmt.conf.sample',
         ]),
 
         # templates
