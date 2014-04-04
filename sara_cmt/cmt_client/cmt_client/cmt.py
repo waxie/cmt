@@ -7,6 +7,7 @@ import requests, json, base64, re, types, argparse, site
 
 from cmt_client import __version__ as cmt_version
 
+from types import *
 from getpass import getpass
 
 DEFAULT_CONFIG_FILE = None
@@ -270,7 +271,9 @@ class Client:
 
         if self.temp_args.has_key( 'config_file' ):
 
-            self.read_config_file( self.temp_args['config_file'] )
+            if type(self.temp_args[ 'config_file' ]) is not NoneType:
+
+                self.read_config_file( self.temp_args['config_file'] )
 
         elif interactive:
 
