@@ -16,7 +16,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 from distutils.core import setup
-from sara_cmt import __version__
+from cmt_server import __version__
 
 setup(
     name = 'CMT',
@@ -47,17 +47,20 @@ setup(
         'Topic :: Utilities',
     ],
 
-    packages = ['sara_cmt', 'sara_cmt.cluster', 'sara_cmt.cluster.templatetags', 'cmt_server', 'cmt_server.apps', 'cmt_server.apps.api', 'cmt_client'],
+    packages = [ 'cmt_server', 'cmt_server.apps', 'cmt_server.apps.api', 'cmt_server.apps.cluster', 'cmt_server.apps.cluster.templatetags' ],
 
     install_requires = [
         'djangorestframework>=2.3.6',
-        'Python>=2.6',
-        'Django>=1.5.2',
+        'Python>=2.6.0','Python<3.0',
+        'Django>=1.5.0','Django<1.6.0',
         'IPy>=0.80',
         'django_extensions>=1.1.1',
         'psycopg2>=2.4.6',
-        'django-grappelli==2.4.9',
+        'django-grappelli>=2.4.9','django-grappelli<2.5.0'
         'django-smuggler',
+        'django_auth_ldap',
+        'django-debug-toolbar',
+        'south',
         'feedparser'
     ],
 

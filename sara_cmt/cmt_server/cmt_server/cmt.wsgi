@@ -18,9 +18,17 @@
 #
 # Add this to apache config:
 #
+#  WSGIDaemonProcess cmt user=www-data group=www-data threads=25
+#  WSGIProcessGroup cmt
+#
 #  WSGIPassAuthorization On
-#  WSGIScriptAlias / /path/to/virtualenvs/cmt/cmt.wsgi
+#
 #  SetEnv VIRTUALENV /path/to/virtualenvs/cmt
+#  WSGIScriptAlias / /path/to/virtualenvs/cmt/lib/python<ver>/site-packages/cmt_server/cmt.wsgi
+#
+#  Alias /media /path/to/virtualenvs/cmt/lib/python<ver>/site-packages/cmt_server/media
+#  Alias /static  /path/to/virtualenvs/cmt/lib/python<ver>/site-packages/cmt_server/static
+#
 
 import os
 

@@ -50,7 +50,7 @@ setup(
     packages = [ 'cmt_client' ],
 
     install_requires = [
-        'Python>=2.6.0','Python<3.0',
+        'Python<3.0.0,>=2.6.0',
         'requests',
         'argparse'
     ],

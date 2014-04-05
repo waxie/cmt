@@ -1,0 +1,2 @@
+include AUTHORS CHANGES README LICENSE
+recursive-include etc/cmt *.conf*
