@@ -15,7 +15,7 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-from distutils.core import setup
+from setuptools import setup, find_packages
 from cmt_server import __version__
 
 setup(
@@ -27,6 +27,9 @@ setup(
     author_email = 'cmt-users@lists.osd.sara.nl',
     license = 'GPL',
     long_description = 'API and Web Admin server for the Cluster Management Tool',
+
+    include_package_data = True,
+    zip_safe = False,
 
     platforms = [ 'linux-x86_64', 'linux-i386' ],
 
@@ -47,17 +50,22 @@ setup(
         'Topic :: Utilities',
     ],
 
-    packages = [ 'cmt_server', 'cmt_server.apps', 'cmt_server.apps.cluster', 'cmt_server.apps.cluster.templatetags', 'cmt_server.apps.api'],
+    packages = find_packages(),
 
     install_requires = [
-        'djangorestframework>=2.3.6',
         'Python<3.0.0,>=2.6.0',
         'Django<1.6.0,>=1.5.2',
-        'IPy>=0.80',
-        'django_extensions>=1.1.1',
-        'psycopg2>=2.4.6',
+        'djangorestframework',
         'django-grappelli<2.5.0,>=2.4.9',
+        'django_extensions',
         'django-smuggler',
+        'django-auth-ldap',
+        'django-debug-toolbar',
+        'django-filter',
+        'django-tagging',
+        'psycopg2',
+        'South',
+        'IPy',
         'feedparser'
     ],
 
@@ -69,7 +77,10 @@ setup(
         ( 'etc/cmt', [
             'etc/cmt/cmt.conf.sample',
             'etc/cmt/logging.conf'
-        ])
+        ]),
 
+        ( 'wsgi', [
+            'wsgi/cmt.wsgi'
+        ])
     ]
 )

@@ -24,9 +24,8 @@
 #  WSGIPassAuthorization On
 #
 #  SetEnv VIRTUALENV /path/to/virtualenvs/cmt
-#  WSGIScriptAlias / /path/to/virtualenvs/cmt/lib/python<ver>/site-packages/cmt_server/cmt.wsgi
+#  WSGIScriptAlias / /path/to/virtualenvs/cmt/wsgi/cmt.wsgi
 #
-#  Alias /media /path/to/virtualenvs/cmt/lib/python<ver>/site-packages/cmt_server/media
 #  Alias /static  /path/to/virtualenvs/cmt/lib/python<ver>/site-packages/cmt_server/static
 #
 
@@ -50,6 +49,8 @@ def application(environ, start_response):
 
     try:
         from django.core.wsgi import get_wsgi_application
+        from django.core.exceptions import ImproperlyConfigured
+
         return get_wsgi_application()(environ, start_response)
 
     except SystemExit as details:
@@ -57,6 +58,10 @@ def application(environ, start_response):
         err_msgs = str( details )
 
     except ImportError as details:
+
+        err_msgs = str( details )
+
+    except ImproperlyConfigured as details:
 
         err_msgs = str( details )
 

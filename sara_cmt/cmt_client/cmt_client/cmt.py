@@ -430,6 +430,18 @@ class Client:
                 raise RuntimeError('Error connecting to server: %s' %e)
             return False
 
+        #print r.text
+
+        # Return response in JSON-format
+        try:
+            assert(r.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
+        except ValueError, e:
+            if self.interactive:
+                print e
+            else:
+                raise TypeError('JSON decoding failed')
+            return False
+
         #print '>>> </CREATING>'
         return r.json()
 
@@ -836,7 +848,9 @@ def main(args):
             pprint.pprint(json)
         elif command =='create':
             json = c.create(parsed_args)
-            pprint.pprint(json)
+
+            if json:
+                pprint.pprint(json)
         elif command == 'update':
             c.update(parsed_args)
         elif command == 'delete':

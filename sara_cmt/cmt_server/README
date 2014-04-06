@@ -9,26 +9,6 @@ it's used in production, to generate configuration-files for services like for
 example dhcpd and bind.
 
 
-DEPENDENCIES
-
-CMT is dependent on, and recommended to use with, the following packages:
- * Django==1.5.1
- * IPy==0.80
- * South==0.7.6
- * django-auth-ldap==1.1.4
- * django-extensions==1.1.1
- * django-tagging==0.3.1
- * djangorestframework==2.2.5
- * ipython==0.13.1
- * psycopg2==2.4.6
- * python-ldap==2.4.10
-
-Besides these Python-packages, the following software should be installed on your system:
- * Python>=2.6
- * header files and a static library for Python
- * header files for libpq (PostgreSQL library)
-
-
 MORE INFO
 
 For more information can be found at https://oss.trac.surfsara.nl/cmt
@@ -36,4 +16,4 @@ For more information can be found at https://oss.trac.surfsara.nl/cmt
 
 CONTACT
 
-For bugs, requests or suggestions, please mail to cmt@surfsara.nl
+For bugs, requests or suggestions, please mail to cmt-dev@surfsara.nl
