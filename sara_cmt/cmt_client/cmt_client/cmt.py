@@ -845,7 +845,9 @@ def main(args):
 
         if command == 'read':
             json = c.read(parsed_args)
-            pprint.pprint(json)
+
+            if json:
+                pprint.pprint(json)
         elif command =='create':
             json = c.create(parsed_args)
 
