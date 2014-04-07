@@ -26,7 +26,8 @@ from cmt_server.apps.api.serializers import ConnectionSerializer, CompanySeriali
 from cmt_server.apps.api.serializers import HardwareModelSerializer, RoleSerializer, InterfaceTypeSerializer
 from cmt_server.apps.api.serializers import WarrantyTypeSerializer, WarrantyContractSerializer
 
-from cmt_server.apps.api.filters import EquipmentFilter
+from cmt_server.apps.api.filters import EquipmentFilter, RackFilter, RoomFilter, AddressFilter, InterfaceFilter, ConnectionFilter, CompanyFilter
+from cmt_server.apps.api.filters import TelephonenumberFilter, HardwareModelFilter, InterfaceTypeFilter, WarrantyTypeFilter, WarrantyContractFilter
 
 from django.contrib.admin.models import LogEntry, DELETION, ADDITION, CHANGE
 from django.utils.encoding import force_unicode
@@ -107,15 +108,11 @@ class CMTViewSet(viewsets.ModelViewSet):
 # Documented at: http://www.django-rest-framework.org/
 #
 
-# Equipment-related
 class ClusterViewSet(CMTViewSet):
     queryset = Cluster.objects.all()
     serializer_class = ClusterSerializer
     fields = ('url', 'name')
     filter_fields = ('name',)
-    #search_fields = ('name',)
-    # model = Cluster
-    # lookup_fields = (...
 
 class EquipmentViewSet(CMTViewSet):
     queryset = Equipment.objects.all()
@@ -125,91 +122,75 @@ class EquipmentViewSet(CMTViewSet):
 class RackViewSet(CMTViewSet):
     queryset = Rack.objects.all()
     serializer_class = RackSerializer
-    filter_fields = ('label', 'room__label')
+    filter_class = RackFilter
 
 class RoomViewSet(CMTViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
-    filter_fields = ('label', 'address__address')
+    filter_class = RoomFilter
 
 class AddressViewSet(CMTViewSet):
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
-    filter_fields = ( 'address',
-            'postalcode', 'city', 'country__name', 'country__country_code'
-            )
-
-
+    filter_class = AddressFilter
 
 class CountryViewSet(CMTViewSet):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
     filter_fields = ('name', 'country_code')
 
-
 # Network-related
 class InterfaceViewSet(CMTViewSet):
     queryset = Interface.objects.all()
     serializer_class = InterfaceSerializer
-    filter_fields = (
-            'network__name', 'network__vlan', 'host__label', 'iftype__label',
-            'label', 'aliases', 'hwaddress', 'ip'
-            )
+    filter_class = InterfaceFilter
 
 class NetworkViewSet(CMTViewSet):
     queryset = Network.objects.all()
     serializer_class = NetworkSerializer
     filter_fields = (
-            'name', 'cidr', 'gateway', 'domain', 'vlan'
+            'name', 'cidr', 'gateway', 'domain', 'vlan', 'hostnames'
             )
-
 
 class ConnectionViewSet(CMTViewSet):
     queryset = Connection.objects.all()
     serializer_class = ConnectionSerializer
-    filter_fields = ('name',)
-
+    filter_class = ConnectionFilter
 
 class CompanyViewSet(CMTViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
-    filter_fields = ('name',)
-
+    filter_class = CompanyFilter
 
 class TelephonenumberViewSet(CMTViewSet):
     queryset = Telephonenumber.objects.all()
     serializer_class = TelephonenumberSerializer
-    filter_fields = ('connection__name', 'subscriber_number' )
-
+    filter_class = TelephonenumberFilter
 
 class HardwareModelViewSet(CMTViewSet):
     queryset = HardwareModel.objects.all()
     serializer_class = HardwareModelSerializer
-    filter_fields = ('vendor__name', 'name', 'vendorcode')
-
+    filter_class = HardwareModelFilter
 
 class RoleViewSet(CMTViewSet):
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
     filter_fields = ('label',)
 
-
 class InterfaceTypeViewSet(CMTViewSet):
     queryset = InterfaceType.objects.all()
     serializer_class = InterfaceTypeSerializer
-    filter_fields = ('vendor__name', 'label')
-
+    filter_class = InterfaceTypeFilter
 
 class WarrantyTypeViewSet(CMTViewSet):
     queryset = WarrantyType.objects.all()
     serializer_class = WarrantyTypeSerializer
-    filter_fields = ('contact__name', 'label')
-
+    filter_class = WarrantyTypeFilter
 
 class WarrantyContractViewSet(CMTViewSet):
     queryset = WarrantyContract.objects.all()
     serializer_class = WarrantyContractSerializer
-    filter_fields = ('warranty_type__label', 'contract_number', 'label')
+    filter_class = WarrantyContractFilter
 
 class TemplateView(APIView):
     parser_classes = (FileUploadParser,)
