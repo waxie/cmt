@@ -26,6 +26,8 @@ from cmt_server.apps.api.serializers import ConnectionSerializer, CompanySeriali
 from cmt_server.apps.api.serializers import HardwareModelSerializer, RoleSerializer, InterfaceTypeSerializer
 from cmt_server.apps.api.serializers import WarrantyTypeSerializer, WarrantyContractSerializer
 
+from cmt_server.apps.api.filters import EquipmentFilter
+
 from django.contrib.admin.models import LogEntry, DELETION, ADDITION, CHANGE
 from django.utils.encoding import force_unicode
 from django.contrib.contenttypes.models import ContentType
@@ -118,17 +120,7 @@ class ClusterViewSet(CMTViewSet):
 class EquipmentViewSet(CMTViewSet):
     queryset = Equipment.objects.all()
     serializer_class = EquipmentSerializer
-    filter_fields = (
-            'cluster__name', 'role__label', 'network__name', 'network__vlan',
-            'specifications__name', 'warranty__label', 'warranty__contract_number',
-            'rack__label', 'warranty_tag', 'serial_number', 'first_slot', 'label',
-            'warranty'
-            #'in_support'
-            )
-    #search_fields = (
-    #        'cluster__name', 'rack__label'
-    #        )
-
+    filter_class = EquipmentFilter
 
 class RackViewSet(CMTViewSet):
     queryset = Rack.objects.all()
