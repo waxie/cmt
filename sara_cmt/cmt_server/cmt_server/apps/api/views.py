@@ -26,8 +26,7 @@ from cmt_server.apps.api.serializers import ConnectionSerializer, CompanySeriali
 from cmt_server.apps.api.serializers import HardwareModelSerializer, RoleSerializer, InterfaceTypeSerializer
 from cmt_server.apps.api.serializers import WarrantyTypeSerializer, WarrantyContractSerializer
 
-from cmt_server.apps.api.filters import EquipmentFilter, RackFilter, RoomFilter, AddressFilter, InterfaceFilter, ConnectionFilter, CompanyFilter
-from cmt_server.apps.api.filters import TelephonenumberFilter, HardwareModelFilter, InterfaceTypeFilter, WarrantyTypeFilter, WarrantyContractFilter
+from cmt_server.apps.api.filters import *
 
 from django.contrib.admin.models import LogEntry, DELETION, ADDITION, CHANGE
 from django.utils.encoding import force_unicode
@@ -112,7 +111,7 @@ class ClusterViewSet(CMTViewSet):
     queryset = Cluster.objects.all()
     serializer_class = ClusterSerializer
     fields = ('url', 'name')
-    filter_fields = ('name',)
+    filter_class = ClusterFilter
 
 class EquipmentViewSet(CMTViewSet):
     queryset = Equipment.objects.all()
@@ -137,7 +136,7 @@ class AddressViewSet(CMTViewSet):
 class CountryViewSet(CMTViewSet):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
-    filter_fields = ('name', 'country_code')
+    filter_class = CountryFilter
 
 # Network-related
 class InterfaceViewSet(CMTViewSet):
@@ -148,9 +147,7 @@ class InterfaceViewSet(CMTViewSet):
 class NetworkViewSet(CMTViewSet):
     queryset = Network.objects.all()
     serializer_class = NetworkSerializer
-    filter_fields = (
-            'name', 'cidr', 'gateway', 'domain', 'vlan', 'hostnames'
-            )
+    filter_class = NetworkFilter
 
 class ConnectionViewSet(CMTViewSet):
     queryset = Connection.objects.all()
@@ -175,7 +172,7 @@ class HardwareModelViewSet(CMTViewSet):
 class RoleViewSet(CMTViewSet):
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
-    filter_fields = ('label',)
+    filter_class = RoleFilter
 
 class InterfaceTypeViewSet(CMTViewSet):
     queryset = InterfaceType.objects.all()

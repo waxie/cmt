@@ -1,8 +1,7 @@
 
 import django_filters
 from cmt_server.apps.cluster.models import HardwareUnit as Equipment
-from cmt_server.apps.cluster.models import Rack, Room, Interface, Address, Connection, Company, Telephonenumber
-from cmt_server.apps.cluster.models import HardwareModel, InterfaceType, WarrantyType, WarrantyContract
+from cmt_server.apps.cluster.models import *
 
 class EquipmentFilter(django_filters.FilterSet):
 
@@ -127,3 +126,31 @@ class WarrantyContractFilter(django_filters.FilterSet):
         model = WarrantyContract
 
         fields =  [ 'warranty_type', 'contract_number', 'annual_cost', 'label', 'date_from', 'date_to' ]
+
+class NetworkFilter(django_filters.FilterSet):
+
+    class Meta:
+        model = Network
+
+        fields =  [ 'name', 'cidr', 'gateway', 'domain', 'vlan', 'hostnames' ]
+
+class ClusterFilter(django_filters.FilterSet):
+
+    class Meta:
+        model = Cluster
+
+        fields =  [ 'name' ]
+
+class CountryFilter(django_filters.FilterSet):
+
+    class Meta:
+        model = Country
+
+        fields =  [ 'name', 'country_code' ]
+
+class RoleFilter(django_filters.FilterSet):
+
+    class Meta:
+        model = Role
+
+        fields =  [ 'label' ]

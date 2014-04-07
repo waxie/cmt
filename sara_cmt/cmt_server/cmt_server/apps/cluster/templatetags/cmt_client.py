@@ -15,6 +15,7 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import pprint
 import os, re, string
 from IPy import IP
 
@@ -23,6 +24,9 @@ from IPy import IP
 from django import template
 from django.template.defaultfilters import stringfilter
 from django.utils.encoding import smart_unicode, force_unicode
+
+from cmt_server.apps.api.views import *
+from cmt_server.apps.api.filters import *
 
 from cmt_server.logger import Logger
 logger = Logger().getLogger()
@@ -495,6 +499,7 @@ class QuerySetNode(template.Node):
 
     def render(self, context):
 
+        q_filter_dict = { }
         filter_dict = { }
 
         myquery_str = ''
@@ -527,30 +532,46 @@ class QuerySetNode(template.Node):
 
                 my_model = get_model('cluster', self.entity)
 
-                if hasattr( my_model, attr ):
+                if str(attr).find( '__' ) != -1:
 
-                    # RB: not a field, but a relation
-                    relation_entity = getattr( get_model('cluster', self.entity), attr ).field.name
-                    relation_model = get_model('cluster', relation_entity )
-                    relation_field_names = relation_model._meta.get_all_field_names()
+                    # anything containing __ (i.e.: entitiy__field or field__startswith) is a django queryset filter
+                    q_filter_dict[ str(attr) ] = str(val)
 
-                    # RB: 'SlugField' ourself.. should be either label or name.. probably..
-                    if 'name' in relation_field_names:
+                else:
 
-                        attr = attr + '__name'
+                    # anything short (i.e. field, shortrelation) is a django-filter filter
+                    filter_dict[ str(attr) ] = str(val)
 
-                    elif 'label' in relation_field_names:
+        # Get Model/Entity name, i.e.: HardwareUnit
+        model_name = get_model('cluster', self.entity).__name__
 
-                        attr = attr + '__label'
+        # Get ViewSet for this Model/Entity, i.e.: HardwareUnitViewSet
+        e_viewset = eval( model_name + 'ViewSet' )
 
-                filter_dict[ str(attr) ] = str(val)
+        # Get the filter class for this viewset, i.e.: HardwareUnitFilter
+        v_filter = e_viewset.filter_class
 
-        queryset = get_model('cluster', self.entity).objects.filter(**filter_dict)
+        # Get the queryset for this viewset, i.e.: HardwareUnit.objects.all()
+        v_queryset = e_viewset.queryset
 
-        if len(queryset) == 1:
-            queryset = queryset[0]
+        # If we have queryset filters, apply those on the Model objects
+        if len( q_filter_dict ) > 0:
+            r_queryset = get_model('cluster', self.entity).objects.filter(**q_filter_dict)
+        # Or else we use the ViewSet's queryset
+        else:
+            r_queryset = v_queryset
 
-        context[self.key] = queryset
+        # If we have django-filter filters, apply these via the ViewSet's filter_class on our queryset
+        if len( filter_dict ) > 0:
+            search_result = v_filter( filter_dict, queryset=r_queryset )
+        # If not we just use the queryset we already had
+        else:
+            search_result = r_queryset
+
+        if len(search_result) == 1:
+            search_result = search_result[0]
+
+        context[self.key] = search_result
 
         #logger.debug('context = %s'%context)
 
