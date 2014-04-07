@@ -21,7 +21,7 @@ for config_dir_guess in [ 'etc/cmt', 'local/etc/cmt' ]:
         DEFAULT_CONFIG_FILE = '%s/cmt.conf' % CONFIG_DIR
         break
 
-def i_print( interactive, i_str ):
+def i_print( i_str, interactive ):
 
     if interactive:
         print i_str
@@ -472,6 +472,8 @@ class Client:
 
         self.API_CONNECTION.SESSION.headers.update( {'content-type': 'application/json' } )
         r = self.API_CONNECTION.SESSION.get(url, params=payload, verify=self.API_CONNECTION.SSL_ROOT_CAS)
+
+        #print r.text
 
         # Check for HTTP-status 200
         try:
