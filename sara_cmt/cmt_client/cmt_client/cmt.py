@@ -742,7 +742,9 @@ class Client:
         if not self.interactive:
             return r
 
-        for output_filename, output_file_attrs in r.items():
+        response_data = r
+
+        for output_filename, output_file_attrs in response_data.items():
 
             output_file_contents = output_file_attrs['contents']
             output_file_diff_ignore = output_file_attrs['diff_ignore']
@@ -838,7 +840,7 @@ class Client:
                 print "[ABORTED] Doing nothing and exiting.."
                 return False
 
-        for output_filename, output_file_attrs in r.items():
+        for output_filename, output_file_attrs in response_data.items():
 
             output_file_contents = output_file_attrs['contents']
 
