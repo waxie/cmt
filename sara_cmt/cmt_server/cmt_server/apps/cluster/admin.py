@@ -17,18 +17,11 @@
 
 from django.contrib import admin
 
-from cmt_server.apps.cluster.models import Cluster, HardwareUnit, Interface, Network, Rack
-from cmt_server.apps.cluster.models import Country, Address, Room
-from cmt_server.apps.cluster.models import Company, Telephonenumber, Connection
-from cmt_server.apps.cluster.models import HardwareModel, Role, InterfaceType
-from cmt_server.apps.cluster.models import WarrantyContract, WarrantyType
+from cmt_server.apps.cluster.models import *
+from cmt_server.apps.cluster.forms import *
 
 from django.contrib.admin import SimpleListFilter
 from types import *
-
-# Some info about the Django admin site can be found at:
-#   http://docs.djangoproject.com/en/dev/intro/tutorial02/#intro-tutorial02
-
 
 
 ######
@@ -73,6 +66,7 @@ class AddressInline(admin.TabularInline):
 
 class InterfaceInline(admin.TabularInline):
     model = Interface
+    form = InterfaceForm #RB: used to override width of input boxes
     exclude = GlobalAdmin.fields + ('tags',)
 
 class PhoneInline(admin.TabularInline):
