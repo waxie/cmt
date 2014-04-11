@@ -108,8 +108,7 @@ class ApiConnection:
         Check and/or create auth header for HTTP request method
         """
 
-        if self.interactive:
-            print '[LOGIN] Authorization required'
+        i_print('[LOGIN] Authorization required', self.interactive)
 
         try:
             self.AUTH_HEADER = self.create_auth_header( self.user, self.passwd )
@@ -634,7 +633,7 @@ class Client:
             #print 'URL:', result['url']
             #print 'PAYLOAD:', payload
 
-            print '[UPDATING] %s of %s ..' %( str( update_nr ), str( result_count ) )
+            i_print('[UPDATING] %s of %s ..' %( str( update_nr ), str( result_count ) ), self.interactive )
 
             update_nr = update_nr + 1
 
@@ -644,7 +643,7 @@ class Client:
 
             #pprint.pprint( r )
 
-        print '[SUCCESS] Succefully updated %s object(s)' %str(result_count)
+        i_print('[SUCCESS] Succefully updated %s object(s)' %str(result_count), self.interactive )
 
     def delete(self, args):
         # Be sure there's a --get arg before taking care of the rest of the args
@@ -697,7 +696,7 @@ class Client:
 
             #print 'URL:', result['url']
 
-            print '[DELETING] %s of %s' %( str( delete_nr ), str( result_count ) )
+            i_print('[DELETING] %s of %s' %( str( delete_nr ), str( result_count ) ), self.interactive )
 
             delete_nr = delete_nr + 1
 
@@ -705,7 +704,7 @@ class Client:
 
             self.API_CONNECTION.do_request( 'DELETE', result['url'], **kw_args )
 
-        print '[SUCCESS] Succefully deleted %s object(s)' %str( result_count )
+        i_print('[SUCCESS] Succefully deleted %s object(s)' %str( result_count ), self.interactive )
  
     # Parse a template
     def parse(self, args):
@@ -748,8 +747,7 @@ class Client:
             output_file_contents = output_file_attrs['contents']
             output_file_diff_ignore = output_file_attrs['diff_ignore']
 
-            print '[RECEIVED] output file: %s' %output_filename
-            print '[RECEIVED] - file size: %d' %len( output_file_contents )
+            print '[RECEIVED] output file: %s - size %d bytes' %(output_filename, len( output_file_contents ) )
 
             #pprint.pprint( output_file_contents )
 
