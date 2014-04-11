@@ -437,7 +437,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.webdesign',
     'django.contrib.messages',
-    #'django.contrib.sites',
     'cmt_server.apps.cluster',
     'south',
     'debug_toolbar',
