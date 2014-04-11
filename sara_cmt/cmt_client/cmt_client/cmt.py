@@ -6,6 +6,7 @@ import logging, sys, textwrap, pprint, os, difflib, ConfigParser
 import requests, json, base64, re, types, argparse, site
 
 from cmt_client import __version__ as cmt_version
+from cmt_client.exceptions import *
 
 from types import *
 from getpass import getpass
@@ -69,6 +70,7 @@ class ApiConnection:
     SESSION = None
     SSL_ROOT_CAS = None
     MANY_FIELDS = None
+    AUTH_HEADER = None
 
     interactive = False
 
@@ -78,16 +80,10 @@ class ApiConnection:
 
         self.SESSION = requests.Session()
 
-        if not self.interactive:
-
-            if not user or not passwd:
-
-                raise RuntimeError('Not interactive and no user/passwd supplied')
-
-        self.AUTH_HEADER = self.create_auth_header( user, passwd )
-
-        self.SESSION.headers.update( { 'Authorization' : self.AUTH_HEADER } )
         self.SESSION.timeout = 3.000
+
+        self.user = user
+        self.passwd = passwd
 
         if not url:
             #base_url = 'http://localhost:8000'
@@ -106,48 +102,171 @@ class ApiConnection:
 
         self.retrieve_entities()
 
+    def authorization_required( self ):
+
+        """
+        Check and/or create auth header for HTTP request method
+        """
+
+        if self.interactive:
+            print '[LOGIN] Authorization required'
+
+        try:
+            self.AUTH_HEADER = self.create_auth_header( self.user, self.passwd )
+
+        except CmtApiNoAuthorizationCredentials as details:
+
+            if self.interactive:
+
+                print '[ERROR] %s' %str(details)
+                sys.exit(1)
+            else:
+                raise CmtApiNoAuthorizationCredentials( str(details) )
+
+        self.SESSION.headers.update( { 'Authorization' : self.AUTH_HEADER } )
+
     def create_auth_header( self, user=None, passw=None ):
 
         """
+        Create HTTP authorization header. Ask for user/passwd if run interactively
         """
+        if not self.interactive:
+
+            if not user or not passw:
+
+                raise CmtApiNoAuthorizationCredentials('Authorization required, but no credentials supplied')
 
         if not user:
-            username = raw_input( 'username: ' )
+            user = raw_input( '[LOGIN] Username: ' )
 
         if not passw:
-            password = getpass( 'password: ' )
+            passw = getpass( '[LOGIN] Password: ' )
 
-        base64string = base64.encodestring('%s:%s' % (username, password)).strip()
+        if user == '' or passw == '':
+
+            raise CmtApiNoAuthorizationCredentials('Authorization required, but some credentials were empty!')
+
+        base64string = base64.encodestring('%s:%s' % (user, passw)).strip()
 
         return "Basic %s" %base64string
 
-    def retrieve_entities(self):
+    def set_content_type( self, content_type ):
 
-        if not self.interactive:
-            r = self.SESSION.get(self.FULL_URL, verify=self.SSL_ROOT_CAS)
-        else:
+        self.SESSION.headers.update( {'content-type': content_type } )
 
-            # Get a list of all existing entities in CMT
-            try:
-                r = self.SESSION.get(self.FULL_URL, verify=self.SSL_ROOT_CAS)
+    def do_request( self, method, url, **kw_args ):
 
-            except requests.exceptions.SSLError as ssl_err:
+        """
+        Perform some HTTP (session) request. Perform all possible error handling here
+        First try unauthorized. If server says authorization is required, retry with authorization
+        """
+
+        ALLOWED_METHODS = [ 'GET', 'POST', 'UPDATE', 'DELETE', 'PUT', 'OPTIONS', 'HEAD', 'PATCH' ]
+
+        if method not in ALLOWED_METHODS:
+
+            raise CmtApiRequestMethodNotSupported('Method %s not supported, must be one of: %s' %( method, string.join( ALLOWED_METHODS, ',' ) ) )
+   
+        kw_args.update( { 'verify': self.SSL_ROOT_CAS } )
+
+        try: 
+            r = self.SESSION.request( method, url, **kw_args )
+
+        except requests.exceptions.SSLError as ssl_err:
+
+            if not self.interactive:
                 print '[ERROR] Unable to verify SSL certificate: %s' %str( ssl_err)
                 print '[INFO]  Using root CAs: %s' %self.SSL_ROOT_CAS
                 sys.exit(1)
+            else:
+                raise CmtApiSslVerificationFailed('SSL verification with root CAs %s failed: %s' %(self.SSL_ROOT_CAS, str( ssl_err)))
 
-            except requests.exceptions.ConnectionError as req_ce:
-                print '[ERROR] connecting to server: %s' % str( req_ce )
+        except requests.exceptions.ConnectionError as req_err:
+
+            if not self.interactive:
+                print '[ERROR] Error connecting to %s: %s' %( url, str( req_ce ) )
                 sys.exit(1)
+            else:
+                raise CmtApiConnectionError( 'Error connection to %s: %s' %( url, str( req_ce ) ) )
 
+        if r.status_code == requests.codes.server_error:
+
+            from tempfile import NamedTemporaryFile
+
+            error_fp = NamedTemporaryFile( delete=False )
+
+            error_fp.write( r.text )
+            error_fp.close()
+
+            raise CmtServerError('Contact your local CMT administrator, a server error has occured. Stored error output in: %s - please supply this file to your local CMT administrator.' %error_fp.name )
+
+        elif r.status_code == requests.codes.unauthorized:
+
+            # Retry request with authorization (if we have any)
+            self.authorization_required()
+
+            r = self.SESSION.request( method, url, **kw_args )
+
+            if r.status_code == requests.codes.server_error:
+
+                from tempfile import NamedTemporaryFile
+
+                error_fp = NamedTemporaryFile( delete=False )
+
+                error_fp.write( r.text )
+                error_fp.close()
+
+                raise CmtServerError('Contact your local CMT administrator, a server error has occured. Stored error output in: %s - please supply this file to your local CMT administrator.' %error_fp.name )
+
+        #print r.status_code
+        #print r.text
+
+        if r.status_code == requests.codes.unauthorized:
+
+            authorization_message = r.json()['detail']
+
+            if self.interactive:
+
+                print '[ERROR] Authorization failed: %s' %str( authorization_message )
+                sys.exit(1)
+            else:
+                raise CmtApiAuthorizationFailed( 'Authorization failed: %s' %str( authorization_message ) )
+
+        elif r.status_code == requests.codes.no_content:
+
+            # HTTP 204: No content -> means request success, but no content in response (i.e. for DELETE requests)
+            return True
+
+        # This should not occur and be caught by server error handling above
         try:
-            #print '>>> REQUEST:', r
-            assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
-        except (AssertionError, requests.exceptions.RequestException), e:
-            print '[ERROR] Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
-            sys.exit(1)
+            nothing = r.json()
 
-        self.ENTITIES = r.json().keys()
+        except ValueError as details:
+
+            from tempfile import NamedTemporaryFile
+
+            error_fp = NamedTemporaryFile( delete=False )
+
+            error_fp.write( r.text )
+            error_fp.close()
+
+            if self.interactive:
+
+                print '[ERROR] While trying to decode HTTP response as JSON: %s' %str(details)
+                print '[ERROR] Stored (debug) response output in: %s - Please contact your local CMT administrator and supply this file' %error_fp.name
+                sys.exit(1)
+            else:
+                raise TypeError( 'Error while trying to decode HTTP response as JSON: %s' %str(details) )
+
+        return r.json()
+
+    def retrieve_entities(self):
+
+        kw_args = { }
+
+        r = self.do_request( 'GET', self.FULL_URL, **kw_args )
+
+        self.ENTITIES = r.keys()
 
     def set_root_ca_bundle( self, location=None ):
 
@@ -189,27 +308,11 @@ class ApiConnection:
 
         url = '%s/' % (self.FULL_URL + entity)
 
-        if not self.interactive:
+        kw_args = { }
 
-            r = self.SESSION.get(url, verify=self.SSL_ROOT_CAS)
+        r = self.do_request( 'GET', url, **kw_args )
 
-        else:
-
-            # Get a list of all existing entities in CMT
-            try:
-                r = self.SESSION.get(url, verify=self.SSL_ROOT_CAS)
-            except requests.exceptions.ConnectionError as req_ce:
-                print '[ERROR] connecting to server: %s' % req_ce.args[0].reason.strerror
-                sys.exit(1)
-
-        try:
-            #print '>>> REQUEST:', r
-            assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
-        except (AssertionError, requests.exceptions.RequestException), e:
-            print '[ERROR] Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
-            sys.exit(1)
-
-        for field_name, field_value in r.json()['results'][0].items():
+        for field_name, field_value in r['results'][0].items():
 
             if type( field_value ) is types.ListType:
 
@@ -420,30 +523,14 @@ class Client:
         payload = self.args_to_payload(entity, args['set'])
         #print 'PAYLOAD:', payload
 
-        self.API_CONNECTION.SESSION.headers.update( {'content-type': 'application/json' } )
-        try:
-            r = self.API_CONNECTION.SESSION.post(url, data=json.dumps(payload), verify=self.API_CONNECTION.SSL_ROOT_CAS) 
-        except ConnectionError, e:
-            if self.interactive:
-                print '[ERROR] connecting to server: %s' % e
-            else:
-                raise RuntimeError('Error connecting to server: %s' %e)
-            return False
+        self.API_CONNECTION.set_content_type( 'application/json' )
 
-        #print r.text
+        kw_args = { 'data' : json.dumps(payload) }
 
-        # Return response in JSON-format
-        try:
-            assert(r.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
-        except ValueError, e:
-            if self.interactive:
-                print e
-            else:
-                raise TypeError('JSON decoding failed')
-            return False
+        r = self.API_CONNECTION.do_request( 'POST', url, **kw_args )
 
         #print '>>> </CREATING>'
-        return r.json()
+        return r
 
     def read(self, args ):
 
@@ -470,34 +557,15 @@ class Client:
 
         #print 'PAYLOAD:', payload
 
-        self.API_CONNECTION.SESSION.headers.update( {'content-type': 'application/json' } )
-        r = self.API_CONNECTION.SESSION.get(url, params=payload, verify=self.API_CONNECTION.SSL_ROOT_CAS)
+        self.API_CONNECTION.set_content_type( 'application/json' )
 
-        #print r.text
+        kw_args = { 'params' : payload }
 
-        # Check for HTTP-status 200
-        try:
-            assert(r.status_code == requests.codes.OK), 'HTTP response not OK'
-        except AssertionError, e:
-
-            if self.interactive:
-                print '[INFO] Server gave HTTP response code %s: %s' % (r.status_code,r.reason)
-            else:
-                raise RuntimeError('Server gave HTTP response code %s: %s' % (r.status_code,r.reason) )
-
-        # Return response in JSON-format
-        try:
-            assert(r.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
-        except ValueError, e:
-            if self.interactive:
-                print e
-            else:
-                raise TypeError('JSON decoding failed')
-            return False
+        r = self.API_CONNECTION.do_request( 'GET', url, **kw_args )
 
         #print '>>> </READING>'
 
-        return r.json()
+        return r
 
     def update(self, args):
 
@@ -525,32 +593,29 @@ class Client:
         entity = args['entity'].pop()
         url = '%s/' % (self.API_CONNECTION.FULL_URL + entity )
         payload = self.args_to_payload(entity, args['get'])
-        self.API_CONNECTION.SESSION.headers.update( {'content-type': 'application/json' } )
-        response = self.API_CONNECTION.SESSION.get(url, params=payload, verify=self.API_CONNECTION.SSL_ROOT_CAS)
 
-        # Return response in JSON-format
-        try:
-            assert(response.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
-        except ValueError, e:
-            if self.interactive:
-                print e
-            else:
-                raise TypeError('JSON decoding failed')
-            return False
+        self.API_CONNECTION.set_content_type( 'application/json' )
 
-        if self.interactive:
-            pprint.pprint( response.json() )
+        kw_args = { 'params' : payload }
 
-        response_data = response.json()
+        r = self.API_CONNECTION.do_request( 'GET', url, **kw_args )
+
+        response_data = r
 
         result_count = response_data[ 'count' ]
 
         if result_count == 0:
 
-            i_print('No objects found', self.interactive)
-            return False
+            if self.interactive:
+                i_print('[ERROR] No objects found to update - that match: %s' %str(payload), self.interactive)
+                return False
+            else:
+                raise CmtClientNoObjectsFound( 'No objects found to update - that match: %s' %str(payload) )
 
         if self.interactive:
+
+            pprint.pprint( response_data )
+
             confirm_str = '[UPDATE] You are about to update: %s object(s). Are you sure ([N]/Y)?: ' %result_count
             confirm = raw_input( confirm_str )
       
@@ -562,23 +627,24 @@ class Client:
 
         payload = self.args_to_payload(entity, args['set'])
 
+        update_nr = 1
+
         for result in response_data['results']:
 
             #print 'URL:', result['url']
             #print 'PAYLOAD:', payload
-            reponse = self.API_CONNECTION.SESSION.patch(result['url'], data=json.dumps(payload), verify=self.API_CONNECTION.SSL_ROOT_CAS )
 
-            # Return response in JSON-format
-            try:
-                assert(response.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
-            except ValueError, e:
-                if self.interactive:
-                    print e
-                else:
-                    raise TypeError('JSON decoding failed')
-                return False
+            print '[UPDATING] %s of %s ..' %( str( update_nr ), str( result_count ) )
 
-            #pprint.pprint( response.json() )
+            update_nr = update_nr + 1
+
+            kw_args = { 'data' : json.dumps(payload) }
+
+            r = self.API_CONNECTION.do_request( 'PATCH', result['url'], **kw_args )
+
+            #pprint.pprint( r )
+
+        print '[SUCCESS] Succefully updated %s object(s)' %str(result_count)
 
     def delete(self, args):
         # Be sure there's a --get arg before taking care of the rest of the args
@@ -595,32 +661,29 @@ class Client:
         entity = args['entity'].pop()
         url = '%s/' % (self.API_CONNECTION.FULL_URL + entity )
         payload = self.args_to_payload(entity, args['get'])
-        self.API_CONNECTION.SESSION.headers.update( {'content-type': 'application/json' } )
-        response = self.API_CONNECTION.SESSION.get(url, params=payload, verify=self.API_CONNECTION.SSL_ROOT_CAS)
+        self.API_CONNECTION.set_content_type( 'application/json' )
 
-        # Return response in JSON-format
-        try:
-            assert(response.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
-        except ValueError, e:
-            if self.interactive:
-                print e
-            else:
-                raise TypeError('JSON decoding failed')
-            return False
+        kw_args = { 'params' : payload }
 
-        if self.interactive:
-            pprint.pprint( response.json() )
+        r = self.API_CONNECTION.do_request( 'GET', url, **kw_args )
 
-        response_data = response.json()
+        response_data = r
 
         result_count = response_data[ 'count' ]
 
         if result_count == 0:
 
-            i_print('No objects found', self.interactive)
-            return False
+            if self.interactive:
+
+                i_print('[ERROR] No objects found to delete - that match: %s' %str(payload), self.interactive)
+                return False
+            else:
+                raise CmtClientNoObjectsFound( 'No objects found to delete - that match: %s' %str(payload) )
 
         if self.interactive:
+
+            pprint.pprint( r )
+
             confirm_str = '[DELETE] You are about to delete: %s object(s). Are you sure ([N]/Y)?: ' %result_count
             confirm = raw_input( confirm_str )
       
@@ -628,23 +691,21 @@ class Client:
 
                 return False
 
+        delete_nr = 1
+
         for result in response_data['results']:
 
             #print 'URL:', result['url']
 
-            reponse = self.API_CONNECTION.SESSION.delete(result['url'], verify=self.API_CONNECTION.SSL_ROOT_CAS)
+            print '[DELETING] %s of %s' %( str( delete_nr ), str( result_count ) )
 
-            # Return response in JSON-format
-            try:
-                assert(response.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
-            except ValueError, e:
-                if self.interactive:
-                    print e
-                else:
-                    raise TypeError('JSON decoding failed')
-                return False
+            delete_nr = delete_nr + 1
 
-            #pprint.pprint( response.json() )
+            kw_args = { }
+
+            self.API_CONNECTION.do_request( 'DELETE', result['url'], **kw_args )
+
+        print '[SUCCESS] Succefully deleted %s object(s)' %str( result_count )
  
     # Parse a template
     def parse(self, args):
@@ -662,17 +723,9 @@ class Client:
 
         i_print('[SENDING] template to server and awaiting response..', self.interactive )
 
-        response = self.API_CONNECTION.SESSION.post(url, params=payload, files=files, verify=self.API_CONNECTION.SSL_ROOT_CAS )
+        kw_args = { 'params' : payload, 'files': files }
 
-        # Return response in JSON-format
-        try:
-            assert(response.json()), '[ERROR] JSON decoding failed. This indicates a server problem'
-        except ValueError, e:
-            if self.interactive:
-                print e
-            else:
-                raise TypeError('JSON decoding failed')
-            return False
+        r = self.API_CONNECTION.do_request( 'POST', url, **kw_args )
 
         file_obj.close()
 
@@ -680,7 +733,7 @@ class Client:
 
         prompt_write = False
 
-        if not hasattr( response.json(), 'items' ):
+        if not hasattr( r, 'items' ):
             if self.interactive:
                 print '[ERROR] %s' %str(response.json())
             else:
@@ -688,9 +741,9 @@ class Client:
             return False
 
         if not self.interactive:
-            return response.json()
+            return r
 
-        for output_filename, output_file_attrs in response.json().items():
+        for output_filename, output_file_attrs in r.items():
 
             output_file_contents = output_file_attrs['contents']
             output_file_diff_ignore = output_file_attrs['diff_ignore']
@@ -787,7 +840,7 @@ class Client:
                 print "[ABORTED] Doing nothing and exiting.."
                 return False
 
-        for output_filename, output_file_attrs in response.json().items():
+        for output_filename, output_file_attrs in r.items():
 
             output_file_contents = output_file_attrs['contents']
 

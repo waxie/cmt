@@ -440,7 +440,7 @@ INSTALLED_APPS = (
     'cmt_server.apps.cluster',
     'south',
     'debug_toolbar',
-    'django_extensions',
+    'django_extensions'
 )
 
 # Finally: test our django/database (settings)
