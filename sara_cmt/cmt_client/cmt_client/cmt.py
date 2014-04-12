@@ -542,7 +542,9 @@ class Client:
 
             line = line.strip()
 
-            assignments = line.split()
+            import shlex
+
+            assignments = shlex.split( line )
 
             for a in assignments:
 
