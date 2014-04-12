@@ -408,6 +408,9 @@ class Client:
         fieldsparser = argparse.ArgumentParser(add_help=False)
         fieldsparser.add_argument('--fields', nargs='+', metavar='FIELDS', type=str, help='Comma seperated list of fields to get, like "KEY[,KEY]"')
 
+        inputparser = argparse.ArgumentParser(add_help=False)
+        inputparser.add_argument('--set-input-file', nargs=1, metavar='SETINPUTFILE', type=lambda x: is_valid_file(parse_parser,x), help='Input file containing set arguments where each new line represents a new entity')
+
         # CRUD commands to [C]reate, [R]ead, [U]pdate and [D]elete objects are parsed by subparsers.
         # Same applies for parsing of templates.
         subparsers = parser.add_subparsers(description=textwrap.dedent(
@@ -419,7 +422,7 @@ class Client:
             help='Available actions')
 
         # CRUD command Create
-        create_parser = subparsers.add_parser('create', help='Create a new object', parents=[setparser])
+        create_parser = subparsers.add_parser('create', help='Create a new object', parents=[setparser,inputparser])
         create_parser.add_argument('entity', choices=ENTITIES, nargs=1, help='The entity to create')
         create_parser.set_defaults(func='create')
 
@@ -479,28 +482,77 @@ class Client:
 
         return self._args
 
-    def args_to_payload(self, entity, q):
+    def args_to_payload(self, entity, args ):
         """
 
         >>> args_to_payload([['cluster__name', 'cluster1'], ['rack__label', 'rack1']])
         {'rack__label': 'rack1', 'cluster__name': 'cluster1'}
+        >>> args_to_payload([[['cluster__name', 'cluster1'], ['rack__label', 'rack1']], [['cluster__name', 'cluster2'], ['rack__label', 'rack1']]])
+        [{'rack__label': 'rack1', 'cluster__name': 'cluster1'},{'rack__label': 'rack1', 'cluster__name': 'cluster1'}]
         """
-        d = {}
+
+        def one_args_to_one_payload( q, MANY_FIELDS ):
+
+            d = {}
+
+            for stmt in q:
+                if MANY_FIELDS.has_key( entity ):
+                    if stmt[0] in MANY_FIELDS[ entity ]:
+                        d[stmt[0]] = check_multiple_values( stmt[1] )
+                    else:
+                        d[stmt[0]] = stmt[1]
+                else:
+                    d[stmt[0]] = stmt[1]
+            return d
 
         self.API_CONNECTION.retrieve_many_fields( entity )
         MANY_FIELDS = self.API_CONNECTION.get_many_fields()
 
-        for stmt in q:
-            if MANY_FIELDS.has_key( entity ):
-                if stmt[0] in MANY_FIELDS[ entity ]:
-                    d[stmt[0]] = check_multiple_values( stmt[1] )
-                else:
-                    d[stmt[0]] = stmt[1]
-            else:
-                d[stmt[0]] = stmt[1]
-        return d
+        # If we are a list of set args
+        if type(args[0][0]) is ListType:
+
+            # Making bulk payload
+            payload = [ ]
+
+            for arg in args:
+
+                p = one_args_to_one_payload( arg, MANY_FIELDS )
+                payload.append( p )
+        else:
+            payload = one_args_to_one_payload( args, MANY_FIELDS )
+
+        return payload
+
+    def build_args_from_file( self, fp ):
+
+        lines = fp[0].readlines()
+        fp[0].close()
+
+        collected_args = [ ]
+
+        for line in lines:
+
+            an_arg = [ ]
+
+            line = line.strip()
+
+            assignments = line.split()
+
+            for a in assignments:
+
+                an_arg.append( a.split('=') )
+
+            collected_args.append( an_arg )
+
+        return collected_args
 
     def create(self, args ):
+
+        if args.has_key('set_input_file'):
+
+            if args['set_input_file']:
+
+                args['set'] = self.build_args_from_file( args['set_input_file'] )
 
         #print '>>> <CREATING>'
         # Be sure there's a --set arg before taking care of the rest of the args
@@ -512,6 +564,7 @@ class Client:
                 print e
             else:
                 raise SyntaxError('Missing set arguments')
+            return False
 
         # Prepare POST request (r) based on session (s) and given --set args
         entity = args['entity'].pop()
@@ -519,17 +572,51 @@ class Client:
         self.API_CONNECTION.retrieve_many_fields( entity )
 
         url = '%s/' % (self.API_CONNECTION.FULL_URL + entity)
+
         payload = self.args_to_payload(entity, args['set'])
+
         #print 'PAYLOAD:', payload
 
         self.API_CONNECTION.set_content_type( 'application/json' )
 
-        kw_args = { 'data' : json.dumps(payload) }
+        create_nr = 1
 
-        r = self.API_CONNECTION.do_request( 'POST', url, **kw_args )
+        created = [ ]
+
+        # Creating a single entity
+        if not type(payload) is ListType:
+
+            create_count = 1
+
+            i_print('[CREATING] %s of %s ..' %( str( create_nr ), str( create_count ) ), self.interactive )
+
+            kw_args = { 'data' : json.dumps(payload) }
+
+            r = self.API_CONNECTION.do_request( 'POST', url, **kw_args )
+
+            created.append( r )
+
+        # Creating multiple entities
+        else:
+
+            create_count = len( payload )
+
+            for p in payload:
+
+                i_print('[CREATING] %s of %s ..' %( str( create_nr ), str( create_count ) ), self.interactive )
+
+                kw_args = { 'data' : json.dumps(p) }
+
+                r = self.API_CONNECTION.do_request( 'POST', url, **kw_args )
+
+                created.append( r )
+
+                create_nr = create_nr + 1
+
+        i_print('[SUCCESS] Succefully created %s object(s)' %str(create_count), self.interactive )
 
         #print '>>> </CREATING>'
-        return r
+        return created
 
     def read(self, args ):
 
@@ -541,9 +628,9 @@ class Client:
 
             if self.interactive:
                 print e
-                return False
             else:
                 raise SyntaxError('Missing get arguments')
+            return False
 
         # Prepare GET request (r) based on session (s) and given --get args
         entity = args['entity'].pop()

@@ -1,11 +1,9 @@
+# vim: set noai tabstop=4 shiftwidth=4 expandtab:
+
 from rest_framework import serializers
 
-from cmt_server.apps.cluster.models import Cluster, Interface, Network, Rack, Room, Address, Country
 from cmt_server.apps.cluster.models import HardwareUnit as Equipment
-from cmt_server.apps.cluster.models import Interface, Network
-from cmt_server.apps.cluster.models import Connection, Company, Telephonenumber
-from cmt_server.apps.cluster.models import HardwareModel, Role, InterfaceType
-from cmt_server.apps.cluster.models import WarrantyType, WarrantyContract
+from cmt_server.apps.cluster.models import *
 
 #####
 #

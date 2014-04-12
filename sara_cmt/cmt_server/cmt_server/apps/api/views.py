@@ -14,19 +14,10 @@ from rest_framework import authentication, permissions
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 
-from cmt_server.apps.cluster.models import Cluster, Rack, Room, Address, Country
 from cmt_server.apps.cluster.models import HardwareUnit as Equipment
-from cmt_server.apps.cluster.models import Interface, Network
-from cmt_server.apps.cluster.models import Connection, Company, Telephonenumber
-from cmt_server.apps.cluster.models import HardwareModel, Role, InterfaceType
-from cmt_server.apps.cluster.models import WarrantyType, WarrantyContract
+from cmt_server.apps.cluster.models import *
 
-from cmt_server.apps.api.serializers import ClusterSerializer, EquipmentSerializer, RackSerializer, RoomSerializer, AddressSerializer, CountrySerializer
-from cmt_server.apps.api.serializers import InterfaceSerializer, NetworkSerializer
-from cmt_server.apps.api.serializers import ConnectionSerializer, CompanySerializer, TelephonenumberSerializer
-from cmt_server.apps.api.serializers import HardwareModelSerializer, RoleSerializer, InterfaceTypeSerializer
-from cmt_server.apps.api.serializers import WarrantyTypeSerializer, WarrantyContractSerializer
-
+from cmt_server.apps.api.serializers import *
 from cmt_server.apps.api.filters import *
 
 from django.contrib.admin.models import LogEntry, DELETION, ADDITION, CHANGE
@@ -38,10 +29,6 @@ from django.template import TemplateSyntaxError
 from django.core.exceptions import FieldError
 from django.http import HttpResponse
 
-#from rest_framework_bulk import ListBulkCreateUpdateDestroyAPIView
-
-
-#class CMTViewSet(ListBulkCreateUpdateDestroyAPIView):
 class CMTViewSet(viewsets.ModelViewSet):
 
     def pre_delete(self, obj):

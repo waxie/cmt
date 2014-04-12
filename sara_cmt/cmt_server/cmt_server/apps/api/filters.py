@@ -1,3 +1,4 @@
+# vim: set noai tabstop=4 shiftwidth=4 expandtab:
 
 import django_filters
 from cmt_server.apps.cluster.models import HardwareUnit as Equipment
