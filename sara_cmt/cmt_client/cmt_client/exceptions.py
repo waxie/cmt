@@ -16,3 +16,6 @@ class CmtApiSslVerificationFailed( Exception ):
 
 class CmtClientNoObjectsFound( Exception ):
     pass
+
+class CmtServerError( Exception ):
+    pass

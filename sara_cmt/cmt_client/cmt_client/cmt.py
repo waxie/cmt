@@ -197,7 +197,13 @@ class ApiConnection:
             error_fp.write( r.text )
             error_fp.close()
 
-            raise CmtServerError('Contact your local CMT administrator, a server error has occured. Stored error output in: %s - please supply this file to your local CMT administrator.' %error_fp.name )
+            error_msg = 'Contact your local CMT administrator, a server error has occured. Stored error output in: %s - please supply this file to your local CMT administrator.' %error_fp.name
+
+            if self.interactive:
+                print '[ERROR] %s' %error_msg
+            else:
+                raise CmtServerError( error_msg )
+            sys.exit(1)
 
         elif r.status_code == requests.codes.unauthorized:
 
