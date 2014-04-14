@@ -63,6 +63,31 @@ def is_valid_file(parser, arg):
     else:
        return open(arg,'r')  #return an open file handle
 
+def getTerminalSize():
+
+    env = os.environ
+
+    def ioctl_GWINSZ(fd):
+        try:
+            import fcntl, termios, struct, os
+            cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ,
+        '1234'))
+        except:
+            return
+        return cr
+    cr = ioctl_GWINSZ(0) or ioctl_GWINSZ(1) or ioctl_GWINSZ(2)
+    if not cr:
+        try:
+            fd = os.open(os.ctermid(), os.O_RDONLY)
+            cr = ioctl_GWINSZ(fd)
+            os.close(fd)
+        except:
+            pass
+    if not cr:
+        cr = (env.get('LINES', 25), env.get('COLUMNS', 80))
+
+    return int(cr[1]), int(cr[0])
+
 class ApiConnection:
 
     ENTITIES = None
@@ -240,7 +265,12 @@ class ApiConnection:
         elif r.status_code == requests.codes.no_content:
 
             # HTTP 204: No content -> means request success, but no content in response (i.e. for DELETE requests)
-            return True
+            return (True, { })
+
+        elif r.status_code == requests.codes.bad_request:
+
+            # HTTP 400: Bad request -> server is saying client is doing it wrong. I.e.: missing field, typo or other user mistake
+            return (False, r.json())
 
         # This should not occur and be caught by server error handling above
         try:
@@ -263,13 +293,13 @@ class ApiConnection:
             else:
                 raise TypeError( 'Error while trying to decode HTTP response as JSON: %s' %str(details) )
 
-        return r.json()
+        return (True, r.json())
 
     def retrieve_entities(self):
 
         kw_args = { }
 
-        r = self.do_request( 'GET', self.FULL_URL, **kw_args )
+        (r_ok, r) = self.do_request( 'GET', self.FULL_URL, **kw_args )
 
         self.ENTITIES = r.keys()
 
@@ -315,7 +345,7 @@ class ApiConnection:
 
         kw_args = { }
 
-        r = self.do_request( 'GET', url, **kw_args )
+        (r_ok, r) = self.do_request( 'GET', url, **kw_args )
 
         for field_name, field_value in r['results'][0].items():
 
@@ -565,8 +595,8 @@ class Client:
         #print '>>> <CREATING>'
         # Be sure there's a --set arg before taking care of the rest of the args
         try:
-            assert(args['set']), '[ERROR] Missing --set arguments'
-        except AssertionError, e:
+            assert(args['set']), '[ERROR] Missing --set arguments or --set-input-file argument'
+        except AssertionError as e:
 
             if self.interactive:
                 print e
@@ -590,6 +620,7 @@ class Client:
         create_nr = 1
 
         created = [ ]
+        failed = [ ]
 
         # Creating a single entity
         if not type(payload) is ListType:
@@ -600,28 +631,78 @@ class Client:
 
             kw_args = { 'data' : json.dumps(payload) }
 
-            r = self.API_CONNECTION.do_request( 'POST', url, **kw_args )
+            (r_ok, r)  = self.API_CONNECTION.do_request( 'POST', url, **kw_args )
 
-            created.append( r )
+            if not r_ok:
+
+                failed.append(r)
+                i_print('[FAILED] Failed to create: %s' %str(r), self.interactive )
+            else:
+
+                created.append( r )
 
         # Creating multiple entities
         else:
 
+            (terminal_width, terminal_height) = getTerminalSize()
+
             create_count = len( payload )
+
+            if self.interactive:
+
+                pprint.pprint( payload )
+
+                confirm_str = '[CREATE] You are about to create: %s object(s). Are you sure ([N]/Y)?: ' %create_count
+                confirm = raw_input( confirm_str )
+      
+                if confirm.lower() != 'y':
+
+                    return False
 
             for p in payload:
 
-                i_print('[CREATING] %s of %s ..' %( str( create_nr ), str( create_count ) ), self.interactive )
+                prepend_create_msg = '[CREATING] %s of %s: ' %( str( create_nr ), str( create_count ) )
+                prepend_create_msg_len = len( prepend_create_msg )
+
+                terminal_width_remaining = terminal_width - prepend_create_msg_len
+                append_create_msg_formatted = '%-' + str(terminal_width_remaining) + 's'
+                append_create_msg = append_create_msg_formatted %str( p )
+
+                full_create_msg = prepend_create_msg + append_create_msg
+
+                i_print(full_create_msg, self.interactive )
 
                 kw_args = { 'data' : json.dumps(p) }
 
-                r = self.API_CONNECTION.do_request( 'POST', url, **kw_args )
+                (r_ok, r)  = self.API_CONNECTION.do_request( 'POST', url, **kw_args )
 
-                created.append( r )
+                if not r_ok:
+
+                    prepend_fail_msg = '[FAILED] %s of %s: ' %( str( create_nr ), str( create_count ) )
+                    prepend_fail_msg_len = len( prepend_fail_msg )
+
+                    terminal_width_remaining = terminal_width - prepend_fail_msg_len
+                    append_fail_msg_formatted = '%-' + str(terminal_width_remaining) + 's'
+                    append_fail_msg = append_fail_msg_formatted %str( p )
+
+                    full_fail_msg = prepend_fail_msg + append_fail_msg
+
+                    i_print(full_fail_msg, self.interactive )
+
+                    i_print('[FAILED] %s of %s: %s' %( str( create_nr ), str( create_count ), str(r) ), self.interactive )
+
+                    failed.append( p )
+
+                else:
+                    created.append( r )
 
                 create_nr = create_nr + 1
 
-        i_print('[SUCCESS] Succefully created %s object(s)' %str(create_count), self.interactive )
+        if len(failed) > 0:
+            i_print('[FAILED] Failed to create %s object(s)' %str(len(failed)), self.interactive )
+
+        if len(created) > 0:
+            i_print('[SUCCESS] Succefully created %s object(s)' %str(len(created)), self.interactive )
 
         #print '>>> </CREATING>'
         return created
@@ -655,7 +736,7 @@ class Client:
 
         kw_args = { 'params' : payload }
 
-        r = self.API_CONNECTION.do_request( 'GET', url, **kw_args )
+        (r_ok, r) = self.API_CONNECTION.do_request( 'GET', url, **kw_args )
 
         #print '>>> </READING>'
 
@@ -692,7 +773,7 @@ class Client:
 
         kw_args = { 'params' : payload }
 
-        r = self.API_CONNECTION.do_request( 'GET', url, **kw_args )
+        (r_ok, r) = self.API_CONNECTION.do_request( 'GET', url, **kw_args )
 
         response_data = r
 
@@ -734,7 +815,7 @@ class Client:
 
             kw_args = { 'data' : json.dumps(payload) }
 
-            r = self.API_CONNECTION.do_request( 'PATCH', result['url'], **kw_args )
+            (r_ok, r) = self.API_CONNECTION.do_request( 'PATCH', result['url'], **kw_args )
 
             #pprint.pprint( r )
 
@@ -759,7 +840,7 @@ class Client:
 
         kw_args = { 'params' : payload }
 
-        r = self.API_CONNECTION.do_request( 'GET', url, **kw_args )
+        (r_ok, r) = self.API_CONNECTION.do_request( 'GET', url, **kw_args )
 
         response_data = r
 
@@ -797,7 +878,7 @@ class Client:
 
             kw_args = { }
 
-            self.API_CONNECTION.do_request( 'DELETE', result['url'], **kw_args )
+            (r_ok, r) = self.API_CONNECTION.do_request( 'DELETE', result['url'], **kw_args )
 
         i_print('[SUCCESS] Succefully deleted %s object(s)' %str( result_count ), self.interactive )
  
@@ -819,7 +900,7 @@ class Client:
 
         kw_args = { 'params' : payload, 'files': files }
 
-        r = self.API_CONNECTION.do_request( 'POST', url, **kw_args )
+        (r_ok, r) = self.API_CONNECTION.do_request( 'POST', url, **kw_args )
 
         file_obj.close()
 
