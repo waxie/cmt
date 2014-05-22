@@ -51,7 +51,7 @@ setup(
 
     install_requires = [
         'Python<3.0.0,>=2.6.0',
-        'requests',
+        'requests>=2.0.0',
         'argparse'
     ],
 
