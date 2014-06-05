@@ -44,7 +44,7 @@ from django.template import TemplateDoesNotExist
 
 from types import ListType, StringTypes
 
-from sara_cmt.django_cli import GlobalModel, ObjectManager, QueryManager, \
+from sara_cmt.django_cli import ModelExtension, ObjectManager, QueryManager, \
     logger, parser
 
 import sara_cmt.cluster.models
@@ -183,7 +183,7 @@ def show(option, opt_str, value, parser, *args, **kwargs):
     # !!! TODO: either print short, or print long lists !!!
     # !!! TODO: use config files for fields (not) to print (maybe
     for _object in objects:
-        GlobalModel.display(_object)
+        ModelExtension.display(_object)
 
 
 @crud_validate
