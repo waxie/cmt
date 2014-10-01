@@ -1,0 +1,5 @@
+include AUTHORS CHANGES README LICENSE
+recursive-include wsgi cmt.wsgi
+recursive-include etc/cmt *.conf*
+recursive-include cmt_server/static *
+recursive-include cmt_server/apps/cluster/templates *

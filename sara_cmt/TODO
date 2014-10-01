@@ -7,18 +7,11 @@ Fields in models:
   * Connection.type (leverancier, support, ...)
 
 
-Commandline Interface:
-  * Logging
-  * --script option
-
-
 Web Interface:
   * Filters:
     - Racks on Address
     - Hardware on Room and Address
 
-
-Templates:
 
 
 Feature requests:

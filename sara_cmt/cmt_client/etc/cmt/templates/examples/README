@@ -1,0 +1,10 @@
+Please consult the website for complete documentation on how to utilize CMT and it's templating capabilities.
+
+The CMT website: 
+ * https://oss.trac.surfsara.nl/cmt
+
+Description of available templating functions:
+ * https://oss.trac.surfsara.nl/cmt/wiki/Usage/TemplatingDocumentation
+
+Description of available (data/model) fields and their names:
+ * https://oss.trac.surfsara.nl/cmt/wiki/Data/Datastructure#Availablemodels
