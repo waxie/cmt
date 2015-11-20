@@ -78,7 +78,7 @@
     var lookup_link = function(id, val) {
         var lookuplink = $('<a class="related-lookup"></a>');
         lookuplink.attr('id', 'lookup_'+id);
-        lookuplink.attr('href', "../../../" + MODEL_URL_ARRAY[val].app + "/" + MODEL_URL_ARRAY[val].model + '/?_to_field=id');
+        lookuplink.attr('href', window.ADMIN_URL + MODEL_URL_ARRAY[val].app + "/" + MODEL_URL_ARRAY[val].model + '/?');
         lookuplink.attr('onClick', 'return showRelatedObjectLookupPopup(this);');
         return lookuplink;
     };
@@ -139,6 +139,7 @@
                 select: function(event, ui) {
                     options.input_field.val(ui.item.label);
                     elem.val(ui.item.value);
+                    elem.trigger('change');
                     elem.val() ? $(options.remove_link).show() : $(options.remove_link).hide();
                     return false;
                 }

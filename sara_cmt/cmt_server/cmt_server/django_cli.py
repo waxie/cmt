@@ -42,8 +42,8 @@ from django_extensions.db.fields import CreationDateTimeField, \
 import settings
 
 # To be able to migrate fields of 3rd party app django-extensions
-from south.modelsinspector import add_introspection_rules
-add_introspection_rules([], ["^django_extensions\.db\.fields"])
+#from south.modelsinspector import add_introspection_rules
+#add_introspection_rules([], ["^django_extensions\.db\.fields"])
 
 class ModelExtension(models.Model):
     """
