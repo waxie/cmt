@@ -53,10 +53,10 @@ setup(
     packages = find_packages(),
 
     install_requires = [
-        'Python<3.0.0,>=2.6.0',
-        'Django<1.6.0,>=1.5.2',
-        'djangorestframework',
-        'django-grappelli<2.5.0,>=2.4.9',
+        'Python<3.0.0,>=2.7.0',
+        'Django<1.8.0,>=1.7.0',
+        'djangorestframework<3.0.0,>=2.3.0',
+        'django-grappelli<2.7.0,>=2.6.1',
         'django_extensions',
         'django-smuggler',
         'django-auth-ldap',
