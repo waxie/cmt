@@ -13,7 +13,20 @@ var django = {
     "jQuery": grp.jQuery.noConflict(true)
 };
 
-// var jQuery = grp.jQuery.noConflict(true);
+var inputTypes = [
+    "[type='search']",
+    "[type='email']",
+    "[type='url']",
+    "[type='tel']",
+    "[type='number']",
+    "[type='range']",
+    "[type='date']",
+    "[type='month']",
+    "[type='week']",
+    "[type='time']",
+    "[type='datetime']",
+    "[type='datetime-local']",
+    "[type='color']"].join(",");
 
 (function($) {
     
@@ -26,6 +39,18 @@ var django = {
             });
             return format;
         }
+    };
+
+    // remove types: search, email, url, tel, number, range, date
+    // month, week, time, datetime, datetime-local, color
+    // because of browser inconsistencies
+    /*jshint multistr: true */
+    grappelli.cleanInputTypes = function() {
+        $("form").each(function(){
+            $(this).find(':input').filter(inputTypes).each(function(){
+                $(this).attr("type", "text");
+            });
+        });
     };
     
     // datepicker, timepicker init
@@ -64,21 +89,14 @@ var django = {
         
         // HACK: adds an event listener to the today button of datepicker
         // if clicked today gets selected and datepicker hides.
-        // use live() because couldn't find hook after datepicker generates it's complete dom.
-        $(".ui-datepicker-current").live('click', function() {
+        // use on() because couldn't find hook after datepicker generates it's complete dom.
+        $(document).on('click', '.ui-datepicker-current', function() {
             $.datepicker._selectDate(grappelli.datepicker_instance);
             grappelli.datepicker_instance = null;
         });
         
         // init timepicker
         $("input[class*='vTimeField']:not([id*='__prefix__'])").grp_timepicker();
-
-        // now-button for both date and time
-        // $("<button class='ui-datetime-now' />").insertAfter("button.ui-timepicker-trigger");
-        // $(".ui-datetime-now").live('click', function() {
-        //     alert("Now for date and time: grappelli.js line 68 ff.");
-        //     return false
-        // });
         
     };
     
@@ -147,7 +165,8 @@ var django = {
         var link = elem.next("a");
         if (link.length > 0) {
             var url = link.attr('href').split('/');
-            return url[url.length-1].replace('?', '');
+            pairs = url[url.length-1].replace('?', '').split("&");
+            return pairs.join(":");
         }
         return false;
     };

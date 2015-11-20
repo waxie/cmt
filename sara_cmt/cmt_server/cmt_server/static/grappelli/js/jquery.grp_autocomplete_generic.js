@@ -78,7 +78,7 @@
     var lookup_link = function(id, val) {
         var lookuplink = $('<a class="related-lookup"></a>');
         lookuplink.attr('id', 'lookup_'+id);
-        lookuplink.attr('href', "../../../" + MODEL_URL_ARRAY[val].app + "/" + MODEL_URL_ARRAY[val].model + '/?t=id');
+        lookuplink.attr('href', "../../../" + MODEL_URL_ARRAY[val].app + "/" + MODEL_URL_ARRAY[val].model + '/?_to_field=id');
         lookuplink.attr('onClick', 'return showRelatedObjectLookupPopup(this);');
         return lookuplink;
     };
@@ -143,16 +143,16 @@
                     return false;
                 }
             })
-            .data("autocomplete")._renderItem = function(ul,item) {
+            .data("ui-autocomplete")._renderItem = function(ul,item) {
                 if (!item.value) {
                     return $("<li></li>")
                         .data( "item.autocomplete", item )
-                        .append( "<span class='error'>" + item.label)
+                        .append( "<span class='error'>" + item.label + "</span>")
                         .appendTo(ul);
                 } else {
                     return $("<li></li>")
                         .data( "item.autocomplete", item )
-                        .append( "<a>" + item.label)
+                        .append( "<a>" + item.label + "</a>")
                         .appendTo(ul);
                 }
             };

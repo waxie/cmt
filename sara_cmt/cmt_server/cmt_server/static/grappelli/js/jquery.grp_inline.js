@@ -46,7 +46,7 @@
         var formIndex = elem.find("[id^='id_" + options.prefix + "']").attr('id');
         if (!formIndex) { return -1; }
         return parseInt(regex.exec(formIndex)[1], 10);
-    }
+    };
     
     updateFormIndex = function(elem, options, replace_regex, replace_with) {
         elem.find(':input,span,table,iframe,label,a,ul,p,img,div').each(function() {
@@ -54,13 +54,15 @@
                 node_id = node.attr('id'),
                 node_name = node.attr('name'),
                 node_for = node.attr('for'),
-                node_href = node.attr("href");
-                node_class = node.attr("class");
+                node_href = node.attr("href"),
+                node_class = node.attr("class"),
+                node_onclick = node.attr("onclick");
             if (node_id) { node.attr('id', node_id.replace(replace_regex, replace_with)); }
             if (node_name) { node.attr('name', node_name.replace(replace_regex, replace_with)); }
             if (node_for) { node.attr('for', node_for.replace(replace_regex, replace_with)); }
             if (node_href) { node.attr('href', node_href.replace(replace_regex, replace_with)); }
             if (node_class) { node.attr('class', node_class.replace(replace_regex, replace_with)); }
+            if (node_onclick) { node.attr('onclick', node_onclick.replace(replace_regex, replace_with)); }
         });
     };
     
@@ -76,7 +78,7 @@
             }
             // add options.predeleteCssClass to forms with the delete checkbox checked
             form.find("li.grp-delete-handler-container input").each(function() {
-                if ($(this).attr("checked") && form.hasClass("has_original")) {
+                if ($(this).is(":checked") && form.hasClass("has_original")) {
                     form.toggleClass(options.predeleteCssClass);
                 }
             });
@@ -169,10 +171,10 @@
             // toggle options.predeleteCssClass and toggle checkbox
             if (form.hasClass("has_original")) {
                 form.toggleClass(options.predeleteCssClass);
-                if (deleteInput.attr("checked")) {
+                if (deleteInput.prop("checked")) {
                     deleteInput.removeAttr("checked");
                 } else {
-                    deleteInput.attr("checked", 'checked');
+                    deleteInput.prop("checked", true);
                 }
             }
             // callback
@@ -183,11 +185,15 @@
     hideAddButtons = function(elem, options) {
         var addButtons = elem.find("a." + options.addCssClass);
         addButtons.hide().parents('.grp-add-item').hide();
+        // last row with stacked/tabular
+        addButtons.closest('.grp-module.grp-transparent').hide();
     };
     
     showAddButtons = function(elem, options) {
         var addButtons = elem.find("a." + options.addCssClass);
         addButtons.show().parents('.grp-add-item').show();
+        // last row with stacked/tabular
+        addButtons.closest('.grp-module.grp-transparent').show();
     };
     
 })(grp.jQuery);
