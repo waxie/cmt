@@ -122,12 +122,6 @@ class CustomIndexDashboard(Dashboard):
             feed_url='https://oss.trac.surfsara.nl/cmt/timeline?ticket=on&milestone=on&changeset=on&repo-=on&repo-git=on&wiki=on&max=50&authors=&daysback=90&format=rss',
             limit=5
         ))
-        self.children.append(modules.Feed(
-            _('Latest SURFsara News'),
-            column=2,
-            feed_url='https://www.surfsara.nl/news/feed',
-            limit=5
-        ))
         
         # append a recent actions module
         self.children.append(AllRecentActions(
