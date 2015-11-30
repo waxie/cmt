@@ -34,23 +34,23 @@ parser = Parser().getParser()
 
 from django.db import models
 
-import tagging
-from tagging.fields import TagField
+#import tagging
+#from tagging.fields import TagField
 from django_extensions.db.fields import CreationDateTimeField, \
                                         ModificationDateTimeField
 
 import settings
 
 # To be able to migrate fields of 3rd party app django-extensions
-from south.modelsinspector import add_introspection_rules
-add_introspection_rules([], ["^django_extensions\.db\.fields"])
+#from south.modelsinspector import add_introspection_rules
+#add_introspection_rules([], ["^django_extensions\.db\.fields"])
 
 class ModelExtension(models.Model):
     """
         The ModelExtension of Django-CLI is meant as a Mixin for a Django
         Model.
     """
-    tags = TagField()
+    #tags = TagField()
     created_on = CreationDateTimeField()
     updated_on = ModificationDateTimeField()
     note = models.TextField(blank=True)

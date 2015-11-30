@@ -33,7 +33,10 @@ from types import *
 class GlobalAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_on'
     fields = ('note',)
-    list_filter = ('created_on', 'updated_on' )
+    list_filter = (
+        ('created_on', admin.RelatedOnlyFieldListFilter),
+        ('updated_on', admin.RelatedOnlyFieldListFilter),
+    )
     list_per_page = 50
     extra_fieldset = ('Additional fields', {
         'fields': fields,
@@ -212,10 +215,19 @@ class HardwareUnitAdmin(CMTAdmin):
         ('Involved parties', {'fields': ('seller', 'owner')}),
         GlobalAdmin.extra_fieldset)
 
+    list_select_related = True
     list_display = ('__unicode__', 'warranty_tag', 'cluster', 'address', 'room', 'rack',
-        'first_slot', 'specifications', 'roles', 'in_support')
-    list_filter  = (ClusterListFilter, RackListFilter, RoleListFilter, SpecificationsListFilter, WarrantyListFilter) + \
-        GlobalAdmin.list_filter
+        'first_slot', 'specifications', 'roles', 'in_support' )
+    #list_filter  = (ClusterListFilter, RackListFilter, RoleListFilter, SpecificationsListFilter, WarrantyListFilter) + \
+    #   GlobalAdmin.list_filter
+    list_filter = (
+        ('cluster', admin.RelatedOnlyFieldListFilter),
+        ('rack', admin.RelatedOnlyFieldListFilter),
+        ('role', admin.RelatedOnlyFieldListFilter),
+        ('specifications', admin.RelatedOnlyFieldListFilter),
+        ('warranty', admin.RelatedOnlyFieldListFilter),
+    )
+
     inlines = [InterfaceInline]
     search_fields = ('label', 'warranty_tag')
 

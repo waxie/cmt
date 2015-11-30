@@ -104,20 +104,21 @@
                 select: function(event, ui) {
                     options.input_field.val(ui.item.label);
                     elem.val(ui.item.value);
+                    elem.trigger('change');
                     elem.val() ? $(options.remove_link).show() : $(options.remove_link).hide();
                     return false;
                 }
             })
-            .data("autocomplete")._renderItem = function(ul,item) {
+            .data("ui-autocomplete")._renderItem = function(ul,item) {
                 if (!item.value) {
                     return $("<li></li>")
                         .data( "item.autocomplete", item )
-                        .append( "<span class='error'>" + item.label)
+                        .append( "<span class='error'>" + item.label + "</span>")
                         .appendTo(ul);
                 } else {
                     return $("<li></li>")
                         .data( "item.autocomplete", item )
-                        .append( "<a>" + item.label)
+                        .append( "<a>" + item.label + "</a>")
                         .appendTo(ul);
                 }
             };
