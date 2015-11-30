@@ -201,8 +201,8 @@ class ApiConnection:
         except requests.exceptions.SSLError as ssl_err:
 
             if self.interactive:
-                print '[ERROR] Unable to verify SSL certificate: %s' %str( ssl_err)
-                print '[INFO]  Using root CAs: %s' %self.SSL_ROOT_CAS
+                print '[ERROR]  Unable to verify SSL certificate: %s' %str( ssl_err)
+                print '[INFO]   Using root CAs: %s' %self.SSL_ROOT_CAS
                 sys.exit(1)
             else:
                 raise CmtApiSslVerificationFailed('SSL verification with root CAs %s failed: %s' %(self.SSL_ROOT_CAS, str( ssl_err)))
@@ -911,10 +911,11 @@ class Client:
         prompt_write = False
 
         if not hasattr( r, 'items' ):
+
             if self.interactive:
-                print '[ERROR] %s' %str(response.json())
+                print '[ERROR] %s' %str(r)
             else:
-                raise RuntimeError(str(response.json()))
+                raise RuntimeError(str(r))
             return False
 
         if not self.interactive:
