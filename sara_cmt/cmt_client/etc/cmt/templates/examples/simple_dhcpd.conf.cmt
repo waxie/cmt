@@ -19,8 +19,8 @@
 /bin/echo dummy /etc/init.d/isc-dhcp-server restart
 {% endepilogue %}
 
-{% use network with 'name=lisa admin' as net_lisa_admin %}
-{% use interface with 'network__name=lisa admin' as ifaces_lisa_admin %}
+{% read network --get 'name=lisa admin' as net_lisa_admin %}
+{% read interface --get 'network__name=lisa admin' as ifaces_lisa_admin %}
 
 # general options
 authoritative;
