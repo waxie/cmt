@@ -54,7 +54,7 @@ setup(
 
     install_requires = [
         'Python<3.0.0,>=2.7.0',
-        'Django<1.9.0,>=1.8.0',
+        'Django<1.9.0,<1.8.6,>1.8.6',
         'djangorestframework<3.0.0,>=2.3.0',
         'django-grappelli<2.8.0,>=2.7.0',
         'django_extensions',
