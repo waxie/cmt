@@ -54,17 +54,15 @@ setup(
 
     install_requires = [
         'Python<3.0.0,>=2.7.0',
-        'Django<1.8.0,>=1.7.0',
+        'Django<1.9.0,>=1.8.0',
         'djangorestframework<3.0.0,>=2.3.0',
-        'django-grappelli<2.7.0,>=2.6.1',
+        'django-grappelli<2.8.0,>=2.7.0',
         'django_extensions',
         'django-smuggler',
         'django-auth-ldap',
         'django-debug-toolbar',
         'django-filter',
-        'django-tagging',
         'psycopg2',
-        'South',
         'IPy',
         'feedparser'
     ],

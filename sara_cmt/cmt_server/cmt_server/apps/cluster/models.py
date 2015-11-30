@@ -32,7 +32,7 @@ logger = Logger().getLogger()
 
 from cmt_server.django_cli import ModelExtension
 
-from tagging.fields import TagField
+#from tagging.fields import TagField
 from django_extensions.db.fields import CreationDateTimeField, \
                                         ModificationDateTimeField
 
