@@ -198,7 +198,7 @@ class ApiConnection:
 
         except requests.exceptions.SSLError as ssl_err:
 
-            if not self.interactive:
+            if self.interactive:
                 print '[ERROR] Unable to verify SSL certificate: %s' %str( ssl_err)
                 print '[INFO]  Using root CAs: %s' %self.SSL_ROOT_CAS
                 sys.exit(1)
@@ -207,7 +207,7 @@ class ApiConnection:
 
         except requests.exceptions.ConnectionError as req_err:
 
-            if not self.interactive:
+            if self.interactive:
                 print '[ERROR] Error connecting to %s: %s' %( url, str( req_ce ) )
                 sys.exit(1)
             else:
