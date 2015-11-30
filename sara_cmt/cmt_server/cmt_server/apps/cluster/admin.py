@@ -33,10 +33,7 @@ from types import *
 class GlobalAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_on'
     fields = ('note',)
-    list_filter = (
-        ('created_on', admin.RelatedOnlyFieldListFilter),
-        ('updated_on', admin.RelatedOnlyFieldListFilter),
-    )
+    list_filter = ('created_on', 'updated_on' )
     list_per_page = 50
     extra_fieldset = ('Additional fields', {
         'fields': fields,
@@ -235,7 +232,7 @@ class HardwareUnitAdmin(CMTAdmin):
 
 class CountryAdmin(CMTAdmin):
     fieldsets = (
-        ('None', {'fields': (('name', 'country_code'),)}),
+        (None, {'fields': (('name', 'country_code'),)}),
         GlobalAdmin.extra_fieldset)
     list_display = ('country_code', 'name')
     list_filter  = GlobalAdmin.list_filter
