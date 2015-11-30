@@ -63,7 +63,7 @@ class EquipmentSerializer(CMTSerializer):
     class Meta:
         model = Equipment
         fields = ( 'cluster', 'created_on', 'first_slot', 'interfaces', 'label', 'note', 'owner', 'rack',
-               'role', 'seller', 'serial_number', 'specifications', 'state', 'tags', 'updated_on', 'url',
+               'role', 'seller', 'serial_number', 'specifications', 'state', 'updated_on', 'url',
                'warranty', 'warranty_tag' )
         #depth = 1
 
