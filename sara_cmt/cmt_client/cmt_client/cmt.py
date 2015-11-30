@@ -210,10 +210,10 @@ class ApiConnection:
         except requests.exceptions.ConnectionError as req_err:
 
             if self.interactive:
-                print '[ERROR] Error connecting to %s: %s' %( url, str( req_ce ) )
+                print '[ERROR] Error connecting to %s: %s' %( url, str( req_err ) )
                 sys.exit(1)
             else:
-                raise CmtApiConnectionError( 'Error connection to %s: %s' %( url, str( req_ce ) ) )
+                raise CmtApiConnectionError( 'Error connection to %s: %s' %( url, str( req_err ) ) )
 
         if r.status_code == requests.codes.server_error:
 
