@@ -5,6 +5,8 @@
 import logging, sys, textwrap, pprint, os, difflib, ConfigParser
 import requests, json, base64, re, types, argparse, site
 
+requests.packages.urllib3.disable_warnings()
+
 from cmt_client import __version__ as cmt_version
 from cmt_client.exceptions import *
 
