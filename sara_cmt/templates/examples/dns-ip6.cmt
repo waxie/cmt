@@ -1,9 +1,9 @@
 
 {% load cmt_client %}
 
-{% use network with 'name=lisa ipv6 test' as net_lisa_ip6 %}
+{% read network --get 'name=lisa ipv6 test' as net_lisa_ip6 %}
 
-{% for base in net_lisa_ip6.cidr|reverse_names %}
+{% for base in net_lisa_ip6.cidr|reverse_names%}
     {% assign filename = '/var/tmp/wax/db.' base %}
     {% assign query_base = 'ip__startswith=' base %}
     {% store filename %} {% noblanklines %}
