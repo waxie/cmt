@@ -193,7 +193,7 @@ class Interface(ModelExtension):
                                  help_text="6 Octets, optionally delimited by \
                                  a space ' ', a hyphen '-', or a colon ':'.",
                                  validators=[hwaddress_validator])
-    ip        = models.GenericIPAddressField(blank=True, protocol='both')
+    ip        = models.GenericIPAddressField(blank=True, null=True, protocol='both')
 
     class Meta:
         unique_together = ('network', 'hwaddress')
@@ -285,11 +285,10 @@ class Network(ModelExtension):
                                   infiniband')
     cidr       = models.CharField(max_length=100, help_text='example: 192.168.1.0/24 or fd47:e249:06b2:0385::/64')
 
-    gateway    = models.GenericIPAddressField(blank=True, help_text='Automagically generated if kept empty')
+    gateway    = models.GenericIPAddressField(blank=True, help_text='Automagically generated if kept empty', null=True)
     domain     = models.CharField(max_length=255, help_text='example: \
                                   irc.sara.nl', validators=[domain_validator])
-    vlan       = models.PositiveIntegerField(max_length=3, null=True,
-                                             blank=True)
+    vlan       = models.PositiveIntegerField(null=True, blank=True)
     hostnames  = models.CharField(max_length=255, help_text='''stringformat \
                                   of hostnames in the network, example: \
                                   'ib-{machine}''', validators=[hosts_validator])
@@ -484,7 +483,7 @@ class Room(ModelExtension):
     """
     address = models.ForeignKey(Address, related_name='rooms')
 
-    floor   = models.IntegerField(max_length=2)
+    floor   = models.IntegerField()
     label   = models.CharField(max_length=255, blank=False)
 
     class Meta:
@@ -555,7 +554,7 @@ class Telephonenumber(ModelExtension):
     country      = models.ForeignKey(Country, related_name='telephone_numbers')
     connection = models.ForeignKey(Connection, blank=False, null=False, related_name='telephone_numbers')
     areacode          = models.CharField(max_length=4) # because it can start with a zero
-    subscriber_number = models.IntegerField(verbose_name='number', max_length=15)
+    subscriber_number = models.IntegerField(verbose_name='number')
     number_type = models.CharField(max_length=1, choices=NUMBER_CHOICES)
 
     # !!! TODO: link to company / contact / etc... !!!
@@ -571,7 +570,7 @@ class HardwareModel(ModelExtension):
         This model is being used to specify some extra information about a
         specific type (model) of hardware.
     """
-    vendor = models.ForeignKey(Company, related_name='model specifications')
+    vendor = models.ForeignKey(Company, related_name='hardware')
 
     name       = models.CharField(max_length=255, unique=True)
     vendorcode = models.CharField(max_length=255, blank=True, null=True, unique=True, help_text='example: CISCO7606-S')
@@ -639,7 +638,7 @@ class WarrantyType(ModelExtension):
     """
         A type of warranty offered by a company.
     """
-    contact = models.ForeignKey(Connection, related_name='warranty types')
+    contact = models.ForeignKey(Connection, related_name='warranty')
 
     label = models.CharField(max_length=255, unique=True)
 
