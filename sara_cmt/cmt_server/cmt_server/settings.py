@@ -292,8 +292,6 @@ FIXTURE_DIRS = (
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
-#SOUTH_DATABASE_ADAPTERS = {'default':'south.db.postgresql_psycopg2'}
-
 # Append your IP to use the debug_toolbar
 INTERNAL_IPS = (
     '145.100.1.137',
@@ -434,13 +432,13 @@ INSTALLED_APPS = (
     'grappelli.dashboard',
     'grappelli',
     'smuggler',
+    'tagging',
     'django.contrib.admin',
     'django.contrib.sites',
     'django.contrib.staticfiles',
     'django.contrib.webdesign',
     'django.contrib.messages',
     'cmt_server.apps.cluster',
-    #'south',
     'debug_toolbar',
     'django_extensions'
 )

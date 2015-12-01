@@ -38,6 +38,7 @@ class GlobalAdmin(admin.ModelAdmin):
     extra_fieldset = ('Additional fields', {
         'fields': fields,
         'classes': ('collapse',)})
+    exclude = ('tags',)
 
 
 class CMTAdmin(admin.ModelAdmin):
@@ -67,7 +68,7 @@ class AddressInline(admin.TabularInline):
 class InterfaceInline(admin.TabularInline):
     model = Interface
     form = InterfaceForm #RB: used to override width of input boxes
-    exclude = GlobalAdmin.fields + ('tags',)
+    exclude = GlobalAdmin.fields
 
 class PhoneInline(admin.TabularInline):
     model = Telephonenumber
