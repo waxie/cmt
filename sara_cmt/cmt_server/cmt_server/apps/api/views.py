@@ -31,6 +31,10 @@ from django.http import HttpResponse
 
 class CMTViewSet(viewsets.ModelViewSet):
 
+    # This disables pagination but is a huge performance penalty
+    #paginate_by = None
+    #paginate_by_param = None
+
     def pre_delete(self, obj):
 
         """
