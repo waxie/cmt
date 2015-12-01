@@ -466,6 +466,11 @@ class generateStoreOutput(template.Node):
         context['__template_outputfiles__'][ mypath_str ] = { }
         context['__template_outputfiles__'][ mypath_str ][ 'contents' ] = output
 
+        if context.has_key( 'epilogue' ):
+            context['__template_outputfiles__'][ mypath_str ][ 'epilogue' ] = context['epilogue']
+        else:
+            context['__template_outputfiles__'][ mypath_str ][ 'epilogue' ] = ''
+
         if context.has_key( '$cmt$diff_ignore' ):
             context['__template_outputfiles__'][ mypath_str ][ 'diff_ignore' ] = context['$cmt$diff_ignore']
         else:
@@ -484,10 +489,12 @@ class ScriptNode(template.Node):
 
     def render(self, context):
         script = self.nodelist.render(context)
+
+        script_lines = script.strip().splitlines()
         if context.has_key('epilogue'):
-            context['epilogue'].append(script)
+            context['epilogue'].extend(script_lines)
         else:
-            context['epilogue'] = [script]
+            context['epilogue'] = script_lines
         # All content between {% epilogue %} and {% endepilogue %} is parsed now
         return ''
 

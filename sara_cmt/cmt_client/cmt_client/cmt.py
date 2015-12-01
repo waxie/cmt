@@ -3,7 +3,7 @@
 # vim: set noai tabstop=4 shiftwidth=4 expandtab:
 
 import logging, sys, textwrap, pprint, os, difflib, ConfigParser
-import requests, json, base64, re, types, argparse, site
+import requests, json, base64, re, types, argparse, site, subprocess
 
 requests.packages.urllib3.disable_warnings()
 
@@ -927,6 +927,7 @@ class Client:
 
             output_file_contents = output_file_attrs['contents']
             output_file_diff_ignore = output_file_attrs['diff_ignore']
+            output_file_epilogue = output_file_attrs['epilogue']
 
             print '[RECEIVED] output file: %s - size %d bytes' %(output_filename, len( output_file_contents ) )
 
@@ -1062,6 +1063,16 @@ class Client:
             f = open(output_filename, 'w')
             f.writelines(output_file_contents)
             f.close()
+
+        if len( output_file_epilogue ) > 0:
+
+            for epilogue_line in output_file_epilogue:
+
+                epilogue_line = epilogue_line.strip()
+                print "[EPILOGUE] %s" %epilogue_line
+
+                epi_output = subprocess.check_output( epilogue_line, stderr=subprocess.STDOUT, shell=True)
+                print epi_output
 
         print '[FINISHED] done'
         return True
