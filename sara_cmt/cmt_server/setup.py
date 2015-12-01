@@ -62,6 +62,7 @@ setup(
         'django-auth-ldap',
         'django-debug-toolbar',
         'django-filter',
+        'django-tagging',
         'psycopg2',
         'IPy',
         'feedparser'
