@@ -23,7 +23,6 @@ USER      : cmt
 #PASSWORD  : <set_me>
 HOST      : cmt.osd.surfsara.nl
 #PORT      : <optional>
-=======
 #TEST_NAME : sara_cmt_test
 
 [web]
