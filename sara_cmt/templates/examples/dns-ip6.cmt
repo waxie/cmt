@@ -1,9 +1,9 @@
 
 {% load cmt_client %}
 
-{% read network --get 'name=lisa ipv6 test' as net_lisa_ip6 %}
+{% read network --get 'name=SURFsara-Werkplek-LAN v6' as net_ip6 %}
 
-{% for base in net_lisa_ip6.cidr|reverse_names%}
+{% for base in net_ip6.cidr|reverse_names%}
     {% assign filename = '/var/tmp/wax/db.' base %}
     {% assign query_base = 'ip__startswith=' base %}
     {% store filename %} {% noblanklines %}
@@ -27,7 +27,7 @@ $TTL 3600
 
         IN  NS      nsauth1.sara.nl.
         IN  NS      nsauth2.sara.nl.
-    {% for iface in net_lisa_ip6.interfaces.all %}
+    {% for iface in net_ip6.interfaces.all %}
 
 {{ iface.ip|reverse_name}} IN PTR {{ iface.fqdn }}.
 
@@ -37,7 +37,7 @@ $TTL 3600
 {% endstore %}
 {% endfor %}
 
-{% store '/var/tmp/wax/db.ip6.lisa.surfsara.nl' %} {% noblanklines %}
+{% store '/var/tmp/wax/db.ip6.surfsara.nl' %} {% noblanklines %}
 $TTL 3600
 ;
 ; SVN: $Id:$
@@ -59,7 +59,7 @@ $TTL 3600
         IN  NS      nsauth1.sara.nl.
         IN  NS      nsauth2.sara.nl.
 
-            {% for iface in net_lisa_ip6.interfaces.all %}
+            {% for iface in net_ip6.interfaces.all %}
 {{ iface.label }}{{ suffix }} IN AAAA {{ iface.ip }}
                 {% if iface.cnames != None %}
                     {% for cname in iface.cnames %}
