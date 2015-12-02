@@ -345,25 +345,6 @@ LOGGING = {
     }
 }
 
-REST_FRAMEWORK = {
-    # Use hyperlinked styles by default.
-    # Only used if the `serializer_class` attribute is not set on a view.
-    'DEFAULT_MODEL_SERIALIZER_CLASS':
-        'rest_framework.serializers.HyperlinkedModelSerializer',
-
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ],
-    'PAGINATE_BY': 10,
-
-    # Generic filtering backend that allows us to easily construct
-    # complex searches and filters.
-    'DEFAULT_FILTER_BACKENDS': (
-        'rest_framework.filters.DjangoFilterBackend',
-    )
-}
 
 # <AUTH AGAINST LDAP> (based on http://packages.python.org/django-auth-ldap/)
 #
@@ -417,8 +398,31 @@ if AUTHENTICATION_ENABLED:
         'django.contrib.auth.backends.ModelBackend',
     )
 
-    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = [ 'rest_framework.authentication.BasicAuthentication' ]
-    REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = [ 'rest_framework.permissions.IsAuthenticated' ]
+    REST_FRAMEWORK = {
+        # Use hyperlinked styles by default.
+        # Only used if the `serializer_class` attribute is not set on a view.
+        'DEFAULT_MODEL_SERIALIZER_CLASS': (
+            'rest_framework.serializers.HyperlinkedModelSerializer',
+        ),
+
+        'DEFAULT_AUTHENTICATION_CLASSES': (
+            'rest_framework.authentication.BasicAuthentication',
+        ),
+
+        # Use Django's standard `django.contrib.auth` permissions,
+        # or allow read-only access for unauthenticated users.
+        'DEFAULT_PERMISSION_CLASSES': (
+            'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        ),
+
+        'PAGINATE_BY': 10,
+
+        # Generic filtering backend that allows us to easily construct
+        # complex searches and filters.
+        'DEFAULT_FILTER_BACKENDS': (
+            'rest_framework.filters.DjangoFilterBackend',
+        )
+    }
 #
 # </AUTH AGAINST LDAP>
 #
