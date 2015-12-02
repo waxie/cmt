@@ -647,30 +647,6 @@ class WarrantyType(ModelExtension):
     def __unicode__(self):
         return unicode(self.label)
 
-# Remove me (via proper migration)
-class Alias(ModelExtension):
-    label     = models.CharField(max_length=255, unique=True)
-
-    class Meta:
-        verbose_name_plural = 'aliases'
-
-    def _interfaces(self):
-        return ' | '.join([interface.label for interface in
-            self._interfaces.all()]) or '-'
-    interfaces = property(_interfaces)
-
-    def __unicode__(self):
-        return self.label
-
-# Remove me (via proper migration)
-class Site(ModelExtension):
-    """
-    """
-    name = models.CharField(max_length=255, unique=True)
-
-    def __unicode__(self):
-        return self.name
-
 class WarrantyContract(ModelExtension):
     """
         A class which contains warranty information of (a collection of) hardware. (SLA)
