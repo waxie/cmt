@@ -3,9 +3,9 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import re
+import tagging.fields
 import django_extensions.db.fields
 import django.core.validators
-import tagging.fields
 
 
 class Migration(migrations.Migration):
@@ -29,20 +29,6 @@ class Migration(migrations.Migration):
             options={
                 'ordering': ('postalcode',),
                 'verbose_name_plural': 'addresses',
-            },
-        ),
-        migrations.CreateModel(
-            name='Alias',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('tags', tagging.fields.TagField(max_length=255, blank=True)),
-                ('created_on', django_extensions.db.fields.CreationDateTimeField(auto_now_add=True)),
-                ('updated_on', django_extensions.db.fields.ModificationDateTimeField(auto_now=True)),
-                ('note', models.TextField(blank=True)),
-                ('label', models.CharField(unique=True, max_length=255)),
-            ],
-            options={
-                'verbose_name_plural': 'aliases',
             },
         ),
         migrations.CreateModel(
@@ -254,20 +240,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'ordering': ('address__postalcode', 'floor'),
-            },
-        ),
-        migrations.CreateModel(
-            name='Site',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('tags', tagging.fields.TagField(max_length=255, blank=True)),
-                ('created_on', django_extensions.db.fields.CreationDateTimeField(auto_now_add=True)),
-                ('updated_on', django_extensions.db.fields.ModificationDateTimeField(auto_now=True)),
-                ('note', models.TextField(blank=True)),
-                ('name', models.CharField(unique=True, max_length=255)),
-            ],
-            options={
-                'abstract': False,
             },
         ),
         migrations.CreateModel(
