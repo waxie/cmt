@@ -234,8 +234,12 @@ class WarrantyContractViewSet(CMTViewSet):
 
 class TemplateView(APIView):
     parser_classes = (FileUploadParser,)
-    authentication_classes = (authentication.BasicAuthentication,)
-    permissions_classes = (permissions.IsAuthenticated,)
+
+    # Normally POST (method for submitting template) is WRITE action and requires authentication
+    # However we are not doing anything with the database except read/parse
+    # So override this here
+    authentication_classes = []
+    permission_classes = [ permissions.AllowAny, ]
 
     def post(self, request, format=None):
 
