@@ -19,3 +19,6 @@ class CmtClientNoObjectsFound( Exception ):
 
 class CmtServerError( Exception ):
     pass
+
+class CmtApiNoURLSupplied( Exception ):
+    pass

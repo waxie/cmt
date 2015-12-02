@@ -114,9 +114,20 @@ class ApiConnection:
 
         if not url:
             #base_url = 'http://localhost:8000'
-            base_url = 'https://dev.cmt.surfsara.nl'
+            #base_url = 'https://dev.cmt.surfsara.nl'
+
+            err_msg = 'No URL set'
+
+            if self.interactive:
+
+                print '[ERROR] %s' %str(err_msg)
+                sys.exit(1)
+            else:
+                raise CmtApiNoURLSupplied( str(err_msg) )
+
         else:
             base_url = url
+            i_print( "[URL] %s" %base_url, self.interactive )
 
         self.set_root_ca_bundle( root_cas_file )
 
@@ -409,13 +420,7 @@ class Client:
         self.temp_args = vars(parser.parse_known_args( args )[0] )
         #print '>>> PARSED temp ARGS:', self.temp_args
 
-        if self.temp_args.has_key( 'config_file' ):
-
-            if type(self.temp_args[ 'config_file' ]) is not NoneType:
-
-                self.read_config_file( self.temp_args['config_file'] )
-
-        elif interactive:
+        if self.interactive:
 
             if os.path.exists( DEFAULT_CONFIG_FILE ):
 
@@ -423,8 +428,14 @@ class Client:
 
             else:
 
-                # currently a config file is not required.. should it be?
-                pass
+                print '[ERROR] Config file not found'
+                sys.exit(1)
+
+        elif self.temp_args.has_key( 'config_file' ):
+
+            if type(self.temp_args[ 'config_file' ]) is not NoneType:
+
+                self.read_config_file( self.temp_args['config_file'] )
 
         if not api_connection:
 
@@ -496,6 +507,8 @@ class Client:
         config = ConfigParser.RawConfigParser()
         config.readfp( file_object)
 
+        print '[CONFIG] %s' %file_object.name
+
         self.config_options = { }
 
         if config.has_section( 'server' ):
@@ -503,10 +516,20 @@ class Client:
             if config.has_option( 'server', 'api_version' ):
                 
                 self.config_options[ 'api_version' ] = config.get( 'server', 'api_version' )
+            else:
+                print '[ERROR] Config section server: missing api_version'
+                sys.exit(1)
 
             if config.has_option( 'server', 'url' ):
                 
                 self.config_options[ 'url' ] = config.get( 'server', 'url' )
+            else:
+                print '[ERROR] Config section server: missing url'
+                sys.exit(1)
+
+        else:
+            print '[ERROR] Config missing section: server'
+            sys.exit(1)
 
         if config.has_section( 'ssl' ):
 
