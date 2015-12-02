@@ -224,6 +224,7 @@ class HardwareUnitAdmin(CMTAdmin):
         ('role', admin.RelatedOnlyFieldListFilter),
         ('specifications', admin.RelatedOnlyFieldListFilter),
         ('warranty', admin.RelatedOnlyFieldListFilter),
+        ('owner', admin.RelatedOnlyFieldListFilter),
     )
 
     inlines = [InterfaceInline]
