@@ -93,7 +93,12 @@ def arpanize(value):
     """
     # deprecate me: use reverse_name
 
-    ip = IP( value )
+    try:
+        ip = IP( value )
+
+    except ValueError:
+
+        return ''
 
     if ip.version() == 4:
 
@@ -125,7 +130,12 @@ def base_net(value):
             192.168.1
     """
 
-    ip = IP( value )
+    try:
+        ip = IP( value )
+
+    except ValueError:
+
+        return ''
 
     if ip.version() == 4:
 
@@ -158,7 +168,12 @@ def ip_last_digit(value):
             ip4 last digit = 123
             ip6 last digit = 123
     """
-    ip = IP( value )
+    try:
+        ip = IP( value )
+
+    except ValueError:
+
+        return ''
 
     if ip.version() == 4:
 
@@ -257,9 +272,13 @@ def reverse_name(value):
             ip6 = fd93:59ef:8ce1:aac8::123
             ip6 reverse name = 3.2.1.0.0.0.0.0.0.0.0.0.0.0.0.0.8.c.a.a.1.e.c.8.f.e.9.5.3.9.d.f.ip6.arpa.
     """
-    ip = IP( value )
+    try:
+        ip = IP( value )
+        return ip.reverseName()
 
-    return ip.reverseName()
+    except ValueError:
+
+        return ''
 
 register.filter( 'reverse_name', reverse_name )
 
@@ -297,9 +316,14 @@ def reverse_names(value):
             ip6cidr/64 reverse names = 8.c.a.a.1.e.c.8.f.e.9.5.3.9.d.f.ip6.arpa.
 
     """
-    ip = IP( value )
+    try:
+        ip = IP( value )
 
-    return ip.reverseNames()
+        return ip.reverseNames()
+
+    except ValueError:
+
+        return ''
 
 register.filter( 'reverse_names', reverse_names )
 
