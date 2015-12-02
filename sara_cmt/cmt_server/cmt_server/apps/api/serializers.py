@@ -59,11 +59,12 @@ class EquipmentSerializer(CMTSerializer):
     specifications = serializers.SlugRelatedField(required=False, many=False, read_only=False, slug_field='name')
     warranty = serializers.SlugRelatedField(required=False, many=False, read_only=False, slug_field='label')
     seller = serializers.SlugRelatedField(required=False, many=False, read_only=False, slug_field='name')
+    owner = serializers.SlugRelatedField(required=False, many=False, read_only=False, slug_field='name')
 
     class Meta:
         model = Equipment
         fields = ( 'cluster', 'created_on', 'first_slot', 'interfaces', 'label', 'note', 'owner', 'rack',
-               'role', 'seller', 'serial_number', 'specifications', 'state', 'updated_on', 'url',
+               'role', 'seller', 'owner', 'serial_number', 'specifications', 'state', 'updated_on', 'url',
                'warranty', 'warranty_tag' )
         #depth = 1
 
