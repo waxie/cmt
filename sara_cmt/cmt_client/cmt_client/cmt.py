@@ -763,9 +763,29 @@ class Client:
 
         (r_ok, r) = self.API_CONNECTION.do_request( 'GET', url, **kw_args )
 
+        if r.has_key('next'):
+
+            if r['next'] is None:
+
+                return r
+
+        next_url = r['next']
+        r_total = r
+
+        while next_url is not None:
+
+            kw_args = { }
+            (r_ok, r_nextpage) = self.API_CONNECTION.do_request( 'GET', next_url, **kw_args )
+
+            r_total['results'].extend( r_nextpage['results'] )
+
+            next_url = r_nextpage['next']
+
+        r_total['next'] = None
+
         #print '>>> </READING>'
 
-        return r
+        return r_total
 
     def update(self, args):
 
