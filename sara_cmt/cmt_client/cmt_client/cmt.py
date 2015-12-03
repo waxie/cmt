@@ -875,15 +875,14 @@ class Client:
                 raise SyntaxError('Missing get arguments')
             return False
 
+        copy_args = copy.deepcopy( args )
+
         # Get data from given --get args to prepare a request
         entity = args['entity'].pop()
+
         url = '%s/' % (self.API_CONNECTION.FULL_URL + entity )
-        payload = self.args_to_payload(entity, args['get'])
-        self.API_CONNECTION.set_content_type( 'application/json' )
 
-        kw_args = { 'params' : payload }
-
-        (r_ok, r) = self.API_CONNECTION.do_request( 'GET', url, **kw_args )
+        r = self.read( copy_args )
 
         response_data = r
 
