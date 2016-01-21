@@ -425,9 +425,9 @@ class Client:
             self.temp_args = vars(parser.parse_known_args( args )[0] )
             #print '>>> PARSED temp ARGS:', self.temp_args
 
-            if os.path.exists( DEFAULT_CONFIG_FILE ):
+            if os.path.exists( self.temp_args['config_file'] ):
 
-                self.read_config_file( open( DEFAULT_CONFIG_FILE, 'r' ) )
+                self.read_config_file( open( self.temp_args['config_file'], 'r' ) )
 
             else:
 
