@@ -12,6 +12,10 @@ register = template.Library()
 def dns_arpanize(value):
     ip = IP(value)
 
+    # When it's ipv6 just return the reverseName
+    if ip.version == 6:
+        return ip.reverseName()
+
     # Well the maker of IPy has his own way for arpanize which is not widely used
     #  <network>-<broadcast.<subnet> must be:
     #  <broadcast>-<network>.<subnet>
