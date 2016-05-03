@@ -4,6 +4,7 @@
 
 import logging, sys, textwrap, pprint, os, difflib, ConfigParser, copy
 import requests, json, base64, re, types, argparse, site, subprocess
+import json
 
 requests.packages.urllib3.disable_warnings()
 
@@ -127,7 +128,7 @@ class ApiConnection:
 
         else:
             base_url = url
-            i_print( "[URL] %s" %base_url, self.interactive )
+            #i_print( "[URL] %s" %base_url, self.interactive )
 
         self.set_root_ca_bundle( root_cas_file )
 
@@ -1117,16 +1118,16 @@ def main(args):
         command = parsed_args['func']
 
         if command == 'read':
-            json = c.read(parsed_args)
+            results = c.read(parsed_args)
 
-            if json:
-                pprint.pprint(json)
+            if results:
+	    	print json.dumps(results, sort_keys=True,indent=4, separators=(',', ': '))
 
         elif command =='create':
-            json = c.create(parsed_args)
+            results = c.create(parsed_args)
 
-            if json:
-                pprint.pprint(json)
+            if results:
+	    	print json.dumps(results, sort_keys=True,indent=4, separators=(',', ': '))
 
         elif command == 'update':
             c.update(parsed_args)
@@ -1141,5 +1142,5 @@ def main(args):
 
 if __name__ == '__main__':
     status = main(sys.argv[1:])
-    print '>>> exit-status:', status
+    #print '>>> exit-status:', status
     sys.exit(status)
