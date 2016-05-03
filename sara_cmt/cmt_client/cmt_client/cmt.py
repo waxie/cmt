@@ -413,8 +413,7 @@ class Client:
         output_group.add_argument('--quiet', '-s', action='store_true', help='suppress output messages')
         parser.add_argument('--version', action='version', version='%(prog)s ' +str(cmt_version) )
 
-        parser.add_argument('--config-file', '-c', type=lambda x: is_valid_file(parser,x), help='Which config file to use')
-
+        parser.add_argument('--config-file', '-c', type=lambda x: is_valid_file(parser,x), default='/etc/cmt/cmt.conf', help='Which config file to use')
 
         self.temp_args = args
 
@@ -424,15 +423,7 @@ class Client:
             # need config file (settings) (if supplied) for creating API Connection..
             self.temp_args = vars(parser.parse_known_args( args )[0] )
             #print '>>> PARSED temp ARGS:', self.temp_args
-
-            if os.path.exists( self.temp_args['config_file'] ):
-
-                self.read_config_file( open( self.temp_args['config_file'], 'r' ) )
-
-            else:
-
-                print '[ERROR] Config file not found'
-                sys.exit(1)
+            self.read_config_file(self.temp_args['config_file'])
 
         elif self.temp_args.has_key( 'config_file' ):
 
