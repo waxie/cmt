@@ -4,6 +4,7 @@
 
 import logging, sys, textwrap, pprint, os, difflib, ConfigParser, copy
 import requests, json, base64, re, types, argparse, site, subprocess
+import json
 
 requests.packages.urllib3.disable_warnings()
 
@@ -127,7 +128,7 @@ class ApiConnection:
 
         else:
             base_url = url
-            i_print( "[URL] %s" %base_url, self.interactive )
+            #i_print( "[URL] %s" %base_url, self.interactive )
 
         self.set_root_ca_bundle( root_cas_file )
 
@@ -413,34 +414,18 @@ class Client:
         output_group.add_argument('--quiet', '-s', action='store_true', help='suppress output messages')
         parser.add_argument('--version', action='version', version='%(prog)s ' +str(cmt_version) )
 
-        parser.add_argument('--config-file', '-c', type=lambda x: is_valid_file(parser,x), help='Which config file to use')
+        parser.add_argument('--config-file', '-c', type=lambda x: is_valid_file(parser,x), default=DEFAULT_CONFIG_FILE, help='Which config file to use')
 
-        # first parse basic options
-        # need config file (settings) (if supplied) for creating API Connection..
+        self.temp_args = args
+
         self.temp_args = vars(parser.parse_known_args( args )[0] )
-        #print '>>> PARSED temp ARGS:', self.temp_args
-
-        if self.interactive:
-
-            if os.path.exists( DEFAULT_CONFIG_FILE ):
-
-                self.read_config_file( open( DEFAULT_CONFIG_FILE, 'r' ) )
-
-            else:
-
-                print '[ERROR] Config file not found'
-                sys.exit(1)
-
-        elif self.temp_args.has_key( 'config_file' ):
-
-            if type(self.temp_args[ 'config_file' ]) is not NoneType:
-
-                self.read_config_file( self.temp_args['config_file'] )
+        self.read_config_file(self.temp_args['config_file'])
 
         if not api_connection:
 
             kw_args = { 'interactive': self.interactive }
 
+            #pprint.pprint(self.config_options)
             if self.config_options:
                 kw_args.update( self.config_options )
 
@@ -496,18 +481,19 @@ class Client:
         file_group = parse_parser.add_argument_group('files', 'Arguments used for input and output')
         file_group.add_argument('template', type=lambda x: is_valid_file(parse_parser,x), nargs=1, help='The template file to parse')
 
-        try:
-            self._args = vars(parser.parse_args( args ))
-            #print '>>> PARSED ARGS:', self._args
-        except AttributeError, e:
-            print '[ERROR] Invalid entity given'
+        if self.interactive:
+            try:
+                self._args = vars(parser.parse_args( args ))
+                #print '>>> PARSED ARGS:', self._args
+            except AttributeError, e:
+                print '[ERROR] Invalid entity given'
 
     def read_config_file( self, file_object ):
 
         config = ConfigParser.RawConfigParser()
         config.readfp( file_object)
 
-        print '[CONFIG] %s' %file_object.name
+        #print '[CONFIG] %s' %file_object.name
 
         self.config_options = { }
 
@@ -1124,20 +1110,25 @@ def main(args):
     try:
         c = Client( **kw_args )
         parsed_args = c.get_args()
+
+        if parsed_args['verbose'] > 3:
+            pprint.pprint(parsed_args)
        
         # Route parsed args to the action given on command line
         command = parsed_args['func']
 
         if command == 'read':
-            json = c.read(parsed_args)
+            results = c.read(parsed_args)
 
-            if json:
-                pprint.pprint(json)
+            if results:
+	    	print json.dumps(results, sort_keys=True,indent=4, separators=(',', ': '))
+
         elif command =='create':
-            json = c.create(parsed_args)
+            results = c.create(parsed_args)
 
-            if json:
-                pprint.pprint(json)
+            if results:
+	    	print json.dumps(results, sort_keys=True,indent=4, separators=(',', ': '))
+
         elif command == 'update':
             c.update(parsed_args)
         elif command == 'delete':
@@ -1151,5 +1142,5 @@ def main(args):
 
 if __name__ == '__main__':
     status = main(sys.argv[1:])
-    print '>>> exit-status:', status
+    #print '>>> exit-status:', status
     sys.exit(status)

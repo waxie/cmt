@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+
+### export PYTHONPATH=<pwd_client_dir>
+from cmt_client import cmt
+
+args = dict()
+#args['config_file'] = '/data/virtualenvs/cmt2_beta/etc/cmt/cmt.conf' 
+#args['command'] =  'read',
+#args['dryrun'] = False,
+args['entity'] = ['equipment']
+#args['fields'] = None,
+#args['func'] = 'read',
+args['get']  =  list()
+args['get'].append(['rack', '17'])
+args['get'].append(['first_slot', '17'])
+args['quiet']=  True
+args['verbose'] =  0
+kw_args = {  'args' : args, 'interactive' : False }
+
+c = cmt.Client( **kw_args )
+json = c.read(args)
+print json
+
+
+

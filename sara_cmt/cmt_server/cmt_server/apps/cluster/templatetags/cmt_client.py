@@ -613,7 +613,7 @@ class getRacks(template.Node):
 
     def render(self, context):
 
-        cluster_units = get_model('cluster', 'HardwareUnit').objects.filter( cluster__name=str(self.cluster) )
+        cluster_units = get_model('cluster', 'Equipment').objects.filter( cluster__name=str(self.cluster) )
 
         for u in cluster_units:
             if u.rack not in self.racks:
@@ -635,9 +635,9 @@ def do_read(parser, token):
         definition = token.split_contents()
         # definition should look like ['read', <entity>, '--get', <query1>, <query2>, 'as', '<key>']
     except ValueError:
-        raise template.TemplateSyntaxError, '%r tag requires at least 5 arguments' % tag
-    if len(definition) != 6:
-        raise template.TemplateSyntaxError, '%r tag requires at least 5 arguments' % tag
+        raise template.TemplateSyntaxError, '%r tag requires at least 6 arguments' % tag
+    if len(definition) < 6:
+        raise template.TemplateSyntaxError, '%r tag requires at least 6 arguments' % tag
     if definition[2] != '--get':
         raise template.TemplateSyntaxError, "second argument of %r tag has to be '--get'" % tag
     if definition[-2] != 'as':
@@ -671,11 +671,9 @@ class QuerySetNode(template.Node):
         myquery_str = ''
 
         for q in self.query:
-
             myquery_str = remove_quotes( q )
 
             if myquery_str.find( '=' ) == -1:
-
                 # RB: No operator: must be a variable: attempt to resolve to value
                 try:
                     queryvar = template.Variable( str(myquery_str) )
@@ -685,7 +683,6 @@ class QuerySetNode(template.Node):
                     pass
 
             if myquery_str.count( '=' ) > 1 and myquery_str.count( ',' ) > 0:
-
                 myfilters_list = myquery_str.split( ',' )
             else:
                 myfilters_list = [ myquery_str ]
@@ -708,16 +705,16 @@ class QuerySetNode(template.Node):
                     # anything short (i.e. field, shortrelation) is a django-filter filter
                     filter_dict[ str(attr) ] = str(val)
 
-        # Get Model/Entity name, i.e.: HardwareUnit
+        # Get Model/Entity name, i.e.: Equipment
         model_name = get_model('cluster', self.entity).__name__
 
-        # Get ViewSet for this Model/Entity, i.e.: HardwareUnitViewSet
+        # Get ViewSet for this Model/Entity, i.e.: EquipmentViewSet
         e_viewset = eval( model_name + 'ViewSet' )
 
-        # Get the filter class for this viewset, i.e.: HardwareUnitFilter
+        # Get the filter class for this viewset, i.e.: EquipmentFilter
         v_filter = e_viewset.filter_class
 
-        # Get the queryset for this viewset, i.e.: HardwareUnit.objects.all()
+        # Get the queryset for this viewset, i.e.: Equipment.objects.all()
         v_queryset = e_viewset.queryset
 
         # If we have queryset filters, apply those on the Model objects
