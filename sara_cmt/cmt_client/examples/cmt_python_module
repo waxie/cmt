@@ -4,7 +4,7 @@
 from cmt_client import cmt
 
 args = dict()
-args['config_file'] = '/data/virtualenvs/cmt2_beta/etc/cmt/cmt.conf' 
+#args['config_file'] = '/data/virtualenvs/cmt2_beta/etc/cmt/cmt.conf' 
 #args['command'] =  'read',
 #args['dryrun'] = False,
 args['entity'] = ['equipment']
