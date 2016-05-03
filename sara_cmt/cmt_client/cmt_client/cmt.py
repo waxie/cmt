@@ -417,21 +417,8 @@ class Client:
 
         self.temp_args = args
 
-        if self.interactive:
-
-            # first parse basic options
-            # need config file (settings) (if supplied) for creating API Connection..
-            self.temp_args = vars(parser.parse_known_args( args )[0] )
-            #print '>>> PARSED temp ARGS:', self.temp_args
-            self.read_config_file(self.temp_args['config_file'])
-
-        elif self.temp_args.has_key( 'config_file' ):
-
-            if type(self.temp_args[ 'config_file' ]) is not NoneType:
-
-                if os.path.exists( DEFAULT_CONFIG_FILE ):
-
-                    self.read_config_file( open(self.temp_args['config_file'], 'r') )
+        self.temp_args = vars(parser.parse_known_args( args )[0] )
+        self.read_config_file(self.temp_args['config_file'])
 
         if not api_connection:
 
