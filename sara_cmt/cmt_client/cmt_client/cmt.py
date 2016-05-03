@@ -413,7 +413,7 @@ class Client:
         output_group.add_argument('--quiet', '-s', action='store_true', help='suppress output messages')
         parser.add_argument('--version', action='version', version='%(prog)s ' +str(cmt_version) )
 
-        parser.add_argument('--config-file', '-c', type=lambda x: is_valid_file(parser,x), default='/etc/cmt/cmt.conf', help='Which config file to use')
+        parser.add_argument('--config-file', '-c', type=lambda x: is_valid_file(parser,x), default=DEFAULT_CONFIG_FILE, help='Which config file to use')
 
         self.temp_args = args
 
