@@ -55,7 +55,7 @@ class Cluster(ModelExtension):
         return unicode(self.name) or None
 
 
-class HardwareUnit(ModelExtension):
+class Equipment(ModelExtension):
     """
         A specific piece of hardware.
     """
@@ -89,7 +89,7 @@ class HardwareUnit(ModelExtension):
 
     class Meta:
         #verbose_name = "piece of hardware"
-        verbose_name_plural = "hardware"
+        verbose_name_plural = "equipment"
         #ordering = ('cluster__name', 'rack__label', 'first_slot')
         ordering = ('rack__label', 'first_slot')
         unique_together = (('rack', 'first_slot'), ('cluster', 'label'))
@@ -144,7 +144,7 @@ class HardwareUnit(ModelExtension):
         if not self.first_slot:
             self.first_slot = None
 
-        super(HardwareUnit, self).save(force_insert, force_update)
+        super(Equipment, self).save(force_insert, force_update)
 
     def default_label(self):
         try:
@@ -180,7 +180,7 @@ class Interface(ModelExtension):
     hostname_validator  = RegexValidator(re_valid_hostname,'Enter a valid hostname. Example: "myhostname-rack2node3". Valid characters: [a-z], [0-9] and "-"','invalid')
 
     network   = models.ForeignKey('Network', related_name='interfaces')
-    host      = models.ForeignKey('HardwareUnit', related_name='interfaces',
+    host      = models.ForeignKey('Equipment', related_name='interfaces',
                                   verbose_name='machine')
     iftype    = models.ForeignKey('InterfaceType', related_name='interfaces',
                                   verbose_name='type')
@@ -273,7 +273,7 @@ class Interface(ModelExtension):
 class Network(ModelExtension):
     """
         Class with information about a network. Networks are connected with
-        Interfaces (and HardwareUnits as equipment through Interface).
+        Interfaces (and Equipments as equipment through Interface).
     """
     re_valid_domain   = re.compile(r'^(^(?:[a-z0-9]{1}[a-z0-9\-]{1,61}[a-z0-9]{1}\.?)+(?:[a-z]{2,})$)')
     domain_validator  = RegexValidator(re_valid_domain,'Enter a valid domain. Example: admin1.my-domain.com. Valid characters: [a-z], [0-9], "." and "-"','invalid')
@@ -416,7 +416,7 @@ class Network(ModelExtension):
 
 class Rack(ModelExtension):
     """
-        A Rack is a standardized system for mounting various HardwareUnits in a
+        A Rack is a standardized system for mounting various Equipments in a
         stack of slots.
     """
 
@@ -596,10 +596,10 @@ class HardwareModel(ModelExtension):
 
 class Role(ModelExtension):
     """
-        This describes a possible role of a HardwareUnit in the cluster. A piece of
+        This describes a possible role of a Equipment in the cluster. A piece of
         hardware can have a role like 'switch', 'compute node', 'patchpanel', 'pdu',
         'admin node', 'login node', etc...
-        Those roles can be used for all kinds of rules on HardwareUnits which exist
+        Those roles can be used for all kinds of rules on Equipments which exist
         in the cluster.
     """
     label = models.CharField(max_length=255, unique=True)
