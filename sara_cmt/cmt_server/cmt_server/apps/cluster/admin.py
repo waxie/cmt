@@ -202,7 +202,7 @@ class WarrantyListFilter(GenericCMTListFilter):
 
     parameter_name = 'warranty'
 
-class HardwareUnitAdmin(CMTAdmin):
+class EquipmentAdmin(CMTAdmin):
     fieldsets = (
         ('Host info', {'fields': (('cluster', 'label'),)}),
         ('Configuration', {'fields': (('state', 'role'),)}),
@@ -365,7 +365,7 @@ class WarrantyTypeAdmin(CMTAdmin):
 
 
 admin.site.register(Cluster, ClusterAdmin)
-admin.site.register(HardwareUnit, HardwareUnitAdmin)
+admin.site.register(Equipment, EquipmentAdmin)
 admin.site.register(Interface, InterfaceAdmin)
 admin.site.register(Network, NetworkAdmin)
 admin.site.register(Rack, RackAdmin)
