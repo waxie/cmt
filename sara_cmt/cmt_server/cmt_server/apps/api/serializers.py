@@ -2,7 +2,6 @@
 
 from rest_framework import serializers
 
-from cmt_server.apps.cluster.models import HardwareUnit as Equipment
 from cmt_server.apps.cluster.models import *
 
 #####
@@ -108,6 +107,7 @@ class InterfaceSerializer(CMTSerializer):
     host = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='label')
     iftype = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='label')
     network = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='name')
+    fqdn = serializers.CharField(source='fqdn')
 
     class Meta:
         model = Interface
@@ -117,6 +117,8 @@ class InterfaceSerializer(CMTSerializer):
 class NetworkSerializer(CMTSerializer):
     #hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
     #interfaces = serializers.HyperlinkedRelatedField(many=True, view_name='interface-detail')
+    netaddress = serializers.CharField(source='netaddress')
+    netmask    = serializers.CharField(source='netmask')
 
     class Meta:
         model = Network
