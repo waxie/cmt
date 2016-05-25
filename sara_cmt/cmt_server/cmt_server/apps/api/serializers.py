@@ -37,7 +37,7 @@ class CMTSerializer(serializers.HyperlinkedModelSerializer):
                 print 'popping ' + field_name
 
 class ClusterSerializer(CMTSerializer):
-    hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail', required=False)
+    hardware = serializers.HyperlinkedRelatedField(many=True, view_name='equipment-detail', required=False)
     #equipments = django.db.models.ForeignKey(Equipment, related_name='cluster')
 
     class Meta:
@@ -69,7 +69,7 @@ class EquipmentSerializer(CMTSerializer):
 
 
 class RackSerializer(CMTSerializer):
-    #contents = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+    #contents = serializers.HyperlinkedRelatedField(many=True, view_name='equipment-detail')
     room = serializers.RelatedField( many=False )
 
     class Meta:
@@ -115,7 +115,7 @@ class InterfaceSerializer(CMTSerializer):
 
 
 class NetworkSerializer(CMTSerializer):
-    #hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+    #hardware = serializers.HyperlinkedRelatedField(many=True, view_name='equipment-detail')
     #interfaces = serializers.HyperlinkedRelatedField(many=True, view_name='interface-detail')
     netaddress = serializers.CharField(source='netaddress')
     netmask    = serializers.CharField(source='netmask')
@@ -148,7 +148,7 @@ class TelephonenumberSerializer(CMTSerializer):
 
 
 class HardwareModelSerializer(CMTSerializer):
-    #hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+    #hardware = serializers.HyperlinkedRelatedField(many=True, view_name='equipment-detail')
     vendor = serializers.RelatedField( many=False )
 
     class Meta:
@@ -174,7 +174,7 @@ class WarrantyTypeSerializer(CMTSerializer):
 
 
 class WarrantyContractSerializer(CMTSerializer):
-    #hardware = serializers.HyperlinkedRelatedField(many=True, view_name='hardwareunit-detail')
+    #hardware = serializers.HyperlinkedRelatedField(many=True, view_name='equipment-detail')
 
     warranty_type = serializers.RelatedField( many=False )
 
