@@ -107,7 +107,7 @@ class InterfaceSerializer(CMTSerializer):
     host = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='label')
     iftype = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='label')
     network = serializers.SlugRelatedField(required=True, many=False, read_only=False, slug_field='name')
-    fqdn = serializers.CharField(source='fqdn')
+    fqdn = serializers.CharField(source='fqdn', required=False, read_only=True)
 
     class Meta:
         model = Interface
