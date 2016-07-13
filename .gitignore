@@ -12,3 +12,7 @@ MANIFEST
 
 # local development file
 .DEVELOPMENT
+
+.idea
+
+cmt.sql
