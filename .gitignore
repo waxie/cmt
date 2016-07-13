@@ -12,3 +12,5 @@ MANIFEST
 
 # local development file
 .DEVELOPMENT
+
+.idea
