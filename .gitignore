@@ -1,0 +1,16 @@
+# RB: inspired by https://github.com/github/gitignore/blob/master/Python.gitignore
+
+# compiled python files
+*.py[cod]
+
+# package building
+dist/
+*.egg-info/
+
+# This is generated from MANIFEST.in
+MANIFEST
+
+# local development file
+.DEVELOPMENT
+
+.idea
