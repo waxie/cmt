@@ -363,6 +363,19 @@ def do_assign(parser,token):
 
     return resolveVariables( new_var, assignees )
 
+@register.assignment_tag
+def to_list(*args):
+    """
+        Convert string to list
+
+        Usage: 
+		{% to_list 1 2 3 4 5 "yes" as my_list %}
+		{% for i in my_list %}
+		    {{ i }}
+		{% endfor %}
+    """
+    return args
+
 class resolveVariables(template.Node):
 
     def __init__(self, varname, varlist ):
@@ -521,6 +534,7 @@ class ScriptNode(template.Node):
             context['epilogue'] = script_lines
         # All content between {% epilogue %} and {% endepilogue %} is parsed now
         return ''
+
 
 @register.tag(name='epilogue')
 def do_epilogue(parser, token):
