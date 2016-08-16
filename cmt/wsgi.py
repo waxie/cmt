@@ -30,42 +30,25 @@
 #
 
 import os
+import sys
 
-from exceptions import SystemExit
+BASE_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '../'))
+sys.path.append(BASE_DIR)
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings")
+if os.path.isfile(os.path.join(BASE_DIR, '.virtual_env_path')):
+    vpath = None
+    with open(os.path.join(BASE_DIR, '.virtual_env_path'), 'r') as fi: 
+        vpath = fi.read().strip()
 
-def application(environ, start_response):
-    ## Try to activate a virtualenv environment when the
-    ## VIRTUALENV environ var is set
-    virtualenv = environ.get('VIRTUALENV', False)
-
-    if virtualenv and os.path.exists(virtualenv):
-        activate_this = os.path.join(virtualenv, 'bin/activate_this.py')
-        if os.path.exists(activate_this):
+    if vpath:
+        activate_this = os.path.join(vpath, 'bin/activate_this.py')
+        if os.path.isfile(activate_this):
             execfile(activate_this, dict(__file__=activate_this))
 
-    err_msgs = None
 
-    try:
-        from django.core.wsgi import get_wsgi_application
-        from django.core.exceptions import ImproperlyConfigured
+from django.core.wsgi import get_wsgi_application
 
-        return get_wsgi_application()(environ, start_response)
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cmt.settings")
 
-    except SystemExit as details:
+application = get_wsgi_application()
 
-        err_msgs = str( details )
-
-    except ImportError as details:
-
-        err_msgs = str( details )
-
-    except ImproperlyConfigured as details:
-
-        err_msgs = str( details )
-
-    if err_msgs:
-
-        start_response('200 OK',[('Content-type','text/html')])
-        return ['<html><body><h1>Unable to load CMT/Django environment!</h1><p>' + err_msgs + '</p></body></html>']
