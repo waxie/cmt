@@ -144,6 +144,8 @@ INSTALLED_APPS = (
 
     # CMT apps
     'cluster',
+    'api',
+    'client',
 )
 
 # Which auth backends must we support
