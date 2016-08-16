@@ -10,7 +10,8 @@ BASE_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '../'))
 KNOWN_CONFIG_PATHS = [
     '/etc/cmt',
     '/usr/etc/cmt',
-    os.path.join(BASE_DIR, 'files')
+    os.path.realpath(os.path.join(BASE_DIR, '../', 'conf')),
+    os.path.join(BASE_DIR, 'files'),
 ]
 
 CONFIG_DIR = None
