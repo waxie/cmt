@@ -197,37 +197,37 @@ if LDAP_AUTHENTICATION:
 
     # AUTH_LDAP_CONNECTION_OPTIONS['ldap.OPT_TIMEOUT'] = '3000'
 
-    REST_FRAMEWORK = {
-        # Use hyperlinked styles by default.
-        # Only used if the `serializer_class` attribute is not set on a view.
-        'DEFAULT_MODEL_SERIALIZER_CLASS': (
-            'rest_framework.serializers.HyperlinkedModelSerializer',
-        ),
+REST_FRAMEWORK = {
+    # Use hyperlinked styles by default.
+    # Only used if the `serializer_class` attribute is not set on a view.
+    'DEFAULT_MODEL_SERIALIZER_CLASS': (
+        'rest_framework.serializers.HyperlinkedModelSerializer',
+    ),
 
-        'DEFAULT_AUTHENTICATION_CLASSES': (
-            'rest_framework.authentication.BasicAuthentication',
-            'rest_framework.authentication.SessionAuthentication',
-        ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
 
-        # Use Django's standard `django.contrib.auth` permissions,
-        # or allow read-only access for unauthenticated users.
-        'DEFAULT_PERMISSION_CLASSES': (
-            'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-        ),
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ),
 
-        'PAGE_SIZE': 100,
+    'PAGE_SIZE': 100,
 
-        'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
 
-        # Generic filtering backend that allows us to easily construct
-        # complex searches and filters.
-        'DEFAULT_FILTER_BACKENDS': (
-            'rest_framework.filters.DjangoFilterBackend',
-        ),
+    # Generic filtering backend that allows us to easily construct
+    # complex searches and filters.
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework.filters.DjangoFilterBackend',
+    ),
 
-        # Be compatible with the current API
-        'COMPACT_JSON': False
-    }
+    # Be compatible with the current API
+    'COMPACT_JSON': False
+}
 
 # Grappelli configuration
 GRAPPELLI_INDEX_DASHBOARD = 'cmt.dashboard.CustomIndexDashboard'
