@@ -22,8 +22,21 @@ import sys
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cmt.settings")
 
-
 if __name__ == "__main__":
+
+    BASE_DIR = os.path.realpath(os.path.dirname(__file__))
+
+    if os.path.isfile(os.path.join(BASE_DIR, '.virtual_env_path')):
+        print('Setting up virtualenv environment')
+        vpath = None
+        with open(os.path.join(BASE_DIR, '.virtual_env_path'), 'r') as fi:
+            vpath = fi.read().strip()
+
+        if vpath:
+            print('  using %s' % vpath)
+            activate_this = os.path.join(vpath, 'bin/activate_this.py')
+            if os.path.isfile(activate_this):
+                execfile(activate_this, dict(__file__=activate_this))
 
     from django.core.management import execute_from_command_line
 

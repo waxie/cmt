@@ -52,7 +52,7 @@ USE_I18N = False
 USE_L10N = True
 
 # Where are my static stuff
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.realpath(os.path.join(BASE_DIR, '../', 'htdocs/static')) 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'cmt', 'static'),
