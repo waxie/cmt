@@ -1,0 +1,2 @@
+Use this directory only for custom images, javascript and css. For third party applications we will import
+the static data via ./manage.py collectstatic
