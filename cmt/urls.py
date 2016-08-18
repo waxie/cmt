@@ -1,14 +1,19 @@
+# Django core
+from django.conf.urls import include
+from django.conf.urls import url
+from django.contrib import admin
+from django.views.generic.base import RedirectView
 
+
+## Django third party
 from rest_framework import urls as rest_urls
 
+## cmt
 from api import urls as api_urls
 from client import urls as client_urls
 
-from django.conf.urls import include
-from django.conf.urls import url
-
-from django.contrib import admin
 admin.autodiscover()
+
 
 
 urlpatterns = [
@@ -20,5 +25,6 @@ urlpatterns = [
     ## The Admin urls
     url(r'^grappelli/', include('grappelli.urls')),
     url(r'^admin/', include('smuggler.urls')),
-    url(r'^admin/', include(admin.site.urls))
+    url(r'^admin/', include(admin.site.urls)),
+    url(r'^$', RedirectView.as_view(url='/admin', permanent=True), name='go-to-admin'),
 ]
