@@ -1,3 +1,0 @@
-include AUTHORS CHANGES README LICENSE bin/cmt
-recursive-include etc/cmt *.conf*
-recursive-include etc/cmt/templates/examples *.cmt README
