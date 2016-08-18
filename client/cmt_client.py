@@ -7,8 +7,6 @@
 This is the api client tool for the cmt server
 '''
 
-from __future__ import print_function
-
 import argparse
 import cookielib
 import urllib2
@@ -27,10 +25,9 @@ import difflib
 import subprocess
 
 ## START CONFIG
-# This will be edited by the client application, so adding stuff here will be removed
-CMT_SERVER = 'http://127.0.0.1:8000/api'
+CMT_SERVER = 'https://dennis.cmt.surfsara.nl:443'
+CMT_INVENTORY = {'telephonenumber': {'url': 'api/v1/telephonenumber', 'fields': [u'id', 'tags', 'created_on', 'updated_on', 'note', 'country', 'connection', 'areacode', 'subscriber_number', 'number_type']}, 'network': {'url': 'api/v1/network', 'fields': [u'hardware', u'interfaces', u'id', 'tags', 'created_on', 'updated_on', 'note', 'name', 'cidr', 'gateway', 'domain', 'vlan', 'hostnames']}, 'equipment': {'url': 'api/v1/equipment', 'fields': [u'interfaces', u'id', 'tags', 'created_on', 'updated_on', 'note', 'cluster', 'specifications', 'warranty', 'rack', 'seller', 'owner', 'state', 'warranty_tag', 'serial_number', 'first_slot', 'label', 'role', 'network']}, 'country': {'url': 'api/v1/country', 'fields': [u'addresses', u'telephone_numbers', u'id', 'tags', 'created_on', 'updated_on', 'note', 'name', 'country_code']}, 'company': {'url': 'api/v1/company', 'fields': [u'companies', u'hardware', u'interfaces', u'id', 'tags', 'created_on', 'updated_on', 'note', 'name', 'website', 'addresses']}, 'cluster': {'url': 'api/v1/cluster', 'fields': [u'hardware', u'id', 'tags', 'created_on', 'updated_on', 'note', 'name', 'machinenames']}, 'connection': {'url': 'api/v1/connection', 'fields': [u'sold', u'owns', u'telephone_numbers', u'warranty', u'id', 'tags', 'created_on', 'updated_on', 'note', 'address', 'company', 'active', 'name', 'email']}, 'role': {'url': 'api/v1/role', 'fields': [u'hardware', u'id', 'tags', 'created_on', 'updated_on', 'note', 'label']}, 'template': {'url': 'api/v1/template', 'fields': []}, 'address': {'url': 'api/v1/address', 'fields': [u'rooms', u'_companies', u'connections', u'id', 'tags', 'created_on', 'updated_on', 'note', 'country', 'address', 'postalcode', 'city']}, 'interface': {'url': 'api/v1/interface', 'fields': [u'id', 'tags', 'created_on', 'updated_on', 'note', 'network', 'host', 'iftype', 'label', 'aliases', 'hwaddress', 'ip']}, 'interfacetype': {'url': 'api/v1/interfacetype', 'fields': [u'interfaces', u'id', 'tags', 'created_on', 'updated_on', 'note', 'vendor', 'label']}, 'hardwaremodel': {'url': 'api/v1/hardwaremodel', 'fields': [u'hardware', u'id', 'tags', 'created_on', 'updated_on', 'note', 'vendor', 'name', 'vendorcode', 'rackspace', 'expansions']}, 'warrantytype': {'url': 'api/v1/warrantytype', 'fields': [u'contracts', u'id', 'tags', 'created_on', 'updated_on', 'note', 'contact', 'label']}, 'rack': {'url': 'api/v1/rack', 'fields': [u'contents', u'id', 'tags', 'created_on', 'updated_on', 'note', 'room', 'label', 'capacity']}, 'warrantycontract': {'url': 'api/v1/warrantycontract', 'fields': [u'hardware', u'id', 'tags', 'created_on', 'updated_on', 'note', 'warranty_type', 'contract_number', 'annual_cost', 'label', 'date_from', 'date_to']}, 'room': {'url': 'api/v1/room', 'fields': [u'racks', u'id', 'tags', 'created_on', 'updated_on', 'note', 'address', 'floor', 'label']}}
 CMT_API_VERSION = 'v1'
-CMT_INVENTORY = {'equipment': ['fielda', 'fieldb'], 'interfaces': ['fielda', 'fieldb']}
 CMT_TEMPLATEDIR = '/etc/cmt/templates'
 ## END CONFIG
 
@@ -125,7 +122,7 @@ class Client(object):
             ('Accept', 'application/json')
         ]
 
-    def request(self, method, object, get_args=None, set_args=None):
+    def request(self, method, cmt_object, get_args=None, set_args=None):
 
         if method == 'read':
             http_method = 'GET'
@@ -138,9 +135,9 @@ class Client(object):
         elif method == 'parse':
             http_method = 'POST'
 
-        if object not in CMT_INVENTORY:
+        if cmt_object not in CMT_INVENTORY:
             raise ClientException('Given object %s is not a valid CMT object')
-        path = CMT_INVENTORY[object]['url']
+        path = CMT_INVENTORY[cmt_object]['url']
         url = urlparse.urljoin(self.uri, path)
 
         if get_args:
@@ -166,11 +163,10 @@ class Client(object):
                                 set_args.append(line)
                         set_args = urllib.urlencode(self.__create_query(set_args))
                     rr = self.__request(r['url'], http_method, args_get=None, args_post=set_args)
-                    print(rr)
             else:
-                raise ClientException('Unable to find objects (%s) to %s (args: %s)' % (object, method, str(get_args)))
+                raise ClientException('Unable to find objects (%s) to %s (args: %s)' % (cmt_object, method, str(get_args)))
         else:
-            if set_args and object != 'template':
+            if set_args and cmt_object != 'template':
                 set_args = urllib.urlencode(self.__create_query(set_args))
             elif set_args:
                 form = MultiPartForm()
@@ -258,8 +254,11 @@ class Client(object):
             if args_post and type(args_post) is MultiPartForm:
                 request = urllib2.Request(uri)
                 body = str(args_post)
-                request.add_header('Content-type', args_post.get_content_type())
-                request.add_header('Content-length', len(body))
+                request.add_header('Content-Length', len(body))
+                for line in body.splitlines():
+                    if line.startswith('Content-'):
+                        parts = [ x.strip() for x in line.split(':') ]
+                        request.add_header(parts[0], ';'.join(parts[1:]))
                 request.add_data(body)
             elif args_get:
                 request = urllib2.Request('%s?%s' % (uri, args_get))
@@ -277,15 +276,15 @@ class Client(object):
             return json.loads(result)
         except urllib2.HTTPError as error:
             data = error.read()
-            print(error.url)
-            print(data)
-            print(
+            p(error.url)
+            p(data)
+            p(
                 json.dumps(json.loads(data), sort_keys=True,indent=4, separators=(',', ': '))
             )
             raise ClientException('Http error occured %s - %s' % (error.code, error.reason))
         except ValueError as error:
-            print(error)
-            print(result)
+            p(error)
+            p(result)
             raise ClientException('return data is not valid json')
 
     def __disconnect(self):
@@ -302,9 +301,9 @@ def generate_index(string):
 
 def choose_file(action, choices):
 
-    print('Choose a file:')
+    p('Choose a file:')
     for choice in choices:
-        print('  %-2d: %s' % (choices.index(choice)+1, choice))
+        p('  %-2d: %s' % (choices.index(choice)+1, choice))
     chosen_number = input('Choose: ')
 
     if chosen_number > len(choices) or chosen_number < 1:
@@ -324,8 +323,8 @@ class FieldCheck(argparse.Action):
         else:
             action = None
 
-        if namespace.object not in CMT_INVENTORY:
-            raise argparse.ArgumentError(action, 'Something went wrong badly, unable to find model %s' % namespace.object)
+        if namespace.cmt_object not in CMT_INVENTORY:
+            raise argparse.ArgumentError(action, 'Something went wrong badly, unable to find model %s' % namespace.cmt_object)
 
         for value in values:
             pair = value.split('=')
@@ -334,9 +333,9 @@ class FieldCheck(argparse.Action):
                 raise argparse.ArgumentError(action, 'option must be specified as <select>=<value>. ie label=r2n1')
 
             field_name = pair[0].rstrip('!-+<>').split('__')[0]
-            if field_name not in CMT_INVENTORY[namespace.object]['fields']:
+            if field_name not in CMT_INVENTORY[namespace.cmt_object]['fields']:
                 raise argparse.ArgumentError(action, 'Invalid field choose from: %s' %(
-                    ', '.join(CMT_INVENTORY[namespace.object]['fields'])
+                    ', '.join(CMT_INVENTORY[namespace.cmt_object]['fields'])
                 ))
 
         setattr(namespace, self.dest, values)
@@ -368,43 +367,6 @@ class TemplatefileCheck(argparse.Action):
         setattr(namespace, self.dest, a_file)
 
 
-def args_parser():
-    parser = argparse.ArgumentParser(description=__doc__)
-    subparsers = parser.add_subparsers()
-
-    valid_objects = [x for x in CMT_INVENTORY.keys() if x != 'template']
-
-    read_parser = subparsers.add_parser('read', help='Fetch and object from CMT')
-    read_parser.add_argument('object', help='What type of data', choices=valid_objects)
-    read_parser.add_argument('--get', nargs='+', help='This is your query', action=FieldCheck, required=True)
-    read_parser.set_defaults(mode='read')
-
-    create_parser = subparsers.add_parser('create', help='Create an object in CMT')
-    create_parser.add_argument('object', help='What type of data', choices=valid_objects)
-    create_parser.add_argument('--set', nargs='+', help='Set the values', action=FieldCheck, required=True)
-    create_parser.set_defaults(mode='create')
-
-    update_parser = subparsers.add_parser('update', help='Update an object from CMT')
-    update_parser.add_argument('object', help='What type of data', choices=valid_objects)
-    update_parser.add_argument('--get', nargs='+', help='This is your query', action=FieldCheck, required=True)
-    update_parser.add_argument('--set', nargs='+', help='Set the values', action=FieldCheck, required=True)
-    update_parser.set_defaults(mode='update')
-
-    delete_parser = subparsers.add_parser('delete', help='Delete an object from CMT')
-    delete_parser.add_argument('object', help='What type of data', choices=valid_objects)
-    delete_parser.add_argument('--get', nargs='+', help='This is your query', action=FieldCheck, required=True)
-    delete_parser.set_defaults(mode='delete')
-
-    parse_parser = subparsers.add_parser('parse', help='Parse a template from CMT')
-    parse_parser.add_argument('filename', help='Specify the templatefile', nargs='?', action=TemplatefileCheck)
-    parse_parser.add_argument('-w', '--write', help='Do not ask to write, just write', action='store_true')
-    parse_parser.add_argument('-d', '--skip-diff', help='Do not ask to show the diff', action='store_true')
-    parse_parser.add_argument('-e', '--skip-epilogue', help='Skip epilogue', action='store_true')
-    parse_parser.set_defaults(mode='parse')
-
-    return parser.parse_args()
-
-
 def color_diff(diff):
     COLORS = dict(
         list(zip([
@@ -424,13 +386,93 @@ def color_diff(diff):
 
     for line in diff:
         if line.strip().startswith('+'):
-            print('\033[%dm' % COLORS['green'] + line.strip() + RESET)
+            p(color(line.strip(), 'green'))
         elif line.strip().startswith('-'):
-            print('\033[%dm' % COLORS['red'] + line.strip() + RESET)
+            p(color(line.strip(), 'red'))
         elif line.strip().startswith('^'):
-            print('\033[%dm' % COLORS['blue'] + line.strip() + RESET)
+            p(color(line.strip(), 'blue'))
         else:
-            print(line.strip())
+            p(line.strip())
+
+
+def color(s, color='grey'):
+    COLORS = dict(
+        list(zip([
+            'grey',
+            'red',
+            'green',
+            'yellow',
+            'blue',
+            'magenta',
+            'cyan',
+            'white',
+        ],
+            list(range(30, 38))
+        ))
+    )
+    RESET = '\033[0m'
+
+    if color not in COLORS:
+        raise ClientException('Chosen color %s does not exist, choose from %s' % (color, ','.join(COLORS.keys())))
+
+    return '\033[%dm' % COLORS[color] + s + RESET
+
+
+def p(*args, **kwargs):
+
+    try:
+        Print = eval('print')
+        Print(*args, **kwargs)
+    except SyntaxError:
+        try:
+            D = dict()
+            exec('from __future__ import print_function\np=print', D)
+            D['p'](*args, **kwargs)
+            del D
+        except SyntaxError:
+            raise ClientException('Please upgrade your Python version to 2.6 or higher')
+
+
+def args_parser():
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose mode')
+    parser.add_argument('-n', '--dry-run', action='store_true', help='Enable dry-run, also enables verbose mode')
+    parser.add_argument('--version', action='version', version='CMT Client API version: %s, host: %s' % (CMT_API_VERSION, CMT_SERVER))
+
+    subparsers = parser.add_subparsers()
+
+    valid_objects = [x for x in CMT_INVENTORY.keys() if x != 'template']
+
+    read_parser = subparsers.add_parser('read', help='Fetch and object from CMT')
+    read_parser.add_argument('cmt_object', help='What type of data', choices=valid_objects)
+    read_parser.add_argument('--get', nargs='+', help='This is your query', action=FieldCheck, required=True)
+    read_parser.set_defaults(mode='read')
+
+    create_parser = subparsers.add_parser('create', help='Create an object in CMT')
+    create_parser.add_argument('cmt_object', help='What type of data', choices=valid_objects)
+    create_parser.add_argument('--set', nargs='+', help='Set the values', action=FieldCheck, required=True)
+    create_parser.set_defaults(mode='create')
+
+    update_parser = subparsers.add_parser('update', help='Update an object from CMT')
+    update_parser.add_argument('cmt_object', help='What type of data', choices=valid_objects)
+    update_parser.add_argument('--get', nargs='+', help='This is your query', action=FieldCheck, required=True)
+    update_parser.add_argument('--set', nargs='+', help='Set the values', action=FieldCheck, required=True)
+    update_parser.set_defaults(mode='update')
+
+    delete_parser = subparsers.add_parser('delete', help='Delete an object from CMT')
+    delete_parser.add_argument('cmt_object', help='What type of data', choices=valid_objects)
+    delete_parser.add_argument('--get', nargs='+', help='This is your query', action=FieldCheck, required=True)
+    delete_parser.set_defaults(mode='delete')
+
+    parse_parser = subparsers.add_parser('parse', help='Parse a template from CMT')
+    parse_parser.add_argument('filename', help='Specify the templatefile, leave empty for menu', nargs='?', action=TemplatefileCheck)
+    parse_parser.add_argument('-w', '--write', help='Do not ask to write, just write', action='store_true')
+    parse_parser.add_argument('-d', '--skip-diff', help='Do not ask to show the diff', action='store_true')
+    parse_parser.add_argument('-e', '--skip-epilogue', help='Skip epilogue', action='store_true')
+    parse_parser.set_defaults(mode='parse')
+
+    return parser.parse_args()
 
 
 if __name__ == '__main__':
@@ -441,11 +483,11 @@ if __name__ == '__main__':
         result = None
 
         if args.mode in ['read', 'delete']:
-            result = client.request(args.mode, args.object, args.get, None)
+            result = client.request(args.mode, args.cmt_object, args.get, None)
         elif args.mode in ['update']:
-            result = client.request(args.mode, args.object, args.get, args.set)
+            result = client.request(args.mode, args.cmt_object, args.get, args.set)
         elif args.mode in ['create']:
-            result = client.request(args.mode, args.object, None, args.set)
+            result = client.request(args.mode, args.cmt_object, None, args.set)
         elif args.mode in ['parse']:
             t_args = {
                 'files': {
@@ -455,13 +497,17 @@ if __name__ == '__main__':
             result = client.request(args.mode, 'template', None, t_args)
 
         if result and args.mode != 'parse':
-            print(
+            p('[%s] Result:' % args.mode.upper())
+            p(
                 json.dumps(result, sort_keys=True, indent=4, separators=(',', ': '))
             )
         elif result:
-            data = json.loads(result)
+            if 'error' in result:
+                raise ClientException(result['error'])
 
-            for store_file in data:
+            data = json.loads(result)
+            write_files = list()
+            for store_file, contents in data['files'].items():
                 path = os.path.dirname(store_file)
 
                 if not os.path.isdir(path):
@@ -478,46 +524,57 @@ if __name__ == '__main__':
                         current_file_contents = fi.readlines()
 
                     d = difflib.unified_diff(
-                        current_file_contents, data[store_file]['contents'].splitlines(1),
+                        current_file_contents, contents.splitlines(1),
                         fromfile=store_file, tofile=store_file, lineterm='')
                     diff = list(d)
 
                     if len(diff) > 0:
+                        write_files.append(store_file)
                         if not args.skip_diff:
-                            try:
-                                yes_or_no = raw_input('[DIFF] File %s has changed, do you want to view the diff (y/N): ' % store_file)
-
-                                if yes_or_no in ['y', 'Y']:
-                                    color_diff(diff)
-                            except EOFError as err:
-                                pass
-
-                        if not args.write:
-                            yes_or_no = raw_input('[WRITE] Do you want to save the changes (y/N: ')
+                            p('[DIFF] File %s has changed, do you want to view the diff (y/N): ' % store_file, end='')
+                            yes_or_no = raw_input()
                             if yes_or_no in ['y', 'Y']:
-                                args.write = True
+                                color_diff(diff)
+                else:
+                    write_files.append(store_file)
+                    
 
-                        if args.write:
-                            with open(store_file, 'w') as fo:
-                                fo.write(data[store_file]['contents'])
-                        else:
-                            print('Skipped writing changes to disk')
+            if not args.write and write_files:
+                p('[WRITE] Do you want to save the changes (y/N: ', end='')
+                yes_or_no = raw_input()
+                if yes_or_no in ['y', 'Y']:
+                    args.write = True
 
-                        if args.write and not args.skip_epilogue:
-                            for epilogue in data[store_file]['epilogue']:
-                                print('Running command: %s' % epilogue.strip())
-                                p = subprocess.Popen(epilogue.strip(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-
-                                stdout, stderr = p.communicate()
-
-                                if stdout:
-                                    print(stdout)
-                                if p.returncode != 0:
-                                    print('An error has occured, exit code %d' % p.returncode)
-                                    if stderr:
-                                        print(stderr, file=sys.stderr)
-
+            if args.write and write_files:
+                for wfile in write_files:
+                    with open(wfile, 'w') as fo:
+                        fo.write(data['files'][wfile])
+            elif not args.write and write_files:
+                p('[WRITE] Skipped writing changes to disk')
+   
+            if args.write and not args.skip_epilogue and write_files:
+                for epilogue in data['epilogue']:
+                    p('[EPILOGUE] Running command: %s' % epilogue.strip())
+                    p = subprocess.Popen(epilogue.strip(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+           
+                    stdout, stderr = p.communicate()
+           
+                    if stdout:
+                        p(stdout)
+                   
+                    if p.returncode != 0:
+                        p('  An error has occured, exit code %d' % p.returncode)
+                 
+                    if stderr:
+                        p(stderr, file=sys.stderr)
+            elif not write_files:
+                p('[EPILOGUE] Files are not changed, not running epilogue')
+            elif write_files and not args.write:
+                p('[EPILOGUE] Changed files are not written to disk, not running epilogue')
+                
     except ClientException as error:
-        print('An error has occured: %s' % str(error), file=sys.stderr)
+        p('[ERROR] An error has occured: %s' % str(error), file=sys.stderr)
     except ClientAuthException as error:
-        print('Unable to authenticate: %s' % str(error), file=sys.stderr)
+        p('[ERROR] Unable to authenticate: %s' % str(error), file=sys.stderr)
+    except KeyboardInterrupt as error:
+        p('\n\nCaught Ctrl+C, exit %s' % sys.argv[0])

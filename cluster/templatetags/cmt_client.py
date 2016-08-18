@@ -469,13 +469,17 @@ class generateStoreOutput(template.Node):
         output = self.nodelist.render(context)
 
         # RB: store output in context dict for later writing to file
-        context['__template_outputfiles__'][ mypath_str ] = { }
-        context['__template_outputfiles__'][ mypath_str ][ 'contents' ] = output
+        if 'files' not in context['__template_outputfiles__']:
+            context['__template_outputfiles__']['files'] = dict()
+        context['__template_outputfiles__']['files'][mypath_str] = output
 
-        if context.has_key( 'epilogue' ):
-            context['__template_outputfiles__'][ mypath_str ][ 'epilogue' ] = context['epilogue']
-        else:
-            context['__template_outputfiles__'][ mypath_str ][ 'epilogue' ] = ''
+        if 'epilogue' not in context['__template_outputfiles__']:
+            context['__template_outputfiles__']['epilogue'] = list()
+
+        if context.has_key('epilogue') and context['epilogue']:
+            for command in context['epilogue']:
+                if command not in context['__template_outputfiles__']['epilogue']:
+                    context['__template_outputfiles__']['epilogue'].append(command)
 
         # RB: output generated into context dict, so we return nothing
         return ''

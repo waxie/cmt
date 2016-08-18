@@ -6,16 +6,13 @@ import urlparse
 from django.http.response import HttpResponse
 from django.apps import apps
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 
+from cmt.decorators import http_basic_auth
 
-def get_inventory():
-    pass
-
-
+@http_basic_auth
+@login_required
 def download_client(request):
-
-    get_inventory()
-
     file_path = os.path.join(
         os.path.realpath(os.path.dirname(__file__)),
         'cmt_client.py'
@@ -59,7 +56,7 @@ def download_client(request):
                 new_file.write('CMT_SERVER = \'%s\'\n' % urlparse.urlunparse(CMT_URL_PARTS))
                 new_file.write('CMT_INVENTORY = %s\n' % str(CMT_INVENTORY))
                 new_file.write('CMT_API_VERSION = \'%s\'\n' % str(settings.CLIENT_API_VERSION))
-                new_file.write('CMT_TEMPLATEDIR = \'/home/dennis/Desktop/templates\'\n')
+                new_file.write('CMT_TEMPLATEDIR = \'/etc/cmt/templates\'\n')
             elif line.strip() == '## END CONFIG':
                 IN_CONFIG_MODE = False
 

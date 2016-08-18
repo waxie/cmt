@@ -238,7 +238,7 @@ class TemplateView(APIView):
             try:
                 rendered_string = render_to_string(file_obj.temporary_file_path(), context_instance=context)
             except TemplateSyntaxError as error:
-                return HttpResponse(json.dumps(str(error)), content_type='application/json')
+                return HttpResponse(json.dumps({'error': str(error)}), content_type='application/json')
         except IOError as error:
             return Response(status=500)
 
