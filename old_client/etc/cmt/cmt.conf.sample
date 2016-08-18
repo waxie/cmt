@@ -1,6 +1,0 @@
-[server]
-api_version      : 1
-url              : https://dev.cmt.surfsara.nl
-
-[ssl]
-root_cas_file    : /etc/ssl/certs/ca-certificates.crt
