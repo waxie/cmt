@@ -122,6 +122,12 @@ class Client(object):
             ('Accept', 'application/json')
         ]
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.__disconnect()
+
     def request(self, method, cmt_object, get_args=None, set_args=None):
 
         if method == 'read':
@@ -142,6 +148,8 @@ class Client(object):
 
         if get_args:
             get_args = urllib.urlencode(self.__create_query(get_args))
+        if set_args:
+            set_args = self.__create_query(set_args)
 
         # This does not work yet, need to update the backend for this
         if http_method in ['DELETE', 'PUT']:
@@ -153,18 +161,21 @@ class Client(object):
             }
             t_result = self.__request(url, 'GET', args_get=get_args, args_post=None)
             if t_result and 'count' in t_result and t_result['count'] > 0:
-                for r in t_result['results']:
+
+                for tr in t_result['results']:
                     if http_method == 'PUT':
-                        for key, value in r.items():
-                            if key == 'url':
-                                continue
-                            line = '%s=%s' % (key, value)
-                            if line not in set_args:
-                                set_args.append(line)
-                        set_args = urllib.urlencode(self.__create_query(set_args))
-                    rr = self.__request(r['url'], http_method, args_get=None, args_post=set_args)
-            else:
-                raise ClientException('Unable to find objects (%s) to %s (args: %s)' % (cmt_object, method, str(get_args)))
+                        get_args = None
+                        set_args = urllib.urlencode(set_args)
+                    else:
+                        get_args = None
+                        set_args = None
+
+                    tr_result = self.__request(tr['url'], http_method, args_get=get_args, args_post=set_args)
+
+                    if method == 'DELETE':
+                        tr_result.update(tr)
+                    result['results'].append(tr)
+                    result['count'] += 1
         else:
             if set_args and cmt_object != 'template':
                 set_args = urllib.urlencode(self.__create_query(set_args))
@@ -178,7 +189,6 @@ class Client(object):
                 set_args = form
 
             result = self.__request(url, http_method, args_get=get_args, args_post=set_args)
-
         return result
 
     def __query(self, s):
@@ -203,10 +213,10 @@ class Client(object):
             r_args[pair[0]] = pair[1]
         return r_args
 
-    def __auth_header(self):
-        #if self.auth_tries > self.max_auth_tries:
-        #    raise ClientAuthException('To many authentication failures')
-        #self.auth_tries += 1
+    def __auth_header(self, error, uri, method, args_get, args_post):
+        if self.auth_tries > self.max_auth_tries:
+            raise ClientAuthException('To many authentication failures')
+        self.auth_tries += 1
 
         if self.as_module and not self.username and not self.password:
             raise ClientAuthException('When using as module, please initiate class with username and password')
@@ -219,36 +229,29 @@ class Client(object):
         while not self.password:
             self.password = getpass.getpass('Password: ')
 
-        base64string = base64.encodestring('%s:%s' % (self.username, self.password)).strip()
-        self.opener.addheaders += [
-            ('WWW-Authenticate', 'Basic %s' % base64string)
-        ]
-        #self.__request(uri, method=method, args_get=args_get, args_post=args_post)
+        realm_header = error.headers.get('WWW-Authenticate', None)
 
-        #realm_header = error.headers.get('WWW-Authenticate', None)
+        if realm_header:
+            realm_found = self.realm_matcher.findall(realm_header)
+            if len(realm_found) > 1:
+                raise ClientAuthException('Unable to determine realm name')
+            elif realm_found and len(realm_found) < 1:
+                realm_found = None
+            else:
+                realm_found = realm_found[0]
+        else:
+            realm_found = False
 
-        #if realm_header:
-        #    realm_found = self.realm_matcher.findall()
-        #    if len(realm_found) > 1:
-        #        raise ClientAuthException('Unable to determine realm name')
-        #    elif realm_found and len(realm_found) < 1:
-        #        realm_found = None
-        #    else:
-        #        realm_found = realm_found[0]
-        #else:
-        #    realm_found = False
-
-        #auth_handler = urllib2.HTTPBasicAuthHandler()
-        #auth_handler.add_password(realm_found, self.uri, self.username, self.password)
-        #self.opener.add_handler(auth_handler)
-        #self.__request(uri, method=method, args_get=args_get, args_post=args_post)
+        auth_handler = urllib2.HTTPBasicAuthHandler()
+        auth_handler.add_password(realm_found, uri, self.username, self.password)
+        self.opener.add_handler(auth_handler)
+        return self.__request(uri, method=method, args_get=args_get, args_post=args_post)
 
     def __request(self, uri, method='GET', args_get=None, args_post=None):
-        # Something wrong with the backend, does not allow for authentication
-        #self.__auth_header()
 
         if method.upper() not in self.methods:
             raise ClientException('Given method is invalid choose from: %s' % ', '.join(method.upper()))
+        json_data = dict()
 
         try:
             if args_post and type(args_post) is MultiPartForm:
@@ -271,21 +274,26 @@ class Client(object):
 
             request.get_method = lambda: method
             data = self.opener.open(request)
-            result = data.read()
 
-            return json.loads(result)
+            if method in ['DELETE']:
+                json_data = dict()
+            else:
+                json_data = json.loads(data.read())
+            json_data['response'] = '%d - %s' % (data.getcode(), data.msg)
         except urllib2.HTTPError as error:
-            data = error.read()
-            p(error.url)
-            p(data)
-            p(
-                json.dumps(json.loads(data), sort_keys=True,indent=4, separators=(',', ': '))
-            )
-            raise ClientException('Http error occured %s - %s' % (error.code, error.reason))
+            ## Retry with authentication header
+            if error.code in [401]:
+                return self.__auth_header(error, uri, method, args_get, args_post)
+            ## Just quit and show the error
+            else:
+                data = error.read()
+                json_data = json.loads(data)
+                json_data['response'] = '%d - %s' % (error.code, error.msg)
+        ## When the server is bad
         except ValueError as error:
-            p(error)
-            p(result)
             raise ClientException('return data is not valid json')
+
+        return json_data
 
     def __disconnect(self):
         self.opener.close()
