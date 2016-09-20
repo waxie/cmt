@@ -16,6 +16,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import re
+import logging
 from datetime import date
 
 from django.db import models
@@ -26,10 +27,9 @@ from psycopg2 import IntegrityError
 
 from IPy import IP
 
-from cmt.logger import Logger
-logger = Logger().getLogger()
-
 from cmt.extensions import ModelExtension
+
+logger = logging.getLogger('cmt.cluster.models')
 
 
 class Cluster(ModelExtension):
