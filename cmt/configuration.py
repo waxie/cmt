@@ -5,7 +5,8 @@ ConfigParser.DEFAULTSECT = 'general'
 
 REQUIRED_OPTIONS = {
     'database': ['engine', 'name', 'user', 'password', 'host'],
-    'web': ['allowed_hosts', 'admins', 'debug', 'ldap_auth']
+    'web': ['allowed_hosts', 'admins', 'debug'],
+    'ldap': ['enabled', 'uri', 'bind_dn', 'bind_password', 'user_dn', 'group_dn', 'superuser_groups', 'staff_groups']
 }
 
 class Configuration(ConfigParser.SafeConfigParser):
@@ -56,3 +57,11 @@ class Configuration(ConfigParser.SafeConfigParser):
             list.append([pair[0], pair[1]])
 
         return tuple(admins)
+
+    def get_ldap_groups(self, types):
+
+        allowed_groups = list()
+        for t in types:
+            allowed_groups += [ 'cn=%s,%s' % (x.strip(), self.get('ldap', 'group_dn')) for x in self.get('ldap', t).split(',') ]
+
+        return allowed_groups

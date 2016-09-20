@@ -29,7 +29,7 @@ if not CONFIG_DIR or not CONFIG_FILE:
 config = Configuration(CONFIG_FILE)
 
 DEBUG = config.getboolean('web', 'debug')
-LDAP_AUTHENTICATION = config.getboolean('web', 'ldap_auth')
+LDAP_AUTHENTICATION = config.getboolean('ldap', 'enabled')
 SECRET_KEY = 'u#396z3t0s(@a2jvgs@%pbu$ytvhzzic70!*=x4cb9g-ae8_k_'
 
 DATABASES = {
@@ -102,25 +102,40 @@ MIDDLEWARE_CLASSES = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-        '()': 'django.utils.log.RequireDebugFalse'
-        }
+    'formatters': {
+        'verbose': {
+            'format' : '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s',
+            'datefmt' : '%d/%b/%Y %H:%M:%S'
+        },
+        'simple' : {
+            'format': '%(levelname)s %(message)s',
+        },
     },
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/data/sites/dennis.cmt.surfsara.nl/logs/django.log',
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
+        'django': {
+            'handlers': ['file'],
+            'level': 'WARN',
+            'propagate': True
+        },
+        'django_auth_ldap': {
+            'handlers': ['file'],
+            'level': 'WARN',
+            'propagate': True
+        },
+        'cmt': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
             'propagate': True,
         },
-    }
+    },
 }
 
 INSTALLED_APPS = (
@@ -150,54 +165,36 @@ INSTALLED_APPS = (
 
 # Which auth backends must we support
 AUTHENTICATION_BACKENDS = (
+    'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 
 # django-auth-ldap
 if LDAP_AUTHENTICATION:
-    AUTHENTICATION_BACKENDS = ('django_auth_ldap.backend.LDAPBackend',) + AUTHENTICATION_BACKENDS
+    #AUTHENTICATION_BACKENDS = ('django_auth_ldap.backend.LDAPBackend',) + AUTHENTICATION_BACKENDS
 
     import ldap
     from django_auth_ldap.config import LDAPSearch, PosixGroupType
 
-    # Baseline configuration.
-    AUTH_LDAP_SERVER_URI = "ldaps://ldap.cua.sara.nl"
-
-    # Set AUTH_LDAP_USER_DN_TEMPLATE to a template that will produce the
-    # authenticating user's DN directly. This template should have one
-    # placeholder, %(user)s.
-    AUTH_LDAP_USER_DN_TEMPLATE = 'uid=%(user)s,ou=Users,dc=hpcv,dc=sara,dc=nl'
-
-    # Set up the basic group parameters.
-    AUTH_LDAP_GROUP_SEARCH = LDAPSearch('ou=Groups,dc=hpcv,dc=sara,dc=nl',
-        ldap.SCOPE_SUBTREE, '(objectClass=posixGroup)',
-    )
     AUTH_LDAP_GROUP_TYPE = PosixGroupType()
 
-    # Only users in this group can log in.
-    AUTH_LDAP_REQUIRE_GROUP = 'cn=cmt,ou=Groups,dc=hpcv,dc=sara,dc=nl'
+    # Baseline configuration.
+    AUTH_LDAP_SERVER_URI = config.get('ldap', 'uri') 
+    
+    AUTH_LDAP_BIND_DN = config.get('ldap', 'bind_dn')
+    AUTH_LDAP_BIND_PASSWORD = config.get('ldap', 'bind_password')
 
-    # Populate the Django user from the LDAP directory.
-    AUTH_LDAP_USER_ATTR_MAP = {
-        'first_name': 'givenName',
-        'last_name': 'sn',
-        'email': 'mail',
-    }
+    AUTH_LDAP_USER_SEARCH = LDAPSearch(config.get('ldap', 'user_dn'), ldap.SCOPE_SUBTREE, '(uid=%(user)s)')
+    AUTH_LDAP_GROUP_SEARCH = LDAPSearch(config.get('ldap', 'group_dn'), ldap.SCOPE_SUBTREE, '(objectClass=posixGroup)')
 
     AUTH_LDAP_USER_FLAGS_BY_GROUP = {
-        'is_active': 'cn=cmt,ou=Groups,dc=hpcv,dc=sara,dc=nl',
-        'is_staff': 'cn=cmt,ou=Groups,dc=hpcv,dc=sara,dc=nl',
-        'is_superuser': 'cn=cmt,ou=Groups,dc=hpcv,dc=sara,dc=nl',
+        'is_active': config.get_ldap_groups(['staff_groups', 'superuser_groups']),
+        'is_staff': config.get_ldap_groups(['staff_groups']),
+        'is_superuser': config.get_ldap_groups(['superuser_groups']),
     }
 
-    # This is the default, but I like to be explicit.
-    AUTH_LDAP_ALWAYS_UPDATE_USER = True
-
-    # Cache group memberships for an hour to minimize LDAP traffic
     AUTH_LDAP_CACHE_GROUPS = True
-    AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
-
-    # AUTH_LDAP_CONNECTION_OPTIONS['ldap.OPT_TIMEOUT'] = '3000'
+    AUTH_LDAP_GROUP_CACHE_TIMEOUT = 300
 
 REST_FRAMEWORK = {
     # Use hyperlinked styles by default.
@@ -208,7 +205,6 @@ REST_FRAMEWORK = {
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
     ),
 
     # Use Django's standard `django.contrib.auth` permissions,
@@ -243,11 +239,3 @@ CLIENT_SKIP_MODELS = [
     'company_addresses'
 ]
 CLIENT_API_VERSION = 'v1'
-
-import logging
-logger = logging.getLogger('django')   # Django's catch-all logger
-hdlr = logging.StreamHandler()   # Logs to stderr by default
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-hdlr.setFormatter(formatter)
-logger.addHandler(hdlr)
-logger.setLevel(logging.WARNING)
