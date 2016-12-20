@@ -281,7 +281,7 @@ class Network(ModelExtension):
         Class with information about a network. Networks are connected with
         Interfaces (and Equipments as equipment through Interface).
     """
-    re_valid_domain = re.compile(r'^(^(?:[a-z0-9]{1}[a-z0-9\-]{1,61}[a-z0-9]{1}\.?)+(?:[a-z]{2,})$)')
+    re_valid_domain = re.compile(r'^((([a-zA-Z]{1,2})|([0-9]{1,2})|([a-zA-Z0-9]{1,2})|([a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]))\.)+[a-zA-Z]{2,6}$')
     domain_validator = RegexValidator(re_valid_domain,'Enter a valid domain. Example: admin1.my-domain.com. Valid characters: [a-z], [0-9], "." and "-"','invalid')
     re_valid_hosts = re.compile(r'^([0-9a-z]{1,2})$|^([a-z0-9\{]{1})([a-z0-9\-\{\}]{1,61})([a-z0-9\}]{1})$')
     hosts_validator = RegexValidator(re_valid_hosts,'Enter a valid hostnames stringformat. Example: ib-{machine}. Valid characters: [a-z], [0-9], "{", "}" and "-"','invalid')

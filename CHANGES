@@ -1,3 +1,7 @@
+v2.1.X
+ * Fixed domain validator could not accept vu.nl and may others
+   Reported by: Juan Luis Font, SURFsara
+
 v1.1.0
 ======
 Added:
