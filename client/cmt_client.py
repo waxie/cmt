@@ -25,10 +25,10 @@ import difflib
 import subprocess
 
 ## START CONFIG
-CMT_SERVER = 'https://dennis.cmt.surfsara.nl:443'
-CMT_INVENTORY = {'telephonenumber': {'url': 'api/v1/telephonenumber', 'fields': [u'id', 'tags', 'created_on', 'updated_on', 'note', 'country', 'connection', 'areacode', 'subscriber_number', 'number_type']}, 'network': {'url': 'api/v1/network', 'fields': [u'hardware', u'interfaces', u'id', 'tags', 'created_on', 'updated_on', 'note', 'name', 'cidr', 'gateway', 'domain', 'vlan', 'hostnames']}, 'equipment': {'url': 'api/v1/equipment', 'fields': [u'interfaces', u'id', 'tags', 'created_on', 'updated_on', 'note', 'cluster', 'specifications', 'warranty', 'rack', 'seller', 'owner', 'state', 'warranty_tag', 'serial_number', 'first_slot', 'label', 'role', 'network']}, 'country': {'url': 'api/v1/country', 'fields': [u'addresses', u'telephone_numbers', u'id', 'tags', 'created_on', 'updated_on', 'note', 'name', 'country_code']}, 'company': {'url': 'api/v1/company', 'fields': [u'companies', u'hardware', u'interfaces', u'id', 'tags', 'created_on', 'updated_on', 'note', 'name', 'website', 'addresses']}, 'cluster': {'url': 'api/v1/cluster', 'fields': [u'hardware', u'id', 'tags', 'created_on', 'updated_on', 'note', 'name', 'machinenames']}, 'connection': {'url': 'api/v1/connection', 'fields': [u'sold', u'owns', u'telephone_numbers', u'warranty', u'id', 'tags', 'created_on', 'updated_on', 'note', 'address', 'company', 'active', 'name', 'email']}, 'role': {'url': 'api/v1/role', 'fields': [u'hardware', u'id', 'tags', 'created_on', 'updated_on', 'note', 'label']}, 'template': {'url': 'api/v1/template', 'fields': []}, 'address': {'url': 'api/v1/address', 'fields': [u'rooms', u'_companies', u'connections', u'id', 'tags', 'created_on', 'updated_on', 'note', 'country', 'address', 'postalcode', 'city']}, 'interface': {'url': 'api/v1/interface', 'fields': [u'id', 'tags', 'created_on', 'updated_on', 'note', 'network', 'host', 'iftype', 'label', 'aliases', 'hwaddress', 'ip']}, 'interfacetype': {'url': 'api/v1/interfacetype', 'fields': [u'interfaces', u'id', 'tags', 'created_on', 'updated_on', 'note', 'vendor', 'label']}, 'hardwaremodel': {'url': 'api/v1/hardwaremodel', 'fields': [u'hardware', u'id', 'tags', 'created_on', 'updated_on', 'note', 'vendor', 'name', 'vendorcode', 'rackspace', 'expansions']}, 'warrantytype': {'url': 'api/v1/warrantytype', 'fields': [u'contracts', u'id', 'tags', 'created_on', 'updated_on', 'note', 'contact', 'label']}, 'rack': {'url': 'api/v1/rack', 'fields': [u'contents', u'id', 'tags', 'created_on', 'updated_on', 'note', 'room', 'label', 'capacity']}, 'warrantycontract': {'url': 'api/v1/warrantycontract', 'fields': [u'hardware', u'id', 'tags', 'created_on', 'updated_on', 'note', 'warranty_type', 'contract_number', 'annual_cost', 'label', 'date_from', 'date_to']}, 'room': {'url': 'api/v1/room', 'fields': [u'racks', u'id', 'tags', 'created_on', 'updated_on', 'note', 'address', 'floor', 'label']}}
-CMT_API_VERSION = 'v1'
-CMT_TEMPLATEDIR = '/etc/cmt/templates'
+CMT_SERVER = ''
+CMT_INVENTORY = {}
+CMT_API_VERSION = ''
+CMT_TEMPLATEDIR = ''
 ## END CONFIG
 
 
@@ -148,11 +148,11 @@ class Client(object):
 
         if get_args:
             get_args = urllib.urlencode(self.__create_query(get_args))
-        if set_args:
-            set_args = self.__create_query(set_args)
 
         # This does not work yet, need to update the backend for this
         if http_method in ['DELETE', 'PUT']:
+            if set_args:
+                set_args = self.__create_query(set_args)
             result = {
                 'count': 0,
                 'next': None,
@@ -279,7 +279,9 @@ class Client(object):
                 json_data = dict()
             else:
                 json_data = json.loads(data.read())
-            json_data['response'] = '%d - %s' % (data.getcode(), data.msg)
+
+            if type(json_data) == type(dict()):
+                json_data['response'] = '%d - %s' % (data.getcode(), data.msg)
         except urllib2.HTTPError as error:
             ## Retry with authentication header
             if error.code in [401]:

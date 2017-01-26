@@ -44,6 +44,7 @@ TIME_ZONE = 'Europe/Amsterdam'
 LANGUAGE_CODE = 'en-us'
 SITE_ID = 1
 ROOT_URLCONF = 'cmt.urls'
+LOGIN_URL = '/admin/login'
 
 # Do not load multi-language support
 USE_I18N = False
