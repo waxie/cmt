@@ -239,4 +239,4 @@ CLIENT_SKIP_MODELS = [
     'equipment_role',
     'company_addresses'
 ]
-CLIENT_API_VERSION = 'v1'
+CLIENT_API_VERSION = 'v2'
