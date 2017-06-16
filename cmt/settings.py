@@ -116,7 +116,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': '/data/sites/dennis.cmt.surfsara.nl/logs/django.log',
+            'filename': config.get('logging', 'filename'),
             'formatter': 'verbose',
         },
     },
@@ -143,6 +143,7 @@ INSTALLED_APPS = (
     # Public apps/projects
     'rest_framework',
     'django_extensions',
+    'django_filters',
     'smuggler',
     'tagging',
     'grappelli.dashboard',
@@ -166,13 +167,12 @@ INSTALLED_APPS = (
 
 # Which auth backends must we support
 AUTHENTICATION_BACKENDS = (
-    'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 
 # django-auth-ldap
 if LDAP_AUTHENTICATION:
-    #AUTHENTICATION_BACKENDS = ('django_auth_ldap.backend.LDAPBackend',) + AUTHENTICATION_BACKENDS
+    AUTHENTICATION_BACKENDS = ('django_auth_ldap.backend.LDAPBackend',) + AUTHENTICATION_BACKENDS
 
     import ldap
     from django_auth_ldap.config import LDAPSearch, PosixGroupType
@@ -233,8 +233,9 @@ GRAPPELLI_INDEX_DASHBOARD = 'cmt.dashboard.CustomIndexDashboard'
 GRAPPELLI_ADMIN_TITLE = 'Config Management Tool'
 
 # Smuggler
-SMUGGLER_EXCLUDE_LIST = [ 'Group', 'User' ]
+SMUGGLER_EXCLUDE_LIST = ['Group', 'User']
 
+# CMT Client options
 CLIENT_SKIP_MODELS = [
     'equipment_role',
     'company_addresses'

@@ -148,11 +148,11 @@ class Client(object):
 
         if get_args:
             get_args = urllib.urlencode(self.__create_query(get_args))
+        if set_args:
+            set_args = self.__create_query(set_args)
 
         # This does not work yet, need to update the backend for this
         if http_method in ['DELETE', 'PUT']:
-            if set_args:
-                set_args = self.__create_query(set_args)
             result = {
                 'count': 0,
                 'next': None,
@@ -160,11 +160,21 @@ class Client(object):
                 'results': list()
             }
             t_result = self.__request(url, 'GET', args_get=get_args, args_post=None)
+
             if t_result and 'count' in t_result and t_result['count'] > 0:
 
                 for tr in t_result['results']:
                     if http_method == 'PUT':
                         get_args = None
+
+                        for key, value in tr.items():
+                            if key in ['url', 'created_on', 'updated_on']:
+                                continue
+                            if not value:
+                                continue
+
+                            if key not in set_args:
+                                set_args[key] = value
                         set_args = urllib.urlencode(set_args)
                     else:
                         get_args = None
@@ -172,13 +182,15 @@ class Client(object):
 
                     tr_result = self.__request(tr['url'], http_method, args_get=get_args, args_post=set_args)
 
-                    if method == 'DELETE':
+                    if method.lower() == 'delete':
                         tr_result.update(tr)
-                    result['results'].append(tr)
+                        result['results'].append(tr)
+                    else:
+                        result['results'].append(tr_result)
                     result['count'] += 1
         else:
             if set_args and cmt_object != 'template':
-                set_args = urllib.urlencode(self.__create_query(set_args))
+                set_args = urllib.urlencode(set_args)
             elif set_args:
                 form = MultiPartForm()
 
@@ -206,7 +218,6 @@ class Client(object):
 
         for arg in args:
             pair = self.__query(arg)
-
             if len(pair) != 2 and len(pair) != 3 and pair[2] not in ['+', '-', '>', '<', '!']:
                 raise ClientException('Given query is wrong')
 
@@ -279,9 +290,7 @@ class Client(object):
                 json_data = dict()
             else:
                 json_data = json.loads(data.read())
-
-            if type(json_data) == type(dict()):
-                json_data['response'] = '%d - %s' % (data.getcode(), data.msg)
+            json_data['response'] = '%d - %s' % (data.getcode(), data.msg)
         except urllib2.HTTPError as error:
             ## Retry with authentication header
             if error.code in [401]:

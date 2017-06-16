@@ -77,17 +77,18 @@ class RoomSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = Room
+        fields = '__all__'
 
 
 class AddressSerializer(DynamicFieldsModelSerializer):
-    country = serializers.SlugRelatedField(many=False, read_only=True, slug_field='name')
+    country = serializers.SlugRelatedField(many=False, read_only=False, slug_field='name', queryset=Country.objects.all())
     rooms = serializers.SlugRelatedField(many=True, read_only=True, slug_field='label')
 
     class Meta:
         model = Address
         fields = (
-            'address', 'postalcode', 'city', 'note', 'tags',
-            'country', 'rooms'
+            'id', 'address', 'postalcode', 'city', 'note', 'tags',
+            'country', 'rooms', 'url'
         )
 
 
@@ -95,37 +96,44 @@ class CountrySerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = Country
+        fields = '__all__'
 
 
 class RoleSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = Role
+        fields = '__all__'
 
 
 class ConnectionSerializer(DynamicFieldsModelSerializer):
-    company = serializers.SlugRelatedField(many=False, read_only=True, slug_field='name')
-    address = serializers.SlugRelatedField(many=False, read_only=True, slug_field='address')
+    company = serializers.SlugRelatedField(many=False, read_only=False, slug_field='name', queryset=Company.objects.all())
+    address = serializers.SlugRelatedField(many=False, read_only=False, slug_field='address', queryset=Address.objects.all())
 
     class Meta:
         model = Connection
+        fields = '__all__'
 
 
 class CompanySerializer(DynamicFieldsModelSerializer):
+    addresses = serializers.SlugRelatedField(many=True, read_only=True, slug_field='address')
 
     class Meta:
         model = Company
+        fields = '__all__'
 
 
 class HardwareModelSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = HardwareModel
+        fields = '__all__'
 
 
 class NetworkSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = Network
+        fields = '__all__'
 
 
 class WarrantyContractSerializer(DynamicFieldsModelSerializer):
@@ -133,6 +141,7 @@ class WarrantyContractSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = WarrantyContract
+        fields = '__all__'
 
 
 class InterfaceSerializer(DynamicFieldsModelSerializer):
@@ -149,12 +158,14 @@ class InterfaceTypeSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = InterfaceType
+        fields = '__all__'
 
 
 class WarrantyTypeSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = WarrantyType
+        fields = '__all__'
 
 
 class TelephonenumberSerializer(DynamicFieldsModelSerializer):
@@ -163,3 +174,4 @@ class TelephonenumberSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = Telephonenumber
+        fields = '__all__'

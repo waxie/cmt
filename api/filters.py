@@ -8,6 +8,7 @@ class ClusterFilter(django_filters.FilterSet):
 
     class Meta:
         model = Cluster
+        fields = '__all__'
 
 
 class EquipmentFilter(django_filters.FilterSet):
@@ -33,12 +34,14 @@ class RackFilter(django_filters.FilterSet):
 
     class Meta:
         model = Rack
+        fields = '__all__'
 
 
 class RoomFilter(django_filters.FilterSet):
 
     class Meta:
         model = Room
+        fields = '__all__'
 
 
 class AddressFilter(django_filters.FilterSet):
@@ -46,69 +49,81 @@ class AddressFilter(django_filters.FilterSet):
 
     class Meta:
         model = Address
+        fields = '__all__'
 
 
 class CountryFilter(django_filters.FilterSet):
 
     class Meta:
         model = Country
+        fields = '__all__'
 
 
 class RoleFilter(django_filters.FilterSet):
 
     class Meta:
         model = Role
+        fields = '__all__'
 
 
 class ConnectionFilter(django_filters.FilterSet):
 
     class Meta:
         model = Connection
+        fields = '__all__'
 
 
 class CompanyFilter(django_filters.FilterSet):
 
     class Meta:
         model = Company
+        fields = '__all__'
 
 
 class HardwareModelFilter(django_filters.FilterSet):
 
     class Meta:
         model = HardwareModel
+        fields = '__all__'
 
 
 class NetworkFilter(django_filters.FilterSet):
 
     class Meta:
         model = Network
+        fields = '__all__'
 
 
 class WarrantyContractFilter(django_filters.FilterSet):
 
     class Meta:
         model = WarrantyContract
+        fields = '__all__'
 
 
 class InterfaceFilter(django_filters.FilterSet):
 
     class Meta:
         model = Interface
+        fields = '__all__'
 
 
 class InterfaceTypeFilter(django_filters.FilterSet):
 
     class Meta:
         model = InterfaceType
+        fields = '__all__'
 
 
 class WarrantyTypeFilter(django_filters.FilterSet):
 
     class Meta:
         model = WarrantyType
+        fields = '__all__'
 
 
 class TelephonenumberFilter(django_filters.FilterSet):
 
     class Meta:
         model = Telephonenumber
+        fields = '__all__'
