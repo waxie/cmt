@@ -17,7 +17,6 @@ import sys
 import urlparse
 import urllib
 import json
-import base64
 import itertools
 import mimetools
 import mimetypes

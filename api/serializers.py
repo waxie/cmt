@@ -62,18 +62,20 @@ class EquipmentSerializer(DynamicFieldsModelSerializer):
 
 
 class RackSerializer(DynamicFieldsModelSerializer):
-    room = serializers.SlugRelatedField(many=False, read_only=True, slug_field='label')
+    room = serializers.SlugRelatedField(many=False, read_only=False, slug_field='label',
+                                        queryset=Room.objects.all())
     contents = serializers.SlugRelatedField(many=True, read_only=True, slug_field='label')
 
     class Meta:
         model = Rack
         fields = (
-            'label', 'capacity',
-            'room', 'contents'
+            'label', 'capacity', 'room', 'contents', 'url'
         )
 
 
 class RoomSerializer(DynamicFieldsModelSerializer):
+    address = serializers.SlugRelatedField(many=False, read_only=False, slug_field='address',
+                                           queryset=Address.objects.all())
 
     class Meta:
         model = Room
@@ -81,7 +83,8 @@ class RoomSerializer(DynamicFieldsModelSerializer):
 
 
 class AddressSerializer(DynamicFieldsModelSerializer):
-    country = serializers.SlugRelatedField(many=False, read_only=False, slug_field='name', queryset=Country.objects.all())
+    country = serializers.SlugRelatedField(many=False, read_only=False, slug_field='name',
+                                           queryset=Country.objects.all())
     rooms = serializers.SlugRelatedField(many=True, read_only=True, slug_field='label')
 
     class Meta:
@@ -100,14 +103,17 @@ class CountrySerializer(DynamicFieldsModelSerializer):
 
 
 class RoleSerializer(DynamicFieldsModelSerializer):
+
     class Meta:
         model = Role
         fields = '__all__'
 
 
 class ConnectionSerializer(DynamicFieldsModelSerializer):
-    company = serializers.SlugRelatedField(many=False, read_only=False, slug_field='name', queryset=Company.objects.all())
-    address = serializers.SlugRelatedField(many=False, read_only=False, slug_field='address', queryset=Address.objects.all())
+    company = serializers.SlugRelatedField(many=False, read_only=False, slug_field='name',
+                                           queryset=Company.objects.all())
+    address = serializers.SlugRelatedField(many=False, read_only=False, slug_field='address',
+                                           queryset=Address.objects.all())
 
     class Meta:
         model = Connection
