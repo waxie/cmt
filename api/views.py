@@ -1,3 +1,20 @@
+#
+# This file is part of CMT
+#
+# CMT is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# CMT is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with CMT.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright 2012-2017 SURFsara
 
 import json
 
@@ -12,13 +29,11 @@ from django.template import Context
 from django.template import TemplateSyntaxError
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.template import TemplateDoesNotExist
 
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
 from rest_framework.views import APIView
-from rest_framework import authentication
 from rest_framework import permissions
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
@@ -39,6 +54,8 @@ class CMTViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
     filter_backends = (filters.DjangoFilterBackend,)
 
+
+    # TODO: This has been changed to perform_create (POST/CREATE), perform_update (PUT/UPDATE) and perform_destroy (DELETE)
     def pre_delete(self, obj):
         """
         pre_delete hook is called by ModelViewSet before deleting a object from database

@@ -1,3 +1,43 @@
+v2.5.0
+======
+Added:
+ * New API version v2, due to compatibility issues between djangorestframework
+   versions we cannot support API v1 anymore (from version 2.4.8 to 3.6.3)
+ * Complete rewrite of the CMT client, no extra modules required and can be downloaded
+   via the CMT server web ui. Client does not need configuration, the client contains
+   the correct settings when you download it (dynamic)
+ * Simplified configuration handling
+
+
+Bugfixes:
+ * Restructured the project to the Django "standard"
+ * Support for Django 1.8 LTS / 1.9
+ * Support for Djangorestframework 3.6
+ * Renamed model HardwareUnit to Equipment, so it's the same as with the API
+ * Updated codebase on several levels to support newer versions of the different requirements of CMT
+ * Better support for VirtualEnv
+ * Use the Django logging framework instead of writing your own one
+
+Authors:
+ * Bas van der Vlies
+ * Dennis Stam
+
+v2.0.0
+======
+Added:
+ * REST Api for easier access to the CMT data, api version v1
+ * Split up the client part of CMT of the server part
+
+Bugfixes:
+ * Cleanup on several places in the code base
+ * Removed some unused files
+ * Support for Django 1.7
+ * Support for Grappelli 2.6.1
+
+Authors:
+ * Ramon Bastiaans
+ * Sil Westerveld
+
 v1.1.0
 ======
 Added:

@@ -1,3 +1,20 @@
+#
+# This file is part of CMT
+#
+# CMT is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# CMT is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with CMT.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright 2012-2017 SURFsara
 
 from cluster.models import *
 from api import fields
@@ -136,6 +153,7 @@ class HardwareModelSerializer(DynamicFieldsModelSerializer):
 
 
 class NetworkSerializer(DynamicFieldsModelSerializer):
+    interfaces = serializers.SlugRelatedField(many=True, read_only=True, slug_field='api_slug_field')
 
     class Meta:
         model = Network
@@ -143,7 +161,8 @@ class NetworkSerializer(DynamicFieldsModelSerializer):
 
 
 class WarrantyContractSerializer(DynamicFieldsModelSerializer):
-    warranty_type = serializers.SlugRelatedField(read_only=True, many=False, slug_field='label')
+    warranty_type = serializers.SlugRelatedField(read_only=False, many=False, slug_field='label',
+                                                 queryset=WarrantyType.objects.all())
 
     class Meta:
         model = WarrantyContract
@@ -160,7 +179,8 @@ class InterfaceSerializer(DynamicFieldsModelSerializer):
 
 
 class InterfaceTypeSerializer(DynamicFieldsModelSerializer):
-    vendor = serializers.SlugRelatedField(read_only=True, many=False, slug_field='name')
+    vendor = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name',
+                                          queryset=Company.objects.all())
 
     class Meta:
         model = InterfaceType
@@ -168,6 +188,8 @@ class InterfaceTypeSerializer(DynamicFieldsModelSerializer):
 
 
 class WarrantyTypeSerializer(DynamicFieldsModelSerializer):
+    contact = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name',
+                                              queryset=Connection.objects.all())
 
     class Meta:
         model = WarrantyType
@@ -175,8 +197,10 @@ class WarrantyTypeSerializer(DynamicFieldsModelSerializer):
 
 
 class TelephonenumberSerializer(DynamicFieldsModelSerializer):
-    country = serializers.SlugRelatedField(read_only=True, many=False, slug_field='name')
-    connection = serializers.SlugRelatedField(read_only=True, many=False, slug_field='name')
+    country = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name',
+                                           queryset=Country.objects.all())
+    connection = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name',
+                                              queryset=Connection.objects.all())
 
     class Meta:
         model = Telephonenumber

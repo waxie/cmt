@@ -1,3 +1,21 @@
+#
+# This file is part of CMT
+#
+# CMT is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# CMT is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with CMT.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright 2012-2017 SURFsara
+
 # Django settings for cmt_server project.
 
 import os
@@ -6,6 +24,8 @@ from exceptions import SystemExit
 from cmt.configuration import Configuration
 
 BASE_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '../'))
+
+VERSION = '2.5.0'
 
 KNOWN_CONFIG_PATHS = [
     '/etc/cmt',
@@ -230,7 +250,7 @@ REST_FRAMEWORK = {
 
 # Grappelli configuration
 GRAPPELLI_INDEX_DASHBOARD = 'cmt.dashboard.CustomIndexDashboard'
-GRAPPELLI_ADMIN_TITLE = 'Config Management Tool'
+GRAPPELLI_ADMIN_TITLE = 'CMT %s' % VERSION
 
 # Smuggler
 SMUGGLER_EXCLUDE_LIST = ['Group', 'User']

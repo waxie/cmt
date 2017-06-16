@@ -4,7 +4,7 @@
 {% read network --get 'name=SURFsara-Werkplek-LAN v6' as net_ip6 %}
 
 {% for base in net_ip6.cidr|reverse_names%}
-    {% assign filename = '/var/tmp/wax/db.' base %}
+    {% assign filename = '/tmp/db.' base %}
     {% assign query_base = 'ip__startswith=' base %}
     {% store filename %} {% noblanklines %}
 $TTL 3600
@@ -37,7 +37,7 @@ $TTL 3600
 {% endstore %}
 {% endfor %}
 
-{% store '/var/tmp/wax/db.ip6.surfsara.nl' %} {% noblanklines %}
+{% store '/tmp/db.ip6.surfsara.nl' %} {% noblanklines %}
 $TTL 3600
 ;
 ; SVN: $Id:$

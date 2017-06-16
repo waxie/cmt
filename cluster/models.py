@@ -1,19 +1,20 @@
-#    This file is part of CMT, a Cluster Management Tool made at SURFsara.
-#    Copyright (C) 2012, 2013  Sil Westerveld, Ramon Bastiaans
 #
-#    This program is free software; you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
-#    (at your option) any later version.
+# This file is part of CMT
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+# CMT is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
 #
-#    You should have received a copy of the GNU General Public License
-#    along with this program; if not, write to the Free Software
-#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+# CMT is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with CMT.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright 2012-2017 SURFsara
 
 import re
 import logging
@@ -119,7 +120,7 @@ class Equipment(ModelExtension):
         except AssertionError, e:
             return unicode(e)
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, *args, **kwargs):
         """
             First check if the label has already been filled in. If it's still
             empty, then set it to the default basename (based on rack# and
@@ -137,7 +138,7 @@ class Equipment(ModelExtension):
         if not self.first_slot:
             self.first_slot = None
 
-        super(Equipment, self).save(force_insert, force_update)
+        super(Equipment, self).save(*args, **kwargs)
 
     def default_label(self):
         try:
@@ -241,7 +242,7 @@ class Interface(ModelExtension):
         if self.ip is None or self.ip == '':
             raise ValidationError('No more IP addresses available in: %s' %self.network.name )
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, *args, **kwargs):
         """
             First check for a correct IP address before saving the object.
             Pick a new one in the related network when the IP hasn't been set
@@ -269,7 +270,7 @@ class Interface(ModelExtension):
                          self.network.construct_interface_label(self.host)
 
             try:
-                super(Interface, self).save(force_insert, force_update)
+                super(Interface, self).save(*args, **kwargs)
             except IntegrityError, e:
                 logger.error(e)
         except AssertionError, e: # !!! TODO: exception on other errors !!!
@@ -285,6 +286,7 @@ class Network(ModelExtension):
     domain_validator = RegexValidator(re_valid_domain,'Enter a valid domain. Example: admin1.my-domain.com. Valid characters: [a-z], [0-9], "." and "-"','invalid')
     re_valid_hosts = re.compile(r'^([0-9a-z]{1,2})$|^([a-z0-9\{]{1})([a-z0-9\-\{\}]{1,61})([a-z0-9\}]{1})$')
     hosts_validator = RegexValidator(re_valid_hosts,'Enter a valid hostnames stringformat. Example: ib-{machine}. Valid characters: [a-z], [0-9], "{", "}" and "-"','invalid')
+
     name = models.CharField(max_length=255, help_text='example: infiniband')
     cidr = models.CharField(max_length=100, help_text='example: 192.168.1.0/24 or fd47:e249:06b2:0385::/64')
     gateway = models.GenericIPAddressField(blank=True, help_text='Automagically generated if kept empty', null=True)
@@ -405,11 +407,11 @@ class Network(ModelExtension):
         interface_label = self.hostnames.format(machine=machine)
         return interface_label
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, *args, **kwargs):
         if not self.gateway:
             self.gateway = self.default_gateway() 
         try:
-            super(Network, self).save(force_insert, force_update)
+            super(Network, self).save(*args, **kwargs)
         except IntegrityError, e:
             logger.error(e)
 
@@ -535,7 +537,7 @@ class Connection(ModelExtension):
         return unicode(self.name)
 
     def _address(self):
-        return address.address
+        return self.address
 
     class Meta:
         verbose_name = 'contact'
@@ -589,14 +591,14 @@ class HardwareModel(ModelExtension):
     def __unicode__(self):
         return unicode('%s (%s)' % (self.name, self.vendor))
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, *args, **kwargs):
         """
             Be sure to save vendorcode as None, when kept blank.
         """
         if not self.vendorcode:
             self.vendorcode = None
 
-        super(HardwareModel, self).save(force_insert, force_update)
+        super(HardwareModel, self).save(*args, **kwargs)
 
 
 class Role(ModelExtension):
@@ -679,7 +681,7 @@ class WarrantyContract(ModelExtension):
     def __unicode__(self):
         return unicode(self.label)
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, *args, **kwargs):
         """
             The contract number is an optional field, but when filled in it
             should have a unique value. When kept blank, it should be stored as
@@ -688,4 +690,4 @@ class WarrantyContract(ModelExtension):
         if not self.contract_number:
             self.contract_number = None
 
-        super(WarrantyContract, self).save(force_insert, force_update)
+        super(WarrantyContract, self).save(*args, **kwargs)
