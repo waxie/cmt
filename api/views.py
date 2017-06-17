@@ -50,47 +50,44 @@ class StandardResultsSetPagination(PageNumberPagination):
     max_page_size = 5000
 
 
+def django_admin_logentry(action, object, user):
+
+    actions = {
+        'create': ADDITION,
+        'update': CHANGE,
+        'delete': DELETION
+    }
+
+    # For now when we don't now it, just ignore it
+    if action not in actions:
+        return False
+
+    LogEntry.objects.log_action(
+        user_id=user.pk,
+        content_type_id=ContentType.objects.get_for_model(object).pk,
+        object_id=object.pk,
+        object_repr=force_unicode(object),
+        action_flag=actions[action],
+        change_message='API'
+    )
+
+    return True
+
 class CMTViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
     filter_backends = (filters.DjangoFilterBackend,)
 
+    def perform_create(self, serializer):
+        object = serializer.save()
+        django_admin_logentry('create', object, self.request.user)
 
-    # TODO: This has been changed to perform_create (POST/CREATE), perform_update (PUT/UPDATE) and perform_destroy (DELETE)
-    def pre_delete(self, obj):
-        """
-        pre_delete hook is called by ModelViewSet before deleting a object from database
-        Log entry to django-admin log
-        """
-        LogEntry.objects.log_action(
-            user_id=self.request.user.pk,
-            content_type_id=ContentType.objects.get_for_model(obj).pk,
-            object_id=obj.pk,
-            object_repr=force_unicode(obj),
-            action_flag=DELETION
-        )
+    def perform_update(self, serializer):
+        object = serializer.save()
+        django_admin_logentry('update', object, self.request.user)
 
-    def post_save(self, obj, created=False):
-        """
-        post_save hook is called by ModelViewSet after saving a object to database
-        created indicates if the object was changed (existing) or added (new)
-        Log entry to django-admin log
-        """
-        if created:
-            LogEntry.objects.log_action(
-                user_id=self.request.user.pk,
-                content_type_id=ContentType.objects.get_for_model(obj).pk,
-                object_id=obj.pk,
-                object_repr=force_unicode(obj),
-                action_flag=ADDITION
-            )
-        else:
-            LogEntry.objects.log_action(
-                user_id=self.request.user.pk,
-                content_type_id=ContentType.objects.get_for_model(obj).pk,
-                object_id=obj.pk,
-                object_repr=force_unicode(obj),
-                action_flag=CHANGE
-            )
+    def perform_destroy(self, instance):
+        django_admin_logentry('delete', instance, self.request.user)
+        instance.delete()
 
     def get_serializer_context(self):
        """

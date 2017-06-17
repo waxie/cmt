@@ -168,7 +168,7 @@ class Interface(ModelExtension):
     re_valid_cnames  = re.compile(r'^[a-z\d\-\.]+([,]{1}[a-z\d\-\.]+)*$')
 
     # valid hostname  = 1-63 length, lowercase, numbers and hyphen (-). May not begin/end with hyphen
-    re_valid_hostname = re.compile(r'^([0-9a-z]{1,2})$|^([a-z0-9]{1})([a-z0-9\-]{1,61})([a-z0-9]{1})$')
+    re_valid_hostname = re.compile(r'^(?![0-9]+$)(?!-)[a-zA-Z0-9-.]{,63}(?<!-)$')
 
     hwaddress_validator = RegexValidator(
         re_valid_mac,
