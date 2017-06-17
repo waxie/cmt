@@ -10,6 +10,8 @@ Added:
 
 
 Bugfixes:
+ * Fixed domain validator could not accept vu.nl and may others
+   Reported by: Juan Luis Font, SURFsara
  * Restructured the project to the Django "standard"
  * Support for Django 1.8 LTS / 1.9
  * Support for Djangorestframework 3.6
@@ -37,6 +39,7 @@ Bugfixes:
 Authors:
  * Ramon Bastiaans
  * Sil Westerveld
+=======
 
 v1.1.0
 ======
