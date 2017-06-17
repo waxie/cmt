@@ -1,22 +1,7 @@
 
-We want views for:
-  * addresses
 
-
-Fields in models:
-  * HardwareModel.formfactor
-  * Connection.type (leverancier, support, ...)
-
-
-Web Interface:
-  * Filters:
-    - Racks on Address
-    - Hardware on Room and Address
-
-
-
-Feature requests:
-  * Reservering van poorten voor bv SAN, FK naar contactpersoon/klant
-  * Support calls
-  * Colo nummering racks op basis van grid van vloertegels
-  * Link Interfaces, Hardware, and Racks via Slots
+The following needs some more attention:
+ - When adding a equipment role is required, but is not mark as required in the API
+ - Adding multiple values for roles with model equipment
+ - Need to rewrite the way an Interface is saved
+ - Rename model HardwareModel to EquipmentModel

@@ -219,6 +219,8 @@ class Interface(ModelExtension):
         # return self.fqdn
         return unicode(self.label) or unicode('anonymous')
 
+
+    # Todo: Need to rewrite the clean and save methods for know added a quick fix to make it work in the API
     def clean(self):
 
         """
@@ -256,6 +258,8 @@ class Interface(ModelExtension):
                 self.hwaddress = ':'.join(self.re_mac_octets.findall(self.hwaddress.lower()))
             # To be sure that the interface has a valid network
             # assert isinstance(self.network, Network), "network doesn't exist"
+
+            self.clean()
 
             try:
                 if self.network:
@@ -582,7 +586,10 @@ class HardwareModel(ModelExtension):
 
     @property
     def api_slug_field(self):
-        return self.__unicode__()
+        return {
+            'name': self.name,
+            'vendor': self.vendor.name
+        }
 
     class Meta:
         verbose_name = 'model'
@@ -676,7 +683,12 @@ class WarrantyContract(ModelExtension):
 
     @property
     def api_slug_field(self):
-        return self.__unicode__()
+        return {
+            'label': self.label,
+            'date_from': self.date_from,
+            'date_to': self.date_to,
+            'expired': self.expired
+        }
 
     def __unicode__(self):
         return unicode(self.label)

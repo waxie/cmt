@@ -1,5 +1,8 @@
 v2.5.0
 ======
+In this release we focussed to make the API more usable, also making CMT comptable with
+the the newer releases of the different requirements.
+
 Added:
  * New API version v2, due to compatibility issues between djangorestframework
    versions we cannot support API v1 anymore (from version 2.4.8 to 3.6.3)
@@ -26,6 +29,8 @@ Authors:
 
 v2.0.0
 ======
+Goal for this release was implementing an API backend for easy remote access
+
 Added:
  * REST Api for easier access to the CMT data, api version v1
  * Split up the client part of CMT of the server part

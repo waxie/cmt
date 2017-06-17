@@ -55,27 +55,29 @@ class ClusterSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = Cluster
-        fields = (
-            'url', 'name', 'machinenames', 'hardware'
-        )
+        fields = '__all__'
 
 
 class EquipmentSerializer(DynamicFieldsModelSerializer):
-    cluster = fields.BasicField(read_only=False, many=False)
-    rack = serializers.SlugRelatedField(read_only=True, many=False, slug_field='label')
-    role = serializers.SlugRelatedField(read_only=True, many=True, slug_field='label')
-    seller = serializers.SlugRelatedField(read_only=True, many=False, slug_field='name')
-    owner = serializers.SlugRelatedField(read_only=True, many=False, slug_field='name')
-    specifications = serializers.SlugRelatedField(read_only=True, many=False, slug_field='api_slug_field')
+    cluster = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name',
+                                           queryset=Cluster.objects.all())
+    rack = serializers.SlugRelatedField(read_only=False, many=False, slug_field='label',
+                                            queryset=Rack.objects.all())
+    role = serializers.SlugRelatedField(read_only=False, many=True, slug_field='label', required=True,
+                                            queryset=Role.objects.all())
+    seller = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name', required=False,
+                                            queryset=Connection.objects.all())
+    owner = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name', required=False,
+                                            queryset=Connection.objects.all())
+    specifications = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name', required=False,
+                                            queryset=HardwareModel.objects.all())
     interfaces = serializers.SlugRelatedField(read_only=True, many=True, slug_field='api_slug_field')
-    warranty = serializers.SlugRelatedField(read_only=True, many=False, slug_field='api_slug_field')
+    warranty = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name', required=False,
+                                            queryset=WarrantyContract.objects.all())
 
     class Meta:
         model = Equipment
-        fields = (
-            'state', 'warranty_tag', 'serial_number', 'first_slot', 'label', 'note', 'updated_on', 'created_on', 'url',
-            'cluster', 'rack', 'role', 'seller', 'owner', 'specifications', 'interfaces', 'warranty'
-        )
+        fields = '__all__'
 
 
 class RackSerializer(DynamicFieldsModelSerializer):
@@ -85,9 +87,7 @@ class RackSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = Rack
-        fields = (
-            'label', 'capacity', 'room', 'contents', 'url'
-        )
+        fields = '__all__'
 
 
 class RoomSerializer(DynamicFieldsModelSerializer):
@@ -106,10 +106,7 @@ class AddressSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = Address
-        fields = (
-            'id', 'address', 'postalcode', 'city', 'note', 'tags',
-            'country', 'rooms', 'url'
-        )
+        fields = '__all__'
 
 
 class CountrySerializer(DynamicFieldsModelSerializer):
@@ -146,6 +143,8 @@ class CompanySerializer(DynamicFieldsModelSerializer):
 
 
 class HardwareModelSerializer(DynamicFieldsModelSerializer):
+    vendor = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name',
+                                          queryset=Company.objects.all())
 
     class Meta:
         model = HardwareModel
@@ -170,12 +169,16 @@ class WarrantyContractSerializer(DynamicFieldsModelSerializer):
 
 
 class InterfaceSerializer(DynamicFieldsModelSerializer):
-    network = serializers.SlugRelatedField(read_only=True, many=False, slug_field='name')
-    host = serializers.SlugRelatedField(read_only=True, many=False, slug_field='label')
-    iftype = serializers.SlugRelatedField(read_only=True, many=False, slug_field='label')
+    network = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name',
+                                           queryset=Network.objects.all())
+    host = serializers.SlugRelatedField(read_only=False, many=False, slug_field='label',
+                                        queryset=Equipment.objects.all())
+    iftype = serializers.SlugRelatedField(read_only=False, many=False, slug_field='label',
+                                          queryset=InterfaceType.objects.all())
 
     class Meta:
         model = Interface
+        fields = '__all__'
 
 
 class InterfaceTypeSerializer(DynamicFieldsModelSerializer):
