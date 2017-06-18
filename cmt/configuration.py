@@ -16,9 +16,12 @@
 #
 # Copyright 2012-2017 SURFsara
 
-import ConfigParser
+try:
+    import ConfigParser as configparser
+except ImportError:
+    import configparser
 
-ConfigParser.DEFAULTSECT = 'general'
+configparser.DEFAULTSECT = 'general'
 
 REQUIRED_OPTIONS = {
     'database': ['engine', 'name', 'user', 'password', 'host'],
@@ -26,10 +29,10 @@ REQUIRED_OPTIONS = {
     'ldap': ['enabled', 'uri', 'bind_dn', 'bind_password', 'user_dn', 'group_dn', 'superuser_groups', 'staff_groups']
 }
 
-class Configuration(ConfigParser.SafeConfigParser):
+class Configuration(configparser.SafeConfigParser):
 
     def __init__(self, config_file):
-        ConfigParser.SafeConfigParser.__init__(self)
+        configparser.SafeConfigParser.__init__(self)
         self.read([config_file])
         self.__verify_configuration()
 

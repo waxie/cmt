@@ -117,7 +117,7 @@ class Equipment(ModelExtension):
         try:
             assert self.label, "piece of hardware hasn't got a label yet"
             return unicode(self.label)
-        except AssertionError, e:
+        except AssertionError as e:
             return unicode(e)
 
     def save(self, *args, **kwargs):
@@ -265,20 +265,20 @@ class Interface(ModelExtension):
                 if self.network:
                     network = IP('%s' % (self.network.cidr) )
 
-            except ValueError, e:
-                print ValueError, e
-            except Exception, e:
-                print 'An error occured:', e
+            except ValueError as e:
+                print(ValueError, e)
+            except Exception as e:
+                print('An error occured:', e)
 
             self.label = self.label or \
                          self.network.construct_interface_label(self.host)
 
             try:
                 super(Interface, self).save(*args, **kwargs)
-            except IntegrityError, e:
+            except IntegrityError as e:
                 logger.error(e)
-        except AssertionError, e: # !!! TODO: exception on other errors !!!
-            print AssertionError, e
+        except AssertionError as e: # !!! TODO: exception on other errors !!!
+            print(AssertionError, e)
 
 
 class Network(ModelExtension):
@@ -416,7 +416,7 @@ class Network(ModelExtension):
             self.gateway = self.default_gateway() 
         try:
             super(Network, self).save(*args, **kwargs)
-        except IntegrityError, e:
+        except IntegrityError as e:
             logger.error(e)
 
 

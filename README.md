@@ -14,14 +14,14 @@ The documentation is currently a bit limited to this README for know. We are wor
 docmentation
 
 ## Requirements
- * Python 2.7 or higher
+ * Python 2.7 (working on Python 3 support)
  * Python virtualenv
  
 All dependencies for CMT can be found in the [requirements.txt](requirements.txt) file. If you don't want to use
 the LDAP authentication backend, then you can remove django-auth-ldap from the requirements.txt
 file.
 
-Please note that SALI has been testen on Linux only.
+Please note that CMT has been testen on Linux only.
 
 ## Installation of the CMT Server
 
@@ -43,7 +43,8 @@ Finally you will need to bootstrap CMT with `./manage.py migrate` and finally yo
 ## Usage of the CMT Client
 
 Before you can use the client, you will need to download it first. You can do this from the web
-interface or with `curl` or `wget`.
+interface or with `curl` or `wget`. The client has only 1 requirement, Python 2.7. We are working
+Python 3 support. In the next release 2.6.0 Python 3 wil be fully supported.
 
 Examples:
 ```
@@ -182,6 +183,13 @@ json = client.request('read', 'cluster', ['name="CMT Cluster"'], None)
 
 print json
 ```
+
+## Known issues
+
+ * Currently field roles is not marked as required in the API when creating a new Equipment, but 
+   it is required in the database model. So you will need to remember to specify it.
+ * Currently is is not possible to add multiple roles to an Equipment via the API.
+ * CMT client is not Python 3 ready
 
 ## Contact
 

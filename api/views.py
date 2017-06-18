@@ -29,6 +29,8 @@ from django.template import Context
 from django.template import TemplateSyntaxError
 from django.http import HttpResponse
 from django.template.loader import render_to_string
+from django.http import JsonResponse
+from django.template import loader
 
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
@@ -36,7 +38,6 @@ from rest_framework import filters
 from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.parsers import FileUploadParser
-from rest_framework.response import Response
 
 from api.serializers import *
 from api.filters import *
@@ -250,12 +251,13 @@ class TemplateView(APIView):
             context = Context(template_data)
 
             try:
-                rendered_string = render_to_string(file_obj.temporary_file_path(), context_instance=context)
+                tpl = loader.get_template(file_obj.temporary_file_path())
+                tpl.render(template_data)
             except TemplateSyntaxError as error:
-                return HttpResponse(json.dumps({'error': str(error)}), content_type='application/json')
+                return JsonResponse({'error': str(error)})
         except IOError as error:
-            return Response(status=500)
+            return JsonResponse({'status': 500})
 
         file_obj.close()
 
-        return Response(json.dumps(context['__template_outputfiles__']), content_type='application/json')
+        return JsonResponse(context['__template_outputfiles__'])

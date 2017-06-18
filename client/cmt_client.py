@@ -25,26 +25,55 @@ This is the api client tool for the cmt server
 '''
 
 import argparse
-import cookielib
-import urllib2
 import os
 import getpass
 import re
 import sys
-import urlparse
-import urllib
 import json
 import itertools
-import mimetools
 import mimetypes
 import difflib
 import subprocess
+import string
+import random
+
+if sys.version_info < (2,7):
+    print('We only support Python 2.7 or higher')
+    sys.exit(1)
+
+# For Python 3 we need slightly different libs than with Python 2.7
+if sys.version_info > (3,0):
+
+    if 'CMT_PY3' not in os.environ:
+        print('Sorry the client does not support Python 3 or higher at the moment, work in progress')
+        print('  when you define environment var CMT_PY3 you can test the Python3 codebase')
+        sys.exit(1)
+
+    from http.cookiejar import CookieJar
+    from urllib.request import build_opener
+    from urllib.request import HTTPCookieProcessor
+    from urllib.request import HTTPBasicAuthHandler
+    from urllib.request import Request
+    from urllib.request import HTTPError
+    from urllib.parse import urljoin
+    from urllib.parse import urlencode
+else:
+    from cookielib import CookieJar
+    from urllib2 import build_opener
+    from urllib2 import HTTPCookieProcessor
+    from urllib2 import HTTPBasicAuthHandler
+    from urllib2 import Request
+    from urllib2 import HTTPError
+    from urlparse import urljoin
+    from urllib import urlencode
 
 ## START CONFIG
 CMT_SERVER = ''
 CMT_INVENTORY = {}
 CMT_API_VERSION = ''
 CMT_TEMPLATEDIR = ''
+CMT_CLIENT_HASH = ''
+CMT_VERSION = ''
 ## END CONFIG
 
 
@@ -56,12 +85,16 @@ class ClientException(Exception):
     pass
 
 
+def choose_boundary(size=16, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+
 class MultiPartForm(object):
 
     def __init__(self):
         self.form_fields = []
         self.files = []
-        self.boundary = mimetools.choose_boundary()
+        self.boundary = choose_boundary()
         return
 
     def get_content_type(self):
@@ -129,9 +162,9 @@ class Client(object):
         self.uri = CMT_SERVER
         self.username = username
         self.password = password
-        self.cookie = cookielib.CookieJar()
-        self.opener = urllib2.build_opener(
-            urllib2.HTTPCookieProcessor(self.cookie)
+        self.cookie = CookieJar()
+        self.opener = build_opener(
+            HTTPCookieProcessor(self.cookie)
         )
         self.opener.addheaders = [
             ('User-agent', 'CmtClient/%s' % CMT_API_VERSION),
@@ -160,11 +193,11 @@ class Client(object):
         if cmt_object not in CMT_INVENTORY:
             raise ClientException('Given object %s is not a valid CMT object')
         path = CMT_INVENTORY[cmt_object]['url']
-        url = urlparse.urljoin(self.uri, path)
+        url = urljoin(self.uri, path)
 
         if get_args:
-            get_args = urllib.urlencode(self.__create_query(get_args))
-        if set_args:
+            get_args = urlencode(self.__create_query(get_args))
+        if set_args and method != 'parse':
             set_args = self.__create_query(set_args)
 
         # This does not work yet, need to update the backend for this
@@ -191,7 +224,7 @@ class Client(object):
 
                             if key not in set_args:
                                 set_args[key] = value
-                        set_args = urllib.urlencode(set_args)
+                        set_args = urlencode(set_args)
                     else:
                         get_args = None
                         set_args = None
@@ -206,7 +239,7 @@ class Client(object):
                     result['count'] += 1
         else:
             if set_args and cmt_object != 'template':
-                set_args = urllib.urlencode(set_args)
+                set_args = urlencode(set_args)
             elif set_args:
                 form = MultiPartForm()
 
@@ -215,7 +248,6 @@ class Client(object):
                 for key, value in set_args['files'].items():
                     form.add_file('file', os.path.basename(value.name), value)
                 set_args = form
-
             result = self.__request(url, http_method, args_get=get_args, args_post=set_args)
         return result
 
@@ -269,7 +301,7 @@ class Client(object):
         else:
             realm_found = False
 
-        auth_handler = urllib2.HTTPBasicAuthHandler()
+        auth_handler = HTTPBasicAuthHandler()
         auth_handler.add_password(realm_found, uri, self.username, self.password)
         self.opener.add_handler(auth_handler)
         return self.__request(uri, method=method, args_get=args_get, args_post=args_post)
@@ -282,7 +314,7 @@ class Client(object):
 
         try:
             if args_post and type(args_post) is MultiPartForm:
-                request = urllib2.Request(uri)
+                request = Request(uri)
                 body = str(args_post)
                 request.add_header('Content-Length', len(body))
                 for line in body.splitlines():
@@ -291,13 +323,13 @@ class Client(object):
                         request.add_header(parts[0], ';'.join(parts[1:]))
                 request.add_data(body)
             elif args_get:
-                request = urllib2.Request('%s?%s' % (uri, args_get))
+                request = Request('%s?%s' % (uri, args_get))
             elif args_post:
-                request = urllib2.Request(uri, data=args_post)
+                request = Request(uri, data=args_post)
             elif args_get and args_post:
-                request = urllib2.Request('%s?%s' % (uri, args_get), data=args_post)
+                request = Request('%s?%s' % (uri, args_get), data=args_post)
             else:
-                request = urllib2.Request(uri)
+                request = Request(uri)
 
             request.get_method = lambda: method
             data = self.opener.open(request)
@@ -306,8 +338,9 @@ class Client(object):
                 json_data = dict()
             else:
                 json_data = json.loads(data.read())
-            json_data['response'] = '%d - %s' % (data.getcode(), data.msg)
-        except urllib2.HTTPError as error:
+
+            json_data['response'] = '%d - %s' % (data.getcode(), str(data.msg))
+        except HTTPError as error:
             ## Retry with authentication header
             if error.code in [401]:
                 return self.__auth_header(error, uri, method, args_get, args_post)
@@ -465,17 +498,22 @@ def p(*args, **kwargs):
             D['p'](*args, **kwargs)
             del D
         except SyntaxError:
-            raise ClientException('Please upgrade your Python version to 2.6 or higher')
+            raise ClientException('Please upgrade your Python version to 2.7 or higher')
 
 
 def args_parser():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description=__doc__)
+
+    version_text = 'CMT Client API version: %s, host: %s\n  hash: %s\n  server version: %s' % (
+        CMT_API_VERSION, CMT_SERVER, CMT_CLIENT_HASH, CMT_VERSION)
 
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose mode')
     parser.add_argument('-n', '--dry-run', action='store_true', help='Enable dry-run, also enables verbose mode')
-    parser.add_argument('--version', action='version', version='CMT Client API version: %s, host: %s' % (CMT_API_VERSION, CMT_SERVER))
+    parser.add_argument('--version', action='version', version=version_text)
 
     subparsers = parser.add_subparsers()
+    subparsers.dest = 'mode'
+    subparsers.required = True
 
     valid_objects = [x for x in CMT_INVENTORY.keys() if x != 'template']
 
@@ -539,8 +577,8 @@ if __name__ == '__main__':
         elif result:
             if 'error' in result:
                 raise ClientException(result['error'])
+            data = result
 
-            data = json.loads(result)
             write_files = list()
             for store_file, contents in data['files'].items():
                 path = os.path.dirname(store_file)
@@ -575,7 +613,7 @@ if __name__ == '__main__':
                     
 
             if not args.write and write_files:
-                p('[WRITE] Do you want to save the changes (y/N: ', end='')
+                p('[WRITE] Do you want to save the changes (y/N): ', end='')
                 yes_or_no = raw_input()
                 if yes_or_no in ['y', 'Y']:
                     args.write = True

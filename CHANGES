@@ -1,7 +1,9 @@
 v2.5.0
 ======
-In this release we focussed to make the API more usable, also making CMT comptable with
-the the newer releases of the different requirements.
+In this release we focused to make the API more usable, also making CMT compatible with
+the the newer releases of the different requirements. For example Django and Djangorestframework.
+
+Due to the amount of changes version is bumped to 2.5.0 instead of 2.1.0.
 
 Added:
  * New API version v2, due to compatibility issues between djangorestframework
@@ -16,7 +18,7 @@ Bugfixes:
  * Fixed domain validator could not accept vu.nl and may others
    Reported by: Juan Luis Font, SURFsara
  * Restructured the project to the Django "standard"
- * Support for Django 1.8 LTS / 1.9
+ * Support for Django 1.11 LTS
  * Support for Djangorestframework 3.6
  * Renamed model HardwareUnit to Equipment, so it's the same as with the API
  * Updated codebase on several levels to support newer versions of the different requirements of CMT

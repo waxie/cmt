@@ -72,7 +72,7 @@ class EquipmentSerializer(DynamicFieldsModelSerializer):
     specifications = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name', required=False,
                                             queryset=HardwareModel.objects.all())
     interfaces = serializers.SlugRelatedField(read_only=True, many=True, slug_field='api_slug_field')
-    warranty = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name', required=False,
+    warranty = serializers.SlugRelatedField(read_only=False, many=False, slug_field='label', required=False,
                                             queryset=WarrantyContract.objects.all())
 
     class Meta:
