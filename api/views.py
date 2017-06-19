@@ -16,8 +16,6 @@
 #
 # Copyright 2012-2017 SURFsara
 
-import json
-
 from django.contrib.admin.models import LogEntry
 from django.contrib.admin.models import DELETION
 from django.contrib.admin.models import ADDITION
@@ -27,8 +25,6 @@ from django.utils.encoding import force_unicode
 from django.contrib.contenttypes.models import ContentType
 from django.template import Context
 from django.template import TemplateSyntaxError
-from django.http import HttpResponse
-from django.template.loader import render_to_string
 from django.http import JsonResponse
 from django.template import loader
 

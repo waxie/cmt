@@ -22,7 +22,7 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.views.generic.base import RedirectView
 
-## cmt
+# cmt
 from api import urls as api_urls
 from client import urls as client_urls
 
