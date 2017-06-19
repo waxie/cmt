@@ -1,0 +1,21 @@
+2.6.0
+ - Python 3 support, this will be the focus for next release 2.6.0
+ - When adding a equipment role is required, but is not mark as required in the API
+ - Adding multiple values for roles with model equipment, currently not possible
+ - Need to rewrite the way an Interface is saved, checking network is correct, picking ip address
+ - Rename model HardwareModel to EquipmentModel
+ - Add field in Equipment for external reference to other cmdb tools (ie. PatchManager)
+ - Move templatedir from cluster to cmt
+ - Create a new filter for the admin page of Equipment, so you can choose in_support: True or False
+ - Code cleanup:
+   - Make all fields consistent, user name or label not both
+   - Remove all unnecessary code lines
+
+
+Could be that more releases will be available between version 2.6.0 and 3.0.0
+
+3.0.0
+ - Checking whether current database model is still usable
+ - Create a custom web ui, instead of using the /admin generated pages
+ - Add better authorization to CMT, so we can protect equipment so only the owners are allowed
+   to change it (perhaps based on cluster)

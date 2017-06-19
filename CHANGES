@@ -1,0 +1,98 @@
+v2.5.0
+======
+In this release we focused to make the API more usable, also making CMT compatible with
+the the newer releases of the different requirements. For example Django and Djangorestframework.
+
+Due to the amount of changes version is bumped to 2.5.0 instead of 2.1.0.
+
+Added:
+ * New API version v2, due to compatibility issues between djangorestframework
+   versions we cannot support API v1 anymore (from version 2.4.8 to 3.6.3)
+ * Complete rewrite of the CMT client, no extra modules required and can be downloaded
+   via the CMT server web ui. Client does not need configuration, the client contains
+   the correct settings when you download it (dynamic)
+ * Simplified configuration handling
+
+
+Bugfixes:
+ * Fixed domain validator could not accept vu.nl and may others
+   Reported by: Juan Luis Font, SURFsara
+ * Restructured the project to the Django "standard"
+ * Support for Django 1.11 LTS
+ * Support for Djangorestframework 3.6
+ * Renamed model HardwareUnit to Equipment, so it's the same as with the API
+ * Updated codebase on several levels to support newer versions of the different requirements of CMT
+ * Better support for VirtualEnv
+ * Use the Django logging framework instead of writing your own one
+
+Authors:
+ * Bas van der Vlies
+ * Dennis Stam
+
+v2.0.0
+======
+Goal for this release was implementing an API backend for easy remote access
+
+Added:
+ * REST Api for easier access to the CMT data, api version v1
+ * Split up the client part of CMT of the server part
+
+Bugfixes:
+ * Cleanup on several places in the code base
+ * Removed some unused files
+ * Support for Django 1.7
+ * Support for Grappelli 2.6.1
+
+Authors:
+ * Ramon Bastiaans
+ * Sil Westerveld
+=======
+
+v1.1.0
+======
+Added:
+
+* (batch) input file processing : #21
+* interactive user/password authentication : #16
+* more validators implemented : #41
+  * added DNS validator to: interface.label, network.hostnames, network.domain
+* hardwareunit.label generation is now configurable : #42
+  * new database/model field: cluster.machinenames (migration required)
+* updated SARA -> SURFsara everywhere : #43
+  Thanks to: Jaap Dijkshoorn, for reporting this.
+
+Bugfixes:
+
+* Multiple queries in template tag "use" now works : #44
+  Thanks to: Dennis Stam, for reporting this
+
+v1.0.1
+======
+Bugfixes:
+* Cleaned up and fixed server side code.
+  Removed some unnecessary dependancies : #30
+* Fixed slow Network admin page; changed intensive database operation : #32
+* Fixed bug, so that vendor code is no longer mandatory : #23
+  Thanks to: Bas van der Vlies, for reporting this.
+* If CLI query fails, no longer entire database is printed to shell : #35
+* Removed old database migrations : #33
+* Fixed PIP package install path inconsistency : #31, #40
+  Thanks to: Bas van der Vlies, for reporting this.
+
+Added:
+* The CLI now also utilizes validators to check for (in)valid values : #27
+  Thanks to: Bas van der Vlies, for reporting this.
+* README in templates/examples : #28
+* CLI now has a --version argument : #36
+
+v1.0 -- Initial packaged release.
+=================================
+* From now on the config is distributed as a sample config file, which differs
+  from previous config files.
+  Users have to modify the sample config file to reflect their settings and
+  rename it to activate the settings.   
+* All extra templatetags are in a single file now, and some of them have been
+  changed a little.
+  Users have to check their current templates to be sure they are still working
+  as expected.
+* CMT is now distributed as a package, installable with pip.
