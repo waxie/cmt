@@ -1,10 +1,3 @@
-2.5.0
- - Fix all deprecation warnings
- - Code cleanup:
-  - Remove all unnecessary imports
-  - Replace print statements in the code with Django logging
-  - Change old style logging with Django logging
-
 2.6.0
  - Python 3 support, this will be the focus for next release 2.6.0
  - When adding a equipment role is required, but is not mark as required in the API
@@ -13,6 +6,7 @@
  - Rename model HardwareModel to EquipmentModel
  - Add field in Equipment for external reference to other cmdb tools (ie. PatchManager)
  - Move templatedir from cluster to cmt
+ - Create a new filter for the admin page of Equipment, so you can choose in_support: True or False
  - Code cleanup:
    - Make all fields consistent, user name or label not both
    - Remove all unnecessary code lines
