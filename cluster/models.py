@@ -68,14 +68,16 @@ class Equipment(ModelExtension):
         ('unknown', 'unknown'),
         ('off', 'off'))
         
-    cluster = models.ForeignKey('Cluster', related_name='hardware')
+    cluster = models.ForeignKey('Cluster', related_name='hardware', on_delete=models.CASCADE)
     role = models.ManyToManyField('Role', related_name='hardware')
     network = models.ManyToManyField('Network', related_name='hardware', through='Interface')
-    specifications = models.ForeignKey('HardwareModel', related_name='hardware', null=True, blank=True)
-    warranty = models.ForeignKey('WarrantyContract', related_name='hardware', null=True, blank=True)
-    rack = models.ForeignKey('Rack', related_name='contents')
-    seller = models.ForeignKey('Connection', related_name='sold', null=True, blank=True)
-    owner = models.ForeignKey('Connection', related_name='owns', null=True, blank=True)
+    specifications = models.ForeignKey('HardwareModel', related_name='hardware', null=True, blank=True,
+                                    on_delete=models.CASCADE)
+    warranty = models.ForeignKey('WarrantyContract', related_name='hardware', null=True, blank=True,
+                                    on_delete=models.CASCADE)
+    rack = models.ForeignKey('Rack', related_name='contents', on_delete=models.CASCADE)
+    seller = models.ForeignKey('Connection', related_name='sold', null=True, blank=True, on_delete=models.CASCADE)
+    owner = models.ForeignKey('Connection', related_name='owns', null=True, blank=True, on_delete=models.CASCADE)
     state = models.CharField(max_length=10, null=True, blank=True, choices=STATE_CHOICES, default='unknown')
     warranty_tag = models.CharField(max_length=255, blank=True, null=True, help_text='Service tag', unique=True)
     serial_number = models.CharField(max_length=255, blank=True, null=True, unique=True)
@@ -183,9 +185,9 @@ class Interface(ModelExtension):
         'Enter a valid hostname. Example: "myhostname-rack2node3". Valid characters: [a-z], [0-9] and "-"','invalid'
     )
 
-    network = models.ForeignKey('Network', related_name='interfaces')
-    host = models.ForeignKey('Equipment', related_name='interfaces', verbose_name='machine')
-    iftype = models.ForeignKey('InterfaceType', related_name='interfaces', verbose_name='type')
+    network = models.ForeignKey('Network', related_name='interfaces', on_delete=models.CASCADE)
+    host = models.ForeignKey('Equipment', related_name='interfaces', verbose_name='machine', on_delete=models.CASCADE)
+    iftype = models.ForeignKey('InterfaceType', related_name='interfaces', verbose_name='type', on_delete=models.CASCADE)
     label = models.CharField(max_length=255, help_text='Automagically generated if kept empty', validators=[hostname_validator])
     aliases = models.CharField(max_length=255, help_text='Cnames comma-seperated', blank=True, null=True, validators=[cnames_validator])
 
@@ -426,7 +428,7 @@ class Rack(ModelExtension):
         stack of slots.
     """
 
-    room = models.ForeignKey('Room', related_name='racks')
+    room = models.ForeignKey('Room', related_name='racks', on_delete=models.CASCADE)
     label = models.SlugField(max_length=255)
     capacity = models.PositiveIntegerField(verbose_name='number of slots')
 
@@ -464,7 +466,7 @@ class Address(ModelExtension):
     """
         A class to hold information about the physical location of a model.
     """
-    country = models.ForeignKey(Country, null=True, blank=True, related_name='addresses')
+    country = models.ForeignKey(Country, null=True, blank=True, related_name='addresses', on_delete=models.CASCADE)
     address = models.CharField(max_length=255)
     postalcode = models.CharField(max_length=9, blank=True)
     city = models.CharField(max_length=255)
@@ -487,7 +489,7 @@ class Room(ModelExtension):
         A room is located at an address. This is where racks of hardware can be
         found.
     """
-    address = models.ForeignKey(Address, related_name='rooms')
+    address = models.ForeignKey(Address, related_name='rooms', on_delete=models.CASCADE)
 
     floor = models.IntegerField()
     label = models.CharField(max_length=255, blank=False)
@@ -530,8 +532,8 @@ class Connection(ModelExtension):
         This makes it possible to lookup contactpersons in case of problems on a
         site or with specific hardware.
     """
-    address = models.ForeignKey(Address, blank=True, null=True, related_name='connections')
-    company = models.ForeignKey(Company, related_name='companies')
+    address = models.ForeignKey(Address, blank=True, null=True, related_name='connections', on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, related_name='companies', on_delete=models.CASCADE)
 
     active = models.BooleanField(editable=True, default=True)
     name = models.CharField(verbose_name='full name', max_length=255)
@@ -558,8 +560,9 @@ class Telephonenumber(ModelExtension):
         ('T', 'Telephone'),
         ('C', 'Cellphone'),
         ('F', 'Fax'))
-    country = models.ForeignKey(Country, related_name='telephone_numbers')
-    connection = models.ForeignKey(Connection, blank=False, null=False, related_name='telephone_numbers')
+    country = models.ForeignKey(Country, related_name='telephone_numbers', on_delete=models.CASCADE)
+    connection = models.ForeignKey(Connection, blank=False, null=False, related_name='telephone_numbers',
+                                   on_delete=models.CASCADE)
     areacode = models.CharField(max_length=4) # because it can start with a zero
     subscriber_number = models.IntegerField(verbose_name='number')
     number_type = models.CharField(max_length=1, choices=NUMBER_CHOICES)
@@ -578,7 +581,7 @@ class HardwareModel(ModelExtension):
         This model is being used to specify some extra information about a
         specific type (model) of hardware.
     """
-    vendor = models.ForeignKey(Company, related_name='hardware')
+    vendor = models.ForeignKey(Company, related_name='hardware', on_delete=models.CASCADE)
     name = models.CharField(max_length=255, unique=True)
     vendorcode = models.CharField(max_length=255, blank=True, null=True, unique=True, help_text='example: CISCO7606-S')
     rackspace = models.PositiveIntegerField(help_text='size in U for example')
@@ -631,7 +634,7 @@ class InterfaceType(ModelExtension):
     """
         Contains information about different types of interfaces.
     """
-    vendor = models.ForeignKey('Company', null=True, blank=True, related_name='interfaces')
+    vendor = models.ForeignKey('Company', null=True, blank=True, related_name='interfaces', on_delete=models.CASCADE)
     label = models.CharField(max_length=255, help_text="'DRAC 4' for example")
 
     class Meta:
@@ -652,7 +655,7 @@ class WarrantyType(ModelExtension):
     """
         A type of warranty offered by a company.
     """
-    contact = models.ForeignKey(Connection, related_name='warranty')
+    contact = models.ForeignKey(Connection, related_name='warranty', on_delete=models.CASCADE)
     label = models.CharField(max_length=255, unique=True)
 
     class Meta:
@@ -665,7 +668,8 @@ class WarrantyContract(ModelExtension):
     """
         A class which contains warranty information of (a collection of) hardware. (SLA)
     """
-    warranty_type = models.ForeignKey(WarrantyType, blank=True, null=True, related_name='contracts')
+    warranty_type = models.ForeignKey(WarrantyType, blank=True, null=True, related_name='contracts',
+                                      on_delete=models.CASCADE)
 
     contract_number = models.CharField(max_length=255, blank=True, null=True, unique=True, help_text='NSEN420201')
     annual_cost = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, help_text='433.61')
