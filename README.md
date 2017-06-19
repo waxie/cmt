@@ -82,6 +82,44 @@ For each mode you can use the --help which of the arguments are supported by whi
 
 ### Cli Usage
 
+some basics:
+```
+./cmt_client.py --help
+sage: cmt_client.py [-h] [-v] [-n] [--version]
+                     {read,create,update,delete,parse} ...
+
+This is the api client tool for the cmt server
+
+positional arguments:
+  {read,create,update,delete,parse} 
+    read                Fetch and object from CMT 
+    create              Create an object in CMT
+    update              Update an object from CMT
+    delete              Delete an object from CMT 
+    parse               Parse a template from CMT 
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --verbose         Enable verbose mode
+  -n, --dry-run         Enable dry-run, also enables verbose mode
+  --version             show program's version number and exit
+```
+
+subcommand help:
+```
+root# ./cmt_client.py parse --help
+usage: cmt_client.py parse [-h] [-w] [-d] [-e] [filename]
+
+positional arguments:
+  filename             Specify the templatefile, leave empty for menu
+
+optional arguments:
+  -h, --help           show this help message and exit
+  -w, --write          Do not ask to write, just write
+  -d, --skip-diff      Do not ask to show the diff
+  -e, --skip-epilogue  Skip epilogue
+```
+
 Create example:
 ```
 python cmt_client.py create cluster --set name="CMT Cluster"
