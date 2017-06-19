@@ -1,7 +1,25 @@
+#
+# This file is part of CMT
+#
+# CMT is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# CMT is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with CMT.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright 2012-2017 SURFsara
 
 import cStringIO as StringIO
 import os
 import urlparse
+import hashlib
 
 from django.http.response import HttpResponse
 from django.apps import apps
@@ -9,6 +27,17 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 
 from cmt.decorators import http_basic_auth
+
+
+def calculate_has_of_file(filename):
+    hasher = hashlib.sha256()
+
+    with open(filename, 'r') as fo:
+        buf = fo.read()
+        hasher.update(buf)
+
+    return hasher.hexdigest()
+
 
 @http_basic_auth
 @login_required
@@ -47,6 +76,8 @@ def download_client(request):
         fragment='',
     )
 
+    CMT_CLIENT_HASH = calculate_has_of_file(file_path)
+
     with open(file_path, 'r') as fi:
         IN_CONFIG_MODE = False
         for line in fi:
@@ -57,6 +88,8 @@ def download_client(request):
                 new_file.write('CMT_INVENTORY = %s\n' % str(CMT_INVENTORY))
                 new_file.write('CMT_API_VERSION = \'%s\'\n' % str(settings.CLIENT_API_VERSION))
                 new_file.write('CMT_TEMPLATEDIR = \'/etc/cmt/templates\'\n')
+                new_file.write('CMT_CLIENT_HASH = \'%s\'\n' % CMT_CLIENT_HASH)
+                new_file.write('CMT_VERSION = \'%s\'\n' % settings.VERSION)
             elif line.strip() == '## END CONFIG':
                 IN_CONFIG_MODE = False
 
@@ -73,3 +106,8 @@ def download_client(request):
     response.write(new_file.getvalue())
 
     return response
+
+@http_basic_auth
+@login_required
+def check_version(request):
+    pass

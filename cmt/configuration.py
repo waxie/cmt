@@ -1,7 +1,27 @@
+#
+# This file is part of CMT
+#
+# CMT is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# CMT is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with CMT.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright 2012-2017 SURFsara
 
-import ConfigParser
+try:
+    import ConfigParser as configparser
+except ImportError:
+    import configparser
 
-ConfigParser.DEFAULTSECT = 'general'
+configparser.DEFAULTSECT = 'general'
 
 REQUIRED_OPTIONS = {
     'database': ['engine', 'name', 'user', 'password', 'host'],
@@ -9,10 +29,10 @@ REQUIRED_OPTIONS = {
     'ldap': ['enabled', 'uri', 'bind_dn', 'bind_password', 'user_dn', 'group_dn', 'superuser_groups', 'staff_groups']
 }
 
-class Configuration(ConfigParser.SafeConfigParser):
+class Configuration(configparser.SafeConfigParser):
 
     def __init__(self, config_file):
-        ConfigParser.SafeConfigParser.__init__(self)
+        configparser.SafeConfigParser.__init__(self)
         self.read([config_file])
         self.__verify_configuration()
 

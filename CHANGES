@@ -1,6 +1,52 @@
-v2.1.X
+v2.5.0
+======
+In this release we focused to make the API more usable, also making CMT compatible with
+the the newer releases of the different requirements. For example Django and Djangorestframework.
+
+Due to the amount of changes version is bumped to 2.5.0 instead of 2.1.0.
+
+Added:
+ * New API version v2, due to compatibility issues between djangorestframework
+   versions we cannot support API v1 anymore (from version 2.4.8 to 3.6.3)
+ * Complete rewrite of the CMT client, no extra modules required and can be downloaded
+   via the CMT server web ui. Client does not need configuration, the client contains
+   the correct settings when you download it (dynamic)
+ * Simplified configuration handling
+
+
+Bugfixes:
  * Fixed domain validator could not accept vu.nl and may others
    Reported by: Juan Luis Font, SURFsara
+ * Restructured the project to the Django "standard"
+ * Support for Django 1.11 LTS
+ * Support for Djangorestframework 3.6
+ * Renamed model HardwareUnit to Equipment, so it's the same as with the API
+ * Updated codebase on several levels to support newer versions of the different requirements of CMT
+ * Better support for VirtualEnv
+ * Use the Django logging framework instead of writing your own one
+
+Authors:
+ * Bas van der Vlies
+ * Dennis Stam
+
+v2.0.0
+======
+Goal for this release was implementing an API backend for easy remote access
+
+Added:
+ * REST Api for easier access to the CMT data, api version v1
+ * Split up the client part of CMT of the server part
+
+Bugfixes:
+ * Cleanup on several places in the code base
+ * Removed some unused files
+ * Support for Django 1.7
+ * Support for Grappelli 2.6.1
+
+Authors:
+ * Ramon Bastiaans
+ * Sil Westerveld
+=======
 
 v1.1.0
 ======

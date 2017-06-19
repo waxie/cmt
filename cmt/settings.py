@@ -1,11 +1,30 @@
+#
+# This file is part of CMT
+#
+# CMT is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# CMT is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with CMT.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright 2012-2017 SURFsara
+
 # Django settings for cmt_server project.
 
 import os
-from exceptions import SystemExit
 
 from cmt.configuration import Configuration
 
 BASE_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '../'))
+
+VERSION = '2.5.0'
 
 KNOWN_CONFIG_PATHS = [
     '/etc/cmt',
@@ -44,6 +63,7 @@ TIME_ZONE = 'Europe/Amsterdam'
 LANGUAGE_CODE = 'en-us'
 SITE_ID = 1
 ROOT_URLCONF = 'cmt.urls'
+LOGIN_URL = '/admin/login'
 
 # Do not load multi-language support
 USE_I18N = False
@@ -76,13 +96,13 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.contrib.auth.context_processors.auth',
-                'django.core.context_processors.debug',
-                'django.core.context_processors.i18n',
-                'django.core.context_processors.media',
-                'django.core.context_processors.static',
-                'django.core.context_processors.tz',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
-                'django.core.context_processors.request',
+                'django.template.context_processors.request',
             ],
             'debug': DEBUG,
         }
@@ -115,7 +135,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': '/data/sites/dennis.cmt.surfsara.nl/logs/django.log',
+            'filename': config.get('logging', 'filename'),
             'formatter': 'verbose',
         },
     },
@@ -142,6 +162,7 @@ INSTALLED_APPS = (
     # Public apps/projects
     'rest_framework',
     'django_extensions',
+    'django_filters',
     'smuggler',
     'tagging',
     'grappelli.dashboard',
@@ -154,7 +175,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.admin',
     'django.contrib.staticfiles',
-    'django.contrib.webdesign',
     'django.contrib.messages',
 
     # CMT apps
@@ -165,13 +185,12 @@ INSTALLED_APPS = (
 
 # Which auth backends must we support
 AUTHENTICATION_BACKENDS = (
-    'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 
 # django-auth-ldap
 if LDAP_AUTHENTICATION:
-    #AUTHENTICATION_BACKENDS = ('django_auth_ldap.backend.LDAPBackend',) + AUTHENTICATION_BACKENDS
+    AUTHENTICATION_BACKENDS = ('django_auth_ldap.backend.LDAPBackend',) + AUTHENTICATION_BACKENDS
 
     import ldap
     from django_auth_ldap.config import LDAPSearch, PosixGroupType
@@ -229,13 +248,14 @@ REST_FRAMEWORK = {
 
 # Grappelli configuration
 GRAPPELLI_INDEX_DASHBOARD = 'cmt.dashboard.CustomIndexDashboard'
-GRAPPELLI_ADMIN_TITLE = 'Config Management Tool'
+GRAPPELLI_ADMIN_TITLE = 'CMT %s' % VERSION
 
 # Smuggler
-SMUGGLER_EXCLUDE_LIST = [ 'Group', 'User' ]
+SMUGGLER_EXCLUDE_LIST = ['Group', 'User']
 
+# CMT Client options
 CLIENT_SKIP_MODELS = [
     'equipment_role',
     'company_addresses'
 ]
-CLIENT_API_VERSION = 'v1'
+CLIENT_API_VERSION = 'v2'

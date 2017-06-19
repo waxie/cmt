@@ -1,3 +1,20 @@
+#
+# This file is part of CMT
+#
+# CMT is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# CMT is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with CMT.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright 2012-2017 SURFsara
 
 import json
 
@@ -12,16 +29,15 @@ from django.template import Context
 from django.template import TemplateSyntaxError
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.template import TemplateDoesNotExist
+from django.http import JsonResponse
+from django.template import loader
 
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
 from rest_framework.views import APIView
-from rest_framework import authentication
 from rest_framework import permissions
 from rest_framework.parsers import FileUploadParser
-from rest_framework.response import Response
 
 from api.serializers import *
 from api.filters import *
@@ -35,45 +51,44 @@ class StandardResultsSetPagination(PageNumberPagination):
     max_page_size = 5000
 
 
+def django_admin_logentry(action, object, user):
+
+    actions = {
+        'create': ADDITION,
+        'update': CHANGE,
+        'delete': DELETION
+    }
+
+    # For now when we don't now it, just ignore it
+    if action not in actions:
+        return False
+
+    LogEntry.objects.log_action(
+        user_id=user.pk,
+        content_type_id=ContentType.objects.get_for_model(object).pk,
+        object_id=object.pk,
+        object_repr=force_unicode(object),
+        action_flag=actions[action],
+        change_message='API'
+    )
+
+    return True
+
 class CMTViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
     filter_backends = (filters.DjangoFilterBackend,)
 
-    def pre_delete(self, obj):
-        """
-        pre_delete hook is called by ModelViewSet before deleting a object from database
-        Log entry to django-admin log
-        """
-        LogEntry.objects.log_action(
-            user_id=self.request.user.pk,
-            content_type_id=ContentType.objects.get_for_model(obj).pk,
-            object_id=obj.pk,
-            object_repr=force_unicode(obj),
-            action_flag=DELETION
-        )
+    def perform_create(self, serializer):
+        object = serializer.save()
+        django_admin_logentry('create', object, self.request.user)
 
-    def post_save(self, obj, created=False):
-        """
-        post_save hook is called by ModelViewSet after saving a object to database
-        created indicates if the object was changed (existing) or added (new)
-        Log entry to django-admin log
-        """
-        if created:
-            LogEntry.objects.log_action(
-                user_id=self.request.user.pk,
-                content_type_id=ContentType.objects.get_for_model(obj).pk,
-                object_id=obj.pk,
-                object_repr=force_unicode(obj),
-                action_flag=ADDITION
-            )
-        else:
-            LogEntry.objects.log_action(
-                user_id=self.request.user.pk,
-                content_type_id=ContentType.objects.get_for_model(obj).pk,
-                object_id=obj.pk,
-                object_repr=force_unicode(obj),
-                action_flag=CHANGE
-            )
+    def perform_update(self, serializer):
+        object = serializer.save()
+        django_admin_logentry('update', object, self.request.user)
+
+    def perform_destroy(self, instance):
+        django_admin_logentry('delete', instance, self.request.user)
+        instance.delete()
 
     def get_serializer_context(self):
        """
@@ -236,12 +251,13 @@ class TemplateView(APIView):
             context = Context(template_data)
 
             try:
-                rendered_string = render_to_string(file_obj.temporary_file_path(), context_instance=context)
+                tpl = loader.get_template(file_obj.temporary_file_path())
+                tpl.render(template_data)
             except TemplateSyntaxError as error:
-                return HttpResponse(json.dumps({'error': str(error)}), content_type='application/json')
+                return JsonResponse({'error': str(error)})
         except IOError as error:
-            return Response(status=500)
+            return JsonResponse({'status': 500})
 
         file_obj.close()
 
-        return Response(json.dumps(context['__template_outputfiles__']), content_type='application/json')
+        return JsonResponse(context['__template_outputfiles__'])

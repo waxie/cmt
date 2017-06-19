@@ -1,9 +1,9 @@
-Django>=1.8, < 1.8.99
-django-auth-ldap==1.2.8
-django-grappelli==2.8.1
-django-smuggler==0.7.0
-django-tagging==0.4.3
-django-extensions==1.6.7
-djangorestframework==3.4.4
-django-filter==0.13.0
+Django>=1.11, < 1.11.99
+django-auth-ldap>=1.2.8
+django-grappelli>=2.8.1
+django-smuggler>=0.7.0
+django-tagging>=0.4.3
+django-extensions>=1.6.7
+djangorestframework>=3.4.4
+django-filter>=0.13.0
 IPy>=0.81

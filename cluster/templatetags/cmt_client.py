@@ -1,29 +1,30 @@
-#    This file is part of CMT, a Cluster Management Tool made at SURFsara.
-#    Copyright (C) 2012, 2013  Sil Westerveld, Ramon Bastiaans
 #
-#    This program is free software; you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
-#    (at your option) any later version.
+# This file is part of CMT
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+# CMT is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
 #
-#    You should have received a copy of the GNU General Public License
-#    along with this program; if not, write to the Free Software
-#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+# CMT is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with CMT.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright 2012-2017 SURFsara
 
-import pprint
-import os, re, string
-from IPy import IP
+import sys
+import string
 
 # Inspired by Django tips on:
 #   http://www.b-list.org/weblog/2006/jun/07/django-tips-write-better-template-tags/
 from django import template
 from django.template.defaultfilters import stringfilter
-from django.utils.encoding import smart_unicode, force_unicode
+from django.apps import apps
+from django.db.models import QuerySet
 
 from api.views import *
 from api.filters import *
@@ -31,7 +32,6 @@ from api.filters import *
 #from server.logger import Logger
 #logger = Logger().getLogger()
 
-#from django.db.models import get_model
 
 register = template.Library()
 
@@ -76,6 +76,19 @@ def is_ipv6(value):
         return False
 
     return False
+
+@register.filter('cmt_startswith')
+def cmt_startswith(text, starts):
+    if isinstance(text, basestring):
+        return text.startswith(starts)
+    return False
+
+@register.filter('ip6_reverse_address')
+def ip6_reverse_address(address, network):
+    _net = IP(network).reverseName()
+    _address = IP(address).reverseName()
+    length = (len(_address) - len(_net)) - 1
+    return _address[0:length]
 
 @stringfilter
 def arpanize(value):
@@ -513,7 +526,6 @@ def do_epilogue(parser, token):
     parser.delete_first_token()
     return ScriptNode(nodelist)
 
-from django.db.models import get_model
 
 @register.tag(name='getbasenets')
 def do_getbasenets(parser, token):
@@ -556,7 +568,7 @@ class getBaseNets(template.Node):
 
         from IPy import IP
 
-        network_units = get_model('cluster', 'Network').objects.filter( name=str(network_str) )
+        network_units = apps.get_model('cluster', 'Network').objects.filter( name=str(network_str) )
 
         for n in network_units:
 
@@ -595,7 +607,7 @@ class getRacks(template.Node):
 
     def render(self, context):
 
-        cluster_units = get_model('cluster', 'Equipment').objects.filter( cluster__name=str(self.cluster) )
+        cluster_units = apps.get_model('cluster', 'Equipment').objects.filter( cluster__name=str(self.cluster) )
 
         for u in cluster_units:
             if u.rack not in self.racks:
@@ -647,9 +659,7 @@ class QuerySetNode(template.Node):
 
     def render(self, context):
 
-        q_filter_dict = { }
         filter_dict = { }
-
         myquery_str = ''
 
         for q in self.query:
@@ -675,20 +685,12 @@ class QuerySetNode(template.Node):
 
                 val = remove_quotes( val )
 
-                my_model = get_model('cluster', self.entity)
+                my_model = apps.get_model('cluster', self.entity)
 
-                if str(attr).find( '__' ) != -1:
-
-                    # anything containing __ (i.e.: entitiy__field or field__startswith) is a django queryset filter
-                    q_filter_dict[ str(attr) ] = str(val)
-
-                else:
-
-                    # anything short (i.e. field, shortrelation) is a django-filter filter
-                    filter_dict[ str(attr) ] = str(val)
+                filter_dict[ str(attr) ] = str(val)
 
         # Get Model/Entity name, i.e.: Equipment
-        model_name = get_model('cluster', self.entity).__name__
+        model_name = apps.get_model('cluster', self.entity).__name__
 
         # Get ViewSet for this Model/Entity, i.e.: EquipmentViewSet
         e_viewset = eval( model_name + 'ViewSet' )
@@ -700,21 +702,11 @@ class QuerySetNode(template.Node):
         v_queryset = e_viewset.queryset
 
         # If we have queryset filters, apply those on the Model objects
-        if len( q_filter_dict ) > 0:
-            r_queryset = get_model('cluster', self.entity).objects.filter(**q_filter_dict)
+        if len( filter_dict ) > 0:
+            search_result = apps.get_model('cluster', self.entity).objects.filter(**filter_dict)
         # Or else we use the ViewSet's queryset
         else:
-            r_queryset = v_queryset
-
-        # If we have django-filter filters, apply these via the ViewSet's filter_class on our queryset
-        if len( filter_dict ) > 0:
-            search_result = v_filter( filter_dict, queryset=r_queryset )
-        # If not we just use the queryset we already had
-        else:
-            search_result = r_queryset
-
-        if len(search_result) == 1:
-            search_result = search_result[0]
+            search_result = v_queryset
 
         context[self.key] = search_result
 
