@@ -17,7 +17,6 @@
 # Copyright 2012-2017 SURFsara
 
 from cluster.models import *
-from api import fields
 
 from rest_framework import serializers
 

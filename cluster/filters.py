@@ -17,7 +17,6 @@
 # Copyright 2012-2017 SURFsara
 
 from django.contrib.admin.filterspecs import FilterSpec, ChoicesFilterSpec, DateFieldFilterSpec
-# from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext as _
 from datetime import date, timedelta
 
